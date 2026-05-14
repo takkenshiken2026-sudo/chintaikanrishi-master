@@ -213,7 +213,6 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str) -> str:
 <meta property="og:description" content="{html.escape(desc)}">
 <meta property="og:url" content="{html.escape(canonical)}">
 <meta name="twitter:card" content="summary">
-<script defer src="/site-analytics.js"></script>
 <link rel="stylesheet" href="{html.escape(css_href)}">
 <script type="application/ld+json">
 {json.dumps(json_ld, ensure_ascii=False, indent=2)}
@@ -274,7 +273,6 @@ def build_terms_index(entries: list[dict], base_url: str) -> str:
 <title>用語集｜賃管マスター（賃貸不動産経営管理士）</title>
 <meta name="description" content="賃貸不動産経営管理士試験向けの用語集。分野別に用語を一覧できます。">
 <link rel="canonical" href="{html.escape(canonical)}">
-<script defer src="/site-analytics.js"></script>
 <link rel="stylesheet" href="../site-pages.css">
 </head>
 <body class="q-static-body">

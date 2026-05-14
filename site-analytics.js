@@ -1,4 +1,5 @@
 // Google Analytics 4 — window.__GA4_MEASUREMENT_ID__ で上書き可（未設定・空なら下記の既定ID）
+// 測定IDの正: tools/html_footer.GA4_MEASUREMENT_ID と揃えること
 (function () {
   var DEFAULT_MID = "G-NYSHQLECDS";
   var raw = "";
@@ -24,6 +25,9 @@
     var title = pageTitle != null ? String(pageTitle) : typeof document !== "undefined" ? document.title : "";
     try {
       var o = { page_path: path, page_title: title };
+      if (typeof location !== "undefined" && location.href) {
+        o.page_location = location.href;
+      }
       window.gtag("config", MID, o);
     } catch (_e) {}
   }
@@ -53,6 +57,14 @@
   document.head.appendChild(s);
 
   try {
-    gtag("config", MID);
+    var cfg0 = {};
+    if (typeof location !== "undefined" && location.href) {
+      cfg0.page_location = location.href;
+      cfg0.page_path = location.pathname + location.search + location.hash;
+    }
+    if (typeof document !== "undefined" && document.title) {
+      cfg0.page_title = document.title;
+    }
+    gtag("config", MID, cfg0);
   } catch (_e2) {}
 })();

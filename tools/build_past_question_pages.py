@@ -204,7 +204,6 @@ def build_question_html(page: dict, rel_path: Path, base_url: str) -> str:
 <meta property="og:description" content="{html.escape(desc)}">
 <meta property="og:url" content="{html.escape(canonical)}">
 <meta name="twitter:card" content="summary">
-<script defer src="/site-analytics.js"></script>
 <link rel="stylesheet" href="{html.escape(css_href)}">
 <script type="application/ld+json">
 {json.dumps(json_ld, ensure_ascii=False, indent=2)}
@@ -278,7 +277,6 @@ def build_q_index(pages: list[dict], base_url: str) -> str:
 <title>過去問一覧｜賃管マスター（賃貸不動産経営管理士）</title>
 <meta name="description" content="賃貸不動産経営管理士試験の過去問を年度別に一覧するページです。">
 <link rel="canonical" href="{html.escape(public_url(base_url, "q/index.html"))}">
-<script defer src="/site-analytics.js"></script>
 <link rel="stylesheet" href="../site-pages.css">
 </head>
 <body class="q-static-body">
