@@ -1,6 +1,8 @@
-# GitHub Pages — Settings → Pages → Source を「GitHub Actions」にしてください。
+# GitHub Pages
+# ① Settings → Pages → Build and deployment → Source を「GitHub Actions」に必ず設定
+# ② 未設定だと deploy ジョブが失敗します
 # リポジトリ: https://github.com/takkenshiken2026-sudo/chintaikanrishi-master
-# 本番ドメイン: https://chintaikanrishi-master.jp/（CNAME ファイルで指定）
+# 本番: https://chintaikanrishi-master.jp/（CNAME）
 name: Deploy GitHub Pages
 
 on:
@@ -20,8 +22,14 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/configure-pages@v5
 
       - uses: actions/setup-python@v5
         with:
@@ -36,10 +44,7 @@ jobs:
       - name: Bundle public files
         run: bash tools/prepare_public_site.sh
 
-      - uses: actions/configure-pages@v4
-
-      # v3 は GitHub.com で失効済み。Pages 用は v4 以上が必須。
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: public_site
 
@@ -54,4 +59,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
