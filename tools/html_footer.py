@@ -21,7 +21,10 @@ def footer_href(rel_path: Path, site_rel: str) -> str:
     up = len(parts)
     if len(parts) >= 3 and parts[0] == "q" and parts[1] == "past" and site_rel.startswith("q/") and site_rel.count("/") == 1:
         up = len(parts) - 1
-    return "/".join([".."] * up) + "/" + site_rel
+    prefix = "/".join([".."] * up)
+    if not prefix:
+        return site_rel
+    return prefix + "/" + site_rel
 
 
 def static_footer_block(rel_path: Path) -> str:
