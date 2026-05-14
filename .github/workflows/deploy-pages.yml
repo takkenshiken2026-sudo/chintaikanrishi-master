@@ -38,7 +38,8 @@ jobs:
 
       - uses: actions/configure-pages@v4
 
-      - uses: actions/upload-pages-artifact@v3
+      # v3 は GitHub.com で失効済み。Pages 用は v4 以上が必須。
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: public_site
 
