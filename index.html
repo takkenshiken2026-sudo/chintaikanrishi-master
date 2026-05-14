@@ -11,7 +11,7 @@
 
 <!-- 基本SEO -->
 <meta name="description" content="賃貸不動産経営管理士試験の合格を目指す無料学習プラットフォーム。過去問演習・オリジナル問題・本番形式模擬試験・重要用語解説を完全網羅。年度別・科目別（賃管法令・契約実務・設備等）に絞った効率的な学習が可能です。">
-<meta name="keywords" content="賃貸不動産経営管理士,衛生管理者試験,賃貸不動産経営管理士試験,試験演習,過去問無料,模擬試験,関係法令,労働衛生,労働生理,資格学習,合格">
+<meta name="keywords" content="賃貸不動産経営管理士,賃管,賃貸住宅管理業法,過去問,模擬試験,用語集,賃貸借,原状回復,サブリース,資格学習,合格">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#111111">
 <meta name="application-name" content="賃管マスター（賃貸不動産経営管理士試験）">
@@ -1575,9 +1575,9 @@ body.is-solving .site-footer{display:none!important}
         <p class="ichi-config-lead">分野を選んで「開始」してください。記述が正しいときは○、誤りのときは×で答えます。</p>
         <div class="field-chips" id="ichi-field-chips">
           <button type="button" class="chip on" data-field="" onclick="selectIchiField(this)">全分野</button>
-          <button type="button" class="chip" data-field="law" onclick="selectIchiField(this)">関係法令</button>
-          <button type="button" class="chip" data-field="rights" onclick="selectIchiField(this)">労働衛生</button>
-          <button type="button" class="chip" data-field="limit" onclick="selectIchiField(this)">労働生理</button>
+          <button type="button" class="chip" data-field="law" onclick="selectIchiField(this)">賃管法令・制度</button>
+          <button type="button" class="chip" data-field="rights" onclick="selectIchiField(this)">契約・実務</button>
+          <button type="button" class="chip" data-field="limit" onclick="selectIchiField(this)">設備・税務・その他</button>
         </div>
         <button type="button" class="btn-primary ichi-start-btn" onclick="beginIchimondouSession()">開始</button>
       </div>
@@ -1920,9 +1920,9 @@ body.is-solving .site-footer{display:none!important}
         </ul>
         <h2>対応科目</h2>
         <ul>
-          <li>関係法令（労働安全衛生法体系・基準則・特化則など）</li>
-          <li>労働衛生（作業環境管理・温熱・化学物質・局所排気・測定など）</li>
-          <li>労働生理（解剖生理・衛生化・衛生物理・有害因子の作用など）</li>
+          <li>賃管法令（賃貸住宅管理業法・登録・遵守事項・監督処分など）</li>
+          <li>契約・実務（賃貸借・原状回復・サブリース・重要事項説明など）</li>
+          <li>設備・税務・その他（建築・設備・会計税務・不動産証券化など）</li>
         </ul>
         <p style="margin-top:24px;font-size:14px"><a href="about.html">このサイトについて</a> ・ <a href="related-sites.html">関連サイト</a> ・ <a href="/articles/">試験ガイド</a> ・ <a href="privacy-terms.html">利用規約・プライバシー・免責</a></p>
       </div>
@@ -2190,7 +2190,7 @@ function renderGlossary(){
       {id:'lawN',label:'法令・有害外',title:'関係法令（有害以外）'},
       {id:'rightsH',label:'衛生・有害',title:'労働衛生（有害業務）'},
       {id:'rightsN',label:'衛生・有害外',title:'労働衛生（有害以外）'},
-      {id:'limit',label:'労働生理',title:'労働生理'},
+      {id:'limit',label:'設備等',title:'設備・税務・その他'},
     ];
     const catEl = document.getElementById('glos-cats');
     if (!catEl) return;
@@ -2237,7 +2237,7 @@ function renderGlossaryList(){
     rightsH: '労働衛生（有害業務）',
     lawN: '関係法令（有害以外）',
     rightsN: '労働衛生（有害以外）',
-    limit: '労働生理'
+    limit: '設備・税務・その他'
   };
   const filtered = GLOSSARY_DATA.filter(g=>{
     if (g.cat === 'exam') return false;
@@ -3535,7 +3535,7 @@ function _updatePageMeta(id) {
 
 
 // ===== 一問一答 =====
-const FIELD_LABELS = {law:'関係法令', rights:'労働衛生', limit:'労働生理'};
+const FIELD_LABELS = {law: '賃管法令・制度', rights: '契約・実務', limit: '設備・税務・その他'};
 let ichiState = {
   sourcePool: [],
   questions: [],
@@ -4494,7 +4494,7 @@ const ORIG_UNITS = {
     {id:'c_phys',label:'衛生物理学'},
   ],
 };
-const ORIG_FIELD_LABELS = {law:'関係法令', rights:'労働衛生', limit:'労働生理'};
+const ORIG_FIELD_LABELS = {law: '賃管法令・制度', rights: '契約・実務', limit: '設備・税務・その他'};
 const ORIG_FIELD_COLORS = {law:'#1e4a8a', rights:'#1a5f4a', limit:'#8a5a1e'};
 
 
@@ -4630,7 +4630,7 @@ function renderMockQ(){
   document.getElementById('qp-label').textContent = `${mockState.idx+1} / ${total}`;
   document.getElementById('qp-fill').style.width = `${((mockState.idx)/total)*100}%`;
   document.getElementById('qp-time').innerHTML = `<span class="quiz-countdown" id="mock-clock">--:--</span>`;
-  document.getElementById('q-meta').innerHTML = `<span class="tag tag-gray">${{law:'関係法令',rights:'労働衛生',limit:'労働生理'}[q.field]}</span><span class="tag tag-blue">模試${mockState.patternId} 問${q.num}</span>`;
+  document.getElementById('q-meta').innerHTML = `<span class="tag tag-gray">${(FIELDS.find(f=>f.id===q.field)||{name:'—'}).name}</span><span class="tag tag-blue">模試${mockState.patternId} 問${q.num}</span>`;
   updateBookmarkButton(null);
   const _bn=document.getElementById('bookmark-note-wrap');
   if(_bn) _bn.innerHTML='';
@@ -4699,7 +4699,7 @@ function showMockScore(){
   const passed = correct>=passScore;
   // Field breakdown
   const fields = ['law','rights','limit'];
-  const fieldNames = {law:'関係法令',rights:'労働衛生',limit:'労働生理'};
+  const fieldNames = {law:'賃管法令・制度',rights:'契約・実務',limit:'設備・税務・その他'};
   const fieldColors = {law:'#1e4a8a',rights:'#1a5f4a',limit:'#8a5a1e'};
   const breakdown = {};
   fields.forEach(f=>{
@@ -5343,7 +5343,7 @@ function tryOpenNextBadgeEarnPopup(){
 }
 
 const SHARE_URL = 'https://chintaikanrishi-master.jp';
-const SHARE_TWITTER_HASHTAGS = '衛生管理者,賃貸不動産経営管理士,賃管マスター';
+const SHARE_TWITTER_HASHTAGS = '賃貸不動産経営管理士,賃管,賃管マスター';
 /** X Web Intent 用：本文・公式URL・ハッシュタグをパラメータで渡す（投稿欄に読み込まれる） */
 function openTwitterShareIntent(bodyCore){
   const params=new URLSearchParams();
@@ -7246,7 +7246,7 @@ function openSrsModal(){
   const el=document.getElementById('srs-queue-list');
   const overlay=document.getElementById('srs-modal-overlay');
   if(!el||!overlay) return;
-  const FIELD_NAMES={law:'関係法令',rights:'労働衛生',limit:'労働生理'};
+  const FIELD_NAMES={law:'賃管法令・制度',rights:'契約・実務',limit:'設備・税務・その他'};
   if(!queue.length){
     el.innerHTML='<div style="text-align:center;padding:20px 0;color:var(--text3);font-size:13px">今日の復習はすべて完了しています。</div>';
     const btn=document.getElementById('srs-start-btn');
@@ -7344,7 +7344,7 @@ function computeFieldStats(){
   const answers=u?.answers||{};
   const allQ=typeof allPracticeQuestions==='function'?allPracticeQuestions():[];
   const fields=['law','rights','limit'];
-  const FIELD_NAMES={law:'関係法令',rights:'労働衛生',limit:'労働生理'};
+  const FIELD_NAMES={law:'賃管法令・制度',rights:'契約・実務',limit:'設備・税務・その他'};
   return fields.map(f=>{
     const fqs=allQ.filter(q=>q.field===f&&answers[q.id]);
     const correct=fqs.filter(q=>answers[q.id]?.ans===q.ans).length;
@@ -7410,7 +7410,7 @@ function getWeakAnalysis(){
   const u=typeof getUserData==='function'?getUserData():null;
   const answers=u?.answers||{};
   const allQ=typeof allPracticeQuestions==='function'?allPracticeQuestions():[];
-  const FIELD_NAMES={law:'関係法令',rights:'労働衛生',limit:'労働生理'};
+  const FIELD_NAMES={law:'賃管法令・制度',rights:'契約・実務',limit:'設備・税務・その他'};
 
   // ── 分野別の正答率 ──
   const fieldStats={};
@@ -7506,7 +7506,7 @@ function openWeakMode(){
   const {fieldStats,weakFields,weakPool,answeredWeakCount,relatedCount}=getWeakAnalysis();
   const el=document.getElementById('weak-mode-analysis');
   if(!el) return;
-  const FIELD_NAMES={law:'関係法令',rights:'労働衛生',limit:'労働生理'};
+  const FIELD_NAMES={law:'賃管法令・制度',rights:'契約・実務',limit:'設備・税務・その他'};
   // 分野別バー
   let barsHTML=Object.entries(fieldStats).map(([f,s])=>{
     const rate=s.rate!==null?s.rate:0;

@@ -38,6 +38,8 @@ jobs:
       - name: Generate data and static question pages
         run: |
           python3 tools/csv_to_chintaikanrishi_data.py
+          python3 tools/csv_to_chintaikan_eisei_master.py
+          python3 tools/glossary_csv_to_eisei_embed_js.py
           python3 tools/build_past_question_pages.py
           python3 tools/build_glossary_pages.py
 
