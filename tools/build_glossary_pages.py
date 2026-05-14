@@ -17,6 +17,13 @@ from pathlib import Path
 from xml.sax.saxutils import escape as xml_escape
 
 ROOT = Path(__file__).resolve().parents[1]
+import sys
+
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from tools.html_footer import static_footer_block
+
 GLOSSARY_CSV = ROOT / "data" / "glossary_terms.csv"
 TERMS_DIR = ROOT / "terms"
 BASE_DEFAULT = "https://chintaikanrishi-master.jp"
@@ -88,6 +95,8 @@ def collect_sitemap_urls(base: str) -> list[str]:
         f"{base}/index.html",
         f"{base}/about.html",
         f"{base}/privacy.html",
+        f"{base}/related-sites.html",
+        f"{base}/articles/index.html",
         f"{base}/q/index.html",
     ]
     qroot = ROOT / "q"
@@ -233,9 +242,7 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str) -> str:
   {rel_section}
   <p class="q-app-link"><a href="{html.escape(root_idx)}">演習トップへ</a></p>
 </main>
-<footer class="q-static-footer">
-  <p><small>学習用コンテンツです。</small></p>
-</footer>
+{static_footer_block(rel_path)}
 </body>
 </html>
 """
@@ -283,9 +290,7 @@ def build_terms_index(entries: list[dict], base_url: str) -> str:
   <p class="q-meta">全 {len(entries)} 語</p>
   {"".join(blocks)}
 </main>
-<footer class="q-static-footer">
-  <p><small>学習用コンテンツです。</small></p>
-</footer>
+{static_footer_block(Path("terms/index.html"))}
 </body>
 </html>
 """

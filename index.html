@@ -1302,14 +1302,14 @@ body.is-solving .site-footer{display:none!important}
       "name": "宅地建物取引業者Aが、自ら売主として買主B（宅地建物取引業者でない）との間で宅地の売買契約を締結する場合に関する次の記述のうち、宅地建物取引業法の規定によれば、正しいものはどれか。",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "事業者が自ら売主の場合、損害賠償の予定額と違約金の合計が代金の20%を超える特約は無効となります（労働衛生関係法令38条）。手付解除は相手方が履行に着手するまでの間に行う必要があり、売主からの解除は手付の倍額返還が必要です（労働衛生関係法令39条2項）。代金の全額を引渡し前に受領することは保全措置の問題であり一定要件のもと可能です。"
+        "text": "事業者が自ら売主の場合、損害賠償の予定額と違約金の合計が代金の20%を超える特約は無効となります（宅地建物取引業法38条）。手付解除は相手方が履行に着手するまでの間に行う必要があり、売主からの解除は手付の倍額返還が必要です（宅地建物取引業法39条2項）。代金の全額を引渡し前に受領することは保全措置の問題であり一定要件のもと可能です。"
       }
     },    {
       "@type": "Question",
       "name": "宅地建物取引業法に規定する営業保証金に関する次の記述のうち、正しいものはどれか。",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "宅地建物取引業保証協会の社員（弁済業務保証金分担金を納付した業者）は、営業保証金の供託が免除されます（労働衛生関係法令64条の8）。主たる事務所1,000万円・従たる事務所500万円は正しい金額です。還付を受けられるのは事業者と「宅地建物取引業に関し取引をした者」であり、事業者同士の取引は対象外です（労働衛生関係法令27条）。不足額の供託は通知を受けた日から2週間以内（正しい）です。"
+        "text": "宅地建物取引業保証協会の社員（弁済業務保証金分担金を納付した業者）は、営業保証金の供託が免除されます（宅地建物取引業法64条の8）。主たる事務所1,000万円・従たる事務所500万円は正しい金額です。還付を受けられるのは事業者と「宅地建物取引業に関し取引をした者」であり、事業者同士の取引は対象外です（宅地建物取引業法27条）。不足額の供託は通知を受けた日から2週間以内（正しい）です。"
       }
     },    {
       "@type": "Question",
@@ -1419,10 +1419,10 @@ body.is-solving .site-footer{display:none!important}
         <a class="topnav-link" id="tnav-review" href="/#review" onclick="event.preventDefault();gotoPage('review')">
           <svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg>復習
         </a>
-        <a class="topnav-link" id="tnav-glossary" href="/terms/">
+        <a class="topnav-link" id="tnav-glossary" href="terms/index.html">
           <svg viewBox="0 0 16 16"><rect x="2.5" y="2" width="11" height="12" rx="1.5"/><path d="M5 6h6M5 9h4"/></svg>用語解説
         </a>
-        <a class="topnav-link" id="tnav-articles" href="/articles/">
+        <a class="topnav-link" id="tnav-articles" href="articles/index.html">
           <svg viewBox="0 0 16 16"><path d="M3 2.5h10v11H3z"/><path d="M5 5h6M5 8h6M5 11h4"/></svg>試験ガイド
         </a>
       </nav>
@@ -1494,10 +1494,10 @@ body.is-solving .site-footer{display:none!important}
       <a class="mobile-nav-item" id="mnav-review" href="/#review" onclick="event.preventDefault();gotoPage('review');closeMobileDrawer()">
         <svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg>復習
       </a>
-      <a class="mobile-nav-item" id="mnav-glossary" href="/terms/" onclick="closeMobileDrawer()">
+      <a class="mobile-nav-item" id="mnav-glossary" href="terms/index.html" onclick="closeMobileDrawer()">
         <svg viewBox="0 0 16 16"><rect x="2.5" y="2" width="11" height="12" rx="1.5"/><path d="M5 6h6M5 9h4"/></svg>用語解説
       </a>
-      <a class="mobile-nav-item" id="mnav-articles" href="/articles/" onclick="closeMobileDrawer()">
+      <a class="mobile-nav-item" id="mnav-articles" href="articles/index.html" onclick="closeMobileDrawer()">
         <svg viewBox="0 0 16 16"><path d="M3 2.5h10v11H3z"/><path d="M5 5h6M5 8h6M5 11h4"/></svg>試験ガイド
       </a>
 
@@ -1861,44 +1861,44 @@ body.is-solving .site-footer{display:none!important}
       <div id="glossary-list">
 <!-- SEO: 静的用語解説（JS無効時・クローラ向け抜粋。全件は docs/glossary-terms-checklist.csv を fetch して表示） -->
 <section class="glos-static-section" aria-label="用語解説一覧（抜粋）">
-<p class="glos-static-intro"><strong><a href="/terms/">用語解説一覧（静的HTML）</a></strong>と<strong><a href="/articles/">試験ガイド</a></strong>で、クローラが確実に辿れる実リンクから各記事へ誘導します。下のインタラクティブ一覧は JavaScript で <code>docs/glossary-terms-checklist.csv</code> を読み込みます（<code>file://</code> では取得できない場合があるため、簡易サーバー推奨）。以下は用語の抜粋です。</p>
+<p class="glos-static-intro"><strong><a href="terms/index.html">用語解説一覧（静的HTML）</a></strong>と<strong><a href="articles/index.html">試験ガイド</a></strong>で、クローラが確実に辿れる実リンクから各記事へ誘導します。下のインタラクティブ一覧は JavaScript で <code>docs/glossary-terms-checklist.csv</code> を読み込みます（<code>file://</code> では取得できない場合があるため、簡易サーバー推奨）。以下は用語の抜粋です。</p>
 <div class="glos-cat-section" data-cat="lawH">
-<h3 class="glos-cat-heading">関係法令（有害業務）</h3>
+<h3 class="glos-cat-heading">賃貸住宅管理業法等</h3>
 <article class="glos-static-card" itemscope itemtype="https://schema.org/DefinedTerm">
-  <h4 class="glos-static-term" itemprop="name">有機溶剤中毒予防規則</h4>
-  <p class="glos-static-desc" itemprop="description">有機溶剤の区分（特別・第1種・第2種）に応じて、局所排気装置の設置・作業環境評価・作業主任者の選任などの義務が定められます。試験では区分と措置の対応が頻出です。</p>
+  <h4 class="glos-static-term" itemprop="name">管理業務</h4>
+  <p class="glos-static-desc" itemprop="description">賃貸住宅の維持保全と家賃等の金銭管理を併せて行う業務。いずれか一方だけでは賃貸住宅管理業法上の管理業務に該当しない点が頻出です。</p>
 </article>
 </div>
 <div class="glos-cat-section" data-cat="lawN">
-<h3 class="glos-cat-heading">関係法令（有害以外）</h3>
+<h3 class="glos-cat-heading">関連法令</h3>
 <article class="glos-static-card" itemscope itemtype="https://schema.org/DefinedTerm">
-  <h4 class="glos-static-term" itemprop="name">衛生管理者</h4>
-  <p class="glos-static-desc" itemprop="description">事業者が選任する、労働衛生の専門的管理者です。規模・業種に応じた人数・常勤・専任・資格区分（第一種／第二種など）が試験の定番論点です。</p>
+  <h4 class="glos-static-term" itemprop="name">区分所有法</h4>
+  <p class="glos-static-desc" itemprop="description">区分所有建物の管理・使用・規約・集会・決議等を定める法律。賃貸管理では管理組合・共用部分・修繕積立金とセットで論点になります。</p>
 </article>
 </div>
 <div class="glos-cat-section" data-cat="rightsH">
-<h3 class="glos-cat-heading">労働衛生（有害業務）</h3>
+<h3 class="glos-cat-heading">賃貸借・民法・原状回復</h3>
 <article class="glos-static-card" itemscope itemtype="https://schema.org/DefinedTerm">
-  <h4 class="glos-static-term" itemprop="name">局所排気装置</h4>
-  <p class="glos-static-desc" itemprop="description">有害物の発生源付近で汚染空気を捕集しダクトで排出する装置です。希釈換気との優先順位や制気速度などが頻出です。</p>
+  <h4 class="glos-static-term" itemprop="name">原状回復</h4>
+  <p class="glos-static-desc" itemprop="description">賃借人の責めに帰すべき事由による損耗・汚損等を修復すること。経年劣化との線引きや負担範囲が試験の定番です。</p>
 </article>
 </div>
 <div class="glos-cat-section" data-cat="rightsN">
-<h3 class="glos-cat-heading">労働衛生（有害以外）</h3>
+<h3 class="glos-cat-heading">管理実務・書面</h3>
 <article class="glos-static-card" itemscope itemtype="https://schema.org/DefinedTerm">
-  <h4 class="glos-static-term" itemprop="name">WBGT</h4>
-  <p class="glos-static-desc" itemprop="description">暑熱環境での温熱負荷を表す指標です。気温・湿度・輻射熱などを総合して評価し、熱中症対策や休憩設計に用います。</p>
+  <h4 class="glos-static-term" itemprop="name">管理受託契約重要事項説明</h4>
+  <p class="glos-static-desc" itemprop="description">管理受託契約の締結前に、管理業者が貸主に書面を交付して行う説明。IT重説の要件（双方向性・事前交付・承諾）もセットで押さえます。</p>
 </article>
 </div>
 <div class="glos-cat-section" data-cat="limit">
-<h3 class="glos-cat-heading">労働生理</h3>
+<h3 class="glos-cat-heading">建築・設備・会計税務</h3>
 <article class="glos-static-card" itemscope itemtype="https://schema.org/DefinedTerm">
-  <h4 class="glos-static-term" itemprop="name">じん肺</h4>
-  <p class="glos-static-desc" itemprop="description">長期の粉じんばく露による肺の線維化疾患です。病理・管理区分・医学的判断がセットで問われます。</p>
+  <h4 class="glos-static-term" itemprop="name">建築基準法</h4>
+  <p class="glos-static-desc" itemprop="description">建築物の位置・構造・設備・用途等の最低基準を定める法律。賃貸住宅管理では内装制限・防火・避難・バリアフリー等が論点になります。</p>
 </article>
 <article class="glos-static-card" itemscope itemtype="https://schema.org/DefinedTerm">
-  <h4 class="glos-static-term" itemprop="name">酸素欠乏症</h4>
-  <p class="glos-static-desc" itemprop="description">空気中酸素の不足により起きる障害です。窒息ガスとの鑑別や、中枢・循環症状の理解が試験では重要です。</p>
+  <h4 class="glos-static-term" itemprop="name">修繕積立金</h4>
+  <p class="glos-static-desc" itemprop="description">区分所有建物の大規模修繕等に備えて管理組合が積み立てる金銭。計上・引当・修繕タイミングとあわせて理解します。</p>
 </article>
 </div>
 </section>
@@ -1924,7 +1924,7 @@ body.is-solving .site-footer{display:none!important}
           <li>契約・実務（賃貸借・原状回復・サブリース・重要事項説明など）</li>
           <li>設備・税務・その他（建築・設備・会計税務・不動産証券化など）</li>
         </ul>
-        <p style="margin-top:24px;font-size:14px"><a href="about.html">このサイトについて</a> ・ <a href="related-sites.html">関連サイト</a> ・ <a href="/articles/">試験ガイド</a> ・ <a href="privacy-terms.html">利用規約・プライバシー・免責</a></p>
+        <p style="margin-top:24px;font-size:14px;line-height:2"><a href="about.html">このサイトについて</a> ・ <a href="q/index.html">過去問一覧</a> ・ <a href="terms/index.html">用語集</a> ・ <a href="articles/index.html">試験ガイド</a> ・ <a href="related-sites.html">関連リンク</a> ・ <a href="privacy.html">プライバシー</a> ・ <a href="https://forms.gle/duTebNY1vKqV6A816" target="_blank" rel="noopener noreferrer">お問い合わせ</a></p>
       </div>
     </noscript>
 
@@ -1941,13 +1941,15 @@ body.is-solving .site-footer{display:none!important}
         <span class="site-footer-sep" aria-hidden="true"></span>
         <nav class="site-footer-legal" aria-label="サイト情報・ポリシー">
           <a href="about.html">このサイトについて</a>
-          <a href="related-sites.html">関連サイト</a>
-          <a href="/articles/">試験ガイド</a>
-          <a href="privacy-terms.html">利用規約・プライバシー・免責</a>
+          <a href="q/index.html">過去問一覧</a>
+          <a href="terms/index.html">用語集</a>
+          <a href="articles/index.html">試験ガイド</a>
+          <a href="related-sites.html">関連リンク</a>
+          <a href="privacy.html">プライバシー</a>
           <a href="https://forms.gle/duTebNY1vKqV6A816" target="_blank" rel="noopener noreferrer">お問い合わせ</a>
         </nav>
         <span class="site-footer-sep" aria-hidden="true"></span>
-        <span class="site-footer-copy">© 2026 <span class="site-footer-copy-brand">賃管マスター</span><span class="site-footer-copy-sub">賃貸不動産経営管理士試験対策</span></span>
+        <span class="site-footer-copy">© 2026 <span class="site-footer-copy-brand">賃管マスター</span><span class="site-footer-copy-sub">学習支援（非公式）・chintaikanrishi-master.jp</span></span>
       </div>
     </div>
   </footer>
@@ -2114,7 +2116,17 @@ function parseGlossaryCsv(text){
     '労働衛生（有害業務）': 'rightsH',
     '関係法令（有害以外）': 'lawN',
     '労働衛生（有害以外）': 'rightsN',
-    '労働生理': 'limit'
+    '労働生理': 'limit',
+    '賃貸住宅管理業法': 'lawH',
+    '関連法令': 'lawN',
+    '賃貸借契約': 'rightsH',
+    '民法': 'rightsH',
+    '借地借家法': 'rightsH',
+    '原状回復': 'rightsH',
+    '管理実務': 'rightsN',
+    '建物・設備': 'limit',
+    '会計・税務・保険': 'limit',
+    '賃貸経営・PM/AM': 'limit'
   };
   function summaryFromDesc(desc){
     const t = String(desc || '').replace(/\s+/g, ' ').trim();
@@ -2168,7 +2180,7 @@ function loadGlossaryFromCsv(){
     })
     .catch(function(err){
       clearTimeout(tid);
-      console.warn('[glossary] CSV の取得に失敗したため、eisei1-data-glossary.js のデータを使います:', err && err.message ? err.message : err);
+      console.warn('[glossary] CSV の取得に失敗したため、埋め込み用語データを使います:', err && err.message ? err.message : err);
     });
   return _glossaryCsvPromise;
 }
@@ -2186,11 +2198,11 @@ function renderGlossary(){
     if (glosActiveCat === 'exam') glosActiveCat = 'all';
     const cats = [
       {id:'all',label:'すべて',title:'すべて'},
-      {id:'lawH',label:'法令・有害',title:'関係法令（有害業務）'},
-      {id:'lawN',label:'法令・有害外',title:'関係法令（有害以外）'},
-      {id:'rightsH',label:'衛生・有害',title:'労働衛生（有害業務）'},
-      {id:'rightsN',label:'衛生・有害外',title:'労働衛生（有害以外）'},
-      {id:'limit',label:'設備等',title:'設備・税務・その他'},
+      {id:'lawH',label:'業法等',title:'賃貸住宅管理業法等'},
+      {id:'lawN',label:'関連法令',title:'関連法令（区分所有法等）'},
+      {id:'rightsH',label:'契約・修法',title:'賃貸借・民法・借地借家・原状回復'},
+      {id:'rightsN',label:'管理実務',title:'管理受託・書面・報告等'},
+      {id:'limit',label:'設備等',title:'建築・設備・会計税務・経営'},
     ];
     const catEl = document.getElementById('glos-cats');
     if (!catEl) return;
@@ -2227,17 +2239,17 @@ function renderGlossaryList(){
   if (!listEl) return;
   if (typeof GLOSSARY_DATA === 'undefined' || !Array.isArray(GLOSSARY_DATA)) {
     if (listEl && !document.getElementById('glos-fallback-help')) {
-      listEl.insertAdjacentHTML('afterbegin', '<div id="glos-fallback-help" class="glos-static-intro" style="background:#fff8e6;border:1px solid #e6c86a;color:#5a4a20;margin-bottom:12px"><strong>用語データ（eisei1-data-glossary.js）が読み込めていません。</strong><br>① <code>index.html</code> と同じフォルダにそのファイルがあるか確認　② ダブルクリックではなく <code>python3 -m http.server 8080</code> で <code>http://127.0.0.1:8080/</code> から開く　③ 静的な全記事一覧は <a href="/terms/">/terms/</a> を開いてください。</div>');
+      listEl.insertAdjacentHTML('afterbegin', '<div id="glos-fallback-help" class="glos-static-intro" style="background:#fff8e6;border:1px solid #e6c86a;color:#5a4a20;margin-bottom:12px"><strong>用語データ（埋め込み用語ファイル）が読み込めていません。</strong><br>① <code>index.html</code> と同じフォルダにそのファイルがあるか確認　② ダブルクリックではなく <code>python3 -m http.server 8080</code> で <code>http://127.0.0.1:8080/</code> から開く　③ 静的な全記事一覧は <a href="terms/index.html">用語一覧（terms/index.html）</a> を開いてください。</div>');
     }
     return;
   }
   const q = (document.getElementById('glos-search')||{value:''}).value.trim().toLowerCase();
   const catNames = {
-    lawH: '関係法令（有害業務）',
-    rightsH: '労働衛生（有害業務）',
-    lawN: '関係法令（有害以外）',
-    rightsN: '労働衛生（有害以外）',
-    limit: '設備・税務・その他'
+    lawH: '賃貸住宅管理業法等',
+    rightsH: '賃貸借・民法・原状回復等',
+    lawN: '関連法令',
+    rightsN: '管理実務・書面等',
+    limit: '建築・設備・会計税務等'
   };
   const filtered = GLOSSARY_DATA.filter(g=>{
     if (g.cat === 'exam') return false;
@@ -2283,7 +2295,7 @@ function renderGlossaryList(){
   }).join('');
   }catch(err){
     console.error('[glossary] カードHTMLの生成に失敗:', err && err.message ? err.message : err);
-    listEl.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-size:13px;line-height:1.7">用語カードの表示でエラーが発生しました。<code>eisei1-data-glossary.js</code> の読み込みと、ブラウザの開発者ツール（コンソール）を確認してください。</div>';
+    listEl.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-size:13px;line-height:1.7">用語カードの表示でエラーが発生しました。用語データの読み込みと、ブラウザの開発者ツール（コンソール）を確認してください。</div>';
   }
 }
 
@@ -2372,9 +2384,9 @@ const BADGE_DEFS = [
   {id:'bookmark_action',icon:'bookmark', name:'ブックマークを押す',desc:'気になる問題をブックマーク'},
   {id:'timer_action',   icon:'timer',    name:'タイマーを使う',    desc:'集中タイマーを開いて学習準備'},
   {id:'all_fields',     icon:'grid',     name:'全科目タッチ',      desc:'全3科目で1問以上正解'},
-  {id:'rights_master',  icon:'book',     name:'労働衛生 得意',     desc:'労働衛生10問以上・正答率70%以上'},
-  {id:'law_master',     icon:'book',     name:'関係法令 得意',     desc:'関係法令10問以上・正答率70%以上'},
-  {id:'limit_master',   icon:'book',     name:'労働生理 得意',     desc:'労働生理10問以上・正答率70%以上'},
+  {id:'rights_master',  icon:'book',     name:'契約・実務 得意',     desc:'契約・実務10問以上・正答率70%以上'},
+  {id:'law_master',     icon:'book',     name:'賃管法令 得意',     desc:'賃管法令10問以上・正答率70%以上'},
+  {id:'limit_master',   icon:'book',     name:'設備等 得意',     desc:'設備・税務等10問以上・正答率70%以上'},
 ];
 
 function badgeIconHTML(icon){
@@ -2687,25 +2699,25 @@ const MISSION_POOL = {
     {id:'orig3',    text:'オリジナル問題を3問解こう',  type:'mode', mode:'orig', target:3},
     {id:'review_any1', text:'復習を1問進めよう',       type:'review', target:1},
   ],
-  // カテゴリC: 分野系（労働衛生・関係法令）
+  // カテゴリC: 分野系（賃管法令・契約実務）
   C: [
-    {id:'rights1',  text:'労働衛生を1問解こう',   type:'field', field:'rights', target:1},
-    {id:'rights2',  text:'労働衛生を2問解こう',   type:'field', field:'rights', target:2},
-    {id:'rights3',  text:'労働衛生を3問解こう',   type:'field', field:'rights', target:3},
-    {id:'rights4',  text:'労働衛生を4問解こう',   type:'field', field:'rights', target:4},
-    {id:'law1',     text:'関係法令を1問解こう',   type:'field', field:'law',    target:1},
-    {id:'law2',     text:'関係法令を2問解こう',   type:'field', field:'law',    target:2},
-    {id:'law3',     text:'関係法令を3問解こう',   type:'field', field:'law',    target:3},
-    {id:'law4',     text:'関係法令を4問解こう',   type:'field', field:'law',    target:4},
+    {id:'rights1',  text:'契約・実務を1問解こう',   type:'field', field:'rights', target:1},
+    {id:'rights2',  text:'契約・実務を2問解こう',   type:'field', field:'rights', target:2},
+    {id:'rights3',  text:'契約・実務を3問解こう',   type:'field', field:'rights', target:3},
+    {id:'rights4',  text:'契約・実務を4問解こう',   type:'field', field:'rights', target:4},
+    {id:'law1',     text:'賃管法令を1問解こう',   type:'field', field:'law',    target:1},
+    {id:'law2',     text:'賃管法令を2問解こう',   type:'field', field:'law',    target:2},
+    {id:'law3',     text:'賃管法令を3問解こう',   type:'field', field:'law',    target:3},
+    {id:'law4',     text:'賃管法令を4問解こう',   type:'field', field:'law',    target:4},
     {id:'past1',    text:'過去問を1問解こう',      type:'mode',  mode:'past',    target:1},
     {id:'past3',    text:'過去問を3問解こう',      type:'mode',  mode:'past',    target:3},
   ],
-  // カテゴリD: 分野系（労働生理・復習）
+  // カテゴリD: 分野系（設備等・復習）
   D: [
-    {id:'limit1',   text:'労働生理を1問解こう',      type:'field', field:'limit', target:1},
-    {id:'limit2',   text:'労働生理を2問解こう',      type:'field', field:'limit', target:2},
-    {id:'limit3',   text:'労働生理を3問解こう',       type:'field', field:'limit', target:3},
-    {id:'limit4',   text:'労働生理を4問解こう',      type:'field', field:'limit', target:4},
+    {id:'limit1',   text:'設備・税務等を1問解こう',      type:'field', field:'limit', target:1},
+    {id:'limit2',   text:'設備・税務等を2問解こう',      type:'field', field:'limit', target:2},
+    {id:'limit3',   text:'設備・税務等を3問解こう',       type:'field', field:'limit', target:3},
+    {id:'limit4',   text:'設備・税務等を4問解こう',      type:'field', field:'limit', target:4},
     {id:'review1',  text:'復習を1問進めよう',         type:'review', target:1},
     {id:'review2',  text:'復習を2問進めよう',         type:'review', target:2},
   ],
@@ -3357,7 +3369,7 @@ async function doRegister(){
   }
 }
 function demoLogin(){
-  loadDB(); const email='demo@eisei1.example';
+  loadDB(); const email='demo@chintaikan.example';
   if(!db[email]){
     const now=Date.now(),day=86400000, ans={};
     QUESTIONS.forEach((q,i)=>{ ans[q.id]={ans:q.ans,time:10+Math.random()*20,date:now-(4-Math.floor(i/4))*day}; });
@@ -4472,26 +4484,26 @@ function selOrder(o){quizState.order=o;['seq','rnd'].forEach(v=>{const el=docume
 // ===== 45-UNIT DEFINITION =====
 const ORIG_UNITS = {
   rights:[
-    {id:'g_routai',label:'健康障害・作業管理の考え方'},
-    {id:'g_workenv',label:'作業環境管理の体系'},
-    {id:'g_noise',label:'騒音・振動'},
-    {id:'g_heat',label:'暑熱・寒冷'},
-    {id:'e_indoor',label:'換気・空調・給排水'},
-    {id:'e_dust',label:'粉じん・じんあい'},
-    {id:'e_rad',label:'放射線'},
-    {id:'e_met',label:'作業環境測定'},
+    {id:'g_routai',label:'賃貸借の基本（解約・更新）'},
+    {id:'g_workenv',label:'原状回復・修繕負担'},
+    {id:'g_noise',label:'紛争防止・ADR'},
+    {id:'g_heat',label:'サブリース・特定賃貸借'},
+    {id:'e_indoor',label:'重要事項説明・書面'},
+    {id:'e_dust',label:'敷金・家賃・保証'},
+    {id:'e_rad',label:'管理受託契約'},
+    {id:'e_met',label:'勧誘・広告規制'},
   ],
   law:[
-    {id:'h_rouan',label:'労働安全衛生法の体系'},
-    {id:'h_kijun',label:'労働衛生基準則'},
-    {id:'h_eiseiti',label:'衛生管理者・委員会'},
-    {id:'h_tokkan',label:'化学物質・特化則'},
+    {id:'h_rouan',label:'登録義務・業の範囲'},
+    {id:'h_kijun',label:'遵守事項・名義貸し禁止'},
+    {id:'h_eiseiti',label:'監督処分・報告徴収'},
+    {id:'h_tokkan',label:'旧登録制度・経過措置'},
   ],
   limit:[
-    {id:'c_bio',label:'労働生理学'},
-    {id:'c_anatomy',label:'人体の解剖生理'},
-    {id:'c_chem',label:'衛生化学'},
-    {id:'c_phys',label:'衛生物理学'},
+    {id:'c_bio',label:'建築基準法（防火・避難）'},
+    {id:'c_anatomy',label:'設備検査・消防'},
+    {id:'c_chem',label:'会計・税務の基礎'},
+    {id:'c_phys',label:'PM/AM・賃貸経営'},
   ],
 };
 const ORIG_FIELD_LABELS = {law: '賃管法令・制度', rights: '契約・実務', limit: '設備・税務・その他'};
@@ -5287,7 +5299,7 @@ function saveMissionCert(){
   const canvas = document.getElementById('mission-cert-canvas');
   if(!canvas) return;
   const now = new Date();
-  const fname = `eisei1-master-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.png`;
+  const fname = `chintaikan-master-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.png`;
   const a = document.createElement('a');
   a.download = fname;
   a.href = canvas.toDataURL('image/png');
@@ -5576,7 +5588,7 @@ function buildDailyVisitLetter(){
     },
     {
       title:'業法を柱に育てましょう',
-      body:'労働衛生関係法令は出題が厚く得点の土台になりやすいですので、今日は業法を多めに触れ、自信の柱を一緒に太らせていきましょう。'
+      body:'賃貸住宅管理業法は出題の柱になりやすいですので、今日は業法と遵守事項を多めに触れ、得点の土台を一緒に太らせていきましょう。'
     },
     {
       title:'小さな記録を残しましょう',
@@ -5849,7 +5861,7 @@ function saveLevelUpShareImage(){
   const canvas=document.getElementById('level-up-share-canvas');
   if(!canvas) return;
   drawLevelUpShareCard(lu);
-  const fname=`eisei1-master-levelup-Lv${lu.newLv}-${new Date().toISOString().slice(0,10)}.png`;
+  const fname=`chintaikan-master-levelup-Lv${lu.newLv}-${new Date().toISOString().slice(0,10)}.png`;
   const a=document.createElement('a');
   a.download=fname;
   a.href=canvas.toDataURL('image/png');
@@ -5869,7 +5881,7 @@ function saveBadgeShareImage(){
   if(!canvas) return;
   drawBadgeShareCard(badge);
   const now=new Date();
-  const fname=`eisei1-master-badge-${badge.id}-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.png`;
+  const fname=`chintaikan-master-badge-${badge.id}-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.png`;
   const a=document.createElement('a');
   a.download=fname;
   a.href=canvas.toDataURL('image/png');
@@ -5886,7 +5898,7 @@ function buildKaisetsu(k, q){
 
   // 条文バッジ・数字強調のユーティリティ
   function tagLaw(t){
-    return t.replace(/（((?:民法|労働衛生関係法令|借地借家法|区分所有法|不動産登記法|都市計画法|建築基準法|農地法|国土利用計画法|土地区画整理法|盛土規制法|租税特別措置法|地方税法|地価公示法)[^）]{1,30}？)）/g,
+    return t.replace(/（((?:民法|賃貸住宅管理業法|宅地建物取引業法|労働衛生関係法令|借地借家法|区分所有法|不動産登記法|都市計画法|建築基準法|農地法|国土利用計画法|土地区画整理法|盛土規制法|租税特別措置法|地方税法|地価公示法)[^）]{1,30}？)）/g,
       (_,m)=>`<span class="ks-law">${m}</span>`);
   }
   function tagNums(t){
@@ -5965,9 +5977,9 @@ function toggleKsSec(i){
 
 // ===== RICH EXPLANATION BUILDER (オリジナル問題専用・API不使用) =====
 function buildRichExp(expText, opts, ans){
-  // 1. 法令条文をバッジ化（民法○条、労働衛生関係法令○条など）
+  // 1. 法令条文をバッジ化（民法○条、賃貸住宅管理業法○条など）
   function tagLaw(t){
-    return t.replace(/（((?:民法|労働衛生関係法令|借地借家法|区分所有法|不動産登記法|都市計画法|建築基準法|農地法|国土利用計画法|土地区画整理法|盛土規制法|宅造法|租税特別措置法|地方税法|地価公示法|住宅品質確保法|住宅金融支援機構法|住宅瑕疵担保履行法)[^）]{1,30}？)）/g,
+    return t.replace(/（((?:民法|賃貸住宅管理業法|宅地建物取引業法|労働衛生関係法令|借地借家法|区分所有法|不動産登記法|都市計画法|建築基準法|農地法|国土利用計画法|土地区画整理法|盛土規制法|宅造法|租税特別措置法|地方税法|地価公示法|住宅品質確保法|住宅金融支援機構法|住宅瑕疵担保履行法)[^）]{1,30}？)）/g,
       (_,m)=>`<span class="rich-law">${m}</span>`);
   }
   // 2. 重要数字・期間・割合をハイライト
@@ -6852,7 +6864,7 @@ window.addEventListener('load', function(){
     'コーヒー片手に、もう1問。',
     '睡眠も立派な学習のうち。',
     '焦らず、でも止まらず。',
-    '労働衛生関係法令、得点源にしてしまおう。',
+    '賃貸住宅管理業法、得点の柱にしてしまおう。',
     '過去問は未来問。繰り返しが力。',
     '今日の努力は、試験当日に返ってくる。',
     '民法は難しい。でも諦めない人が受かる。',
@@ -6863,7 +6875,7 @@ window.addEventListener('load', function(){
     '数字（期間・割合）は呪文のように覚えよう。',
     '試験日が近づくほど、記憶は定着する。',
     '今日も賃管マスターで賃貸不動産経営管理士試験の学習を一緒に頑張ろう。',
-    '労働衛生の問題が解けたとき、ちょっと気持ちいい。',
+    '契約実務の問題が解けたとき、ちょっと気持ちいい。',
     '満点より、合格点。戦略的に学ぼう。',
     '合格を手にした自分をイメージして。',
     '復習は最強の武器。何度でも解こう。',

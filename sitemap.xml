@@ -9,6 +9,10 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
+    <loc>https://chintaikanrishi-master.jp/articles/index.html</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
     <loc>https://chintaikanrishi-master.jp/index.html</loc>
     <changefreq>monthly</changefreq>
   </url>
@@ -2018,6 +2022,10 @@
   </url>
   <url>
     <loc>https://chintaikanrishi-master.jp/q/past/y2025/q50/index.html</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://chintaikanrishi-master.jp/related-sites.html</loc>
     <changefreq>monthly</changefreq>
   </url>
   <url>

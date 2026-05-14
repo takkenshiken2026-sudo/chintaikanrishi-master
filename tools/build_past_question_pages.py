@@ -17,6 +17,13 @@ from pathlib import Path
 from xml.sax.saxutils import escape as xml_escape
 
 ROOT = Path(__file__).resolve().parents[1]
+import sys
+
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from tools.html_footer import static_footer_block
+
 DATA_CSV = ROOT / "data" / "past_questions.csv"
 Q_ROOT = ROOT / "q"
 BASE_DEFAULT = "https://chintaikanrishi-master.jp"
@@ -238,9 +245,7 @@ def build_question_html(page: dict, rel_path: Path, base_url: str) -> str:
   </section>
   <p class="q-app-link"><a href="{html.escape(root_idx)}">アプリで演習する</a></p>
 </main>
-<footer class="q-static-footer">
-  <p><small>学習用コンテンツです。出題範囲・法令の最新情報は必ず公式情報で確認してください。</small></p>
-</footer>
+{static_footer_block(rel_path)}
 </body>
 </html>
 """
@@ -289,9 +294,7 @@ def build_q_index(pages: list[dict], base_url: str) -> str:
   <p class="q-meta">全 {len(pages)} 問</p>
   {"".join(year_blocks)}
 </main>
-<footer class="q-static-footer">
-  <p><small>学習用コンテンツです。</small></p>
-</footer>
+{static_footer_block(Path("q/index.html"))}
 </body>
 </html>
 """
@@ -341,6 +344,8 @@ def main() -> int:
         f"{base}/index.html",
         f"{base}/about.html",
         f"{base}/privacy.html",
+        f"{base}/related-sites.html",
+        f"{base}/articles/index.html",
         f"{base}/q/index.html",
     ]
     urls += [f"{base}/{p['rel_path']}" for p in pages]
