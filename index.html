@@ -4139,6 +4139,11 @@ function gotoPage(id){
   if(id==='mock')        renderMockPage();
   if(id==='glossary')    renderGlossary();
   if(id==='past-config') buildYearGrid();
+  try {
+    if (typeof window.ga4PageView === "function") {
+      window.ga4PageView(location.pathname + location.search + location.hash, document.title);
+    }
+  } catch (_ga4e) {}
   window.scrollTo(0,0);
 }
 
@@ -4149,6 +4154,11 @@ window.addEventListener('popstate', function(e) {
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     const el = document.getElementById('page-' + e.state.page);
     if (el) el.classList.add('active');
+    try {
+      if (typeof window.ga4PageView === "function") {
+        window.ga4PageView(location.pathname + location.search + location.hash, document.title);
+      }
+    } catch (_ga4e) {}
     window.scrollTo(0, 0);
   }
 });

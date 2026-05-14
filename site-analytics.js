@@ -11,12 +11,33 @@
   var MID = /^G-[A-Za-z0-9]+$/.test(raw) ? raw : "";
   if (!MID) return;
 
-  if (window.gtag && window.dataLayer) {
+  /**
+   * SPA 等で URL・title が変わったあとに呼ぶ。index.html の gotoPage / popstate から利用。
+   * 引数省略時は現在の location + document.title。
+   */
+  function ga4PageView(pagePath, pageTitle) {
+    if (typeof window.gtag !== "function") return;
+    var path = pagePath != null && String(pagePath) ? String(pagePath) : "";
+    if (!path && typeof location !== "undefined") {
+      path = location.pathname + location.search + location.hash;
+    }
+    var title = pageTitle != null ? String(pageTitle) : typeof document !== "undefined" ? document.title : "";
     try {
-      window.gtag("config", MID);
+      var o = { page_path: path, page_title: title };
+      window.gtag("config", MID, o);
     } catch (_e) {}
-    return;
   }
+  window.ga4PageView = ga4PageView;
+
+  if (window.__GA4_SNIPPET_INIT__ === MID) return;
+  window.__GA4_SNIPPET_INIT__ = MID;
+
+  try {
+    if (document.querySelector('script[src*="googletagmanager.com/gtag/js"][data-ga4-mid="' + MID + '"]')) {
+      ga4PageView();
+      return;
+    }
+  } catch (_e) {}
 
   window.dataLayer = window.dataLayer || [];
   function gtag() {
@@ -27,8 +48,11 @@
 
   var s = document.createElement("script");
   s.async = true;
+  s.setAttribute("data-ga4-mid", MID);
   s.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(MID);
   document.head.appendChild(s);
 
-  gtag("config", MID);
+  try {
+    gtag("config", MID);
+  } catch (_e2) {}
 })();
