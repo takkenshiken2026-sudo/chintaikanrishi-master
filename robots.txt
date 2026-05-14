@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://chintaikanrishi-master.jp/sitemap.xml

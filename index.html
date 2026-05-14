@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<script>window.__GA4_MEASUREMENT_ID__="";</script>
+<script defer src="/site-analytics.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>賃管マスター｜賃貸不動産経営管理士 過去問演習（無料）</title>
+<meta name="description" content="賃貸不動産経営管理士試験の過去問を年度・分野別に演習できる無料サイト。正答・解説付き。">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#111111">
+<link rel="canonical" href="https://chintaikanrishi-master.jp/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://chintaikanrishi-master.jp/">
+<meta property="og:title" content="賃管マスター｜賃貸不動産経営管理士 過去問演習">
+<meta property="og:description" content="賃貸不動産経営管理士試験の過去問を年度・分野別に演習できる無料サイト。">
+<meta property="og:locale" content="ja_JP">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site-pages.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://chintaikanrishi-master.jp/#website",
+      "url": "https://chintaikanrishi-master.jp/",
+      "name": "賃管マスター",
+      "alternateName": "賃貸不動産経営管理士試験対策サイト",
+      "description": "賃貸不動産経営管理士試験の過去問演習",
+      "inLanguage": "ja"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<header class="app-header">
+  <div class="app-header-inner">
+    <a class="app-brand" href="./">
+      <strong>賃管マスター</strong>
+      <span>賃貸不動産経営管理士｜過去問</span>
+    </a>
+    <nav class="app-nav" aria-label="サイト内">
+      <a href="q/index.html">過去問一覧</a>
+      <a href="terms/index.html">用語集</a>
+      <a href="about.html">このサイトについて</a>
+      <a href="privacy.html">プライバシー</a>
+    </nav>
+  </div>
+</header>
+<main class="app-main" id="app-root">
+  <div class="app-toolbar">
+    <label>年度
+      <select id="f-year" aria-label="年度で絞り込み"></select>
+    </label>
+    <label>分野
+      <select id="f-cat" aria-label="分野で絞り込み"></select>
+    </label>
+    <label>免除問題
+      <select id="f-exempt" aria-label="試験免除出題の扱い">
+        <option value="hide">除外</option>
+        <option value="show">含む</option>
+      </select>
+    </label>
+    <div class="app-actions">
+      <button type="button" class="app-btn" id="btn-shuffle">シャッフル</button>
+      <button type="button" class="app-btn app-btn-primary" id="btn-next">次の問題</button>
+    </div>
+  </div>
+  <p class="app-pos" id="app-pos" aria-live="polite"></p>
+  <article class="app-card" id="q-card" hidden>
+    <h2>問題</h2>
+    <div class="app-stem" id="q-stem"></div>
+    <h2>選択肢</h2>
+    <div class="app-choices" id="q-choices" role="group" aria-label="選択肢"></div>
+    <div class="app-reveal" id="q-reveal" hidden></div>
+  </article>
+  <p class="app-footer-note">学習用です。出題の正確性・最新法令は公式情報で確認してください。</p>
+  <footer class="app-site-footer">
+    <a href="about.html">このサイトについて</a>
+    <span class="app-site-footer-sep" aria-hidden="true">·</span>
+    <a href="privacy.html">プライバシー</a>
+    <span class="app-site-footer-sep" aria-hidden="true">·</span>
+    <a href="https://forms.gle/jen3mT2nssLsmKaAA" target="_blank" rel="noopener noreferrer">お問い合わせ</a>
+  </footer>
+</main>
+<script src="/chintaikanrishi-master-data.js"></script>
+<script>
+(function () {
+  var ALL = typeof CHINTAIKANRISHI_QUESTIONS !== "undefined" && Array.isArray(CHINTAIKANRISHI_QUESTIONS)
+    ? CHINTAIKANRISHI_QUESTIONS.slice()
+    : [];
+  if (!ALL.length) {
+    document.getElementById("app-root").innerHTML = "<p class=\"app-main\">問題データを読み込めませんでした。</p>";
+    return;
+  }
+
+  var yearSel = document.getElementById("f-year");
+  var catSel = document.getElementById("f-cat");
+  var exemptSel = document.getElementById("f-exempt");
+  var btnNext = document.getElementById("btn-next");
+  var btnShuffle = document.getElementById("btn-shuffle");
+  var card = document.getElementById("q-card");
+  var stemEl = document.getElementById("q-stem");
+  var choicesEl = document.getElementById("q-choices");
+  var revealEl = document.getElementById("q-reveal");
+  var posEl = document.getElementById("app-pos");
+
+  var years = [];
+  var yset = {};
+  ALL.forEach(function (q) {
+    if (!yset[q.examYear]) {
+      yset[q.examYear] = true;
+      years.push(q.examYear);
+    }
+  });
+  years.sort(function (a, b) { return a - b; });
+  yearSel.innerHTML =
+    '<option value="">すべて</option>' +
+    years.map(function (y) { return '<option value="' + y + '">' + y + "年</option>"; }).join("");
+
+  var cats = [];
+  var cset = {};
+  ALL.forEach(function (q) {
+    var c = q.category || "";
+    if (c && !cset[c]) {
+      cset[c] = true;
+      cats.push(c);
+    }
+  });
+  cats.sort();
+  catSel.innerHTML = '<option value="">すべて</option>';
+  cats.forEach(function (c) {
+    var o = document.createElement("option");
+    o.value = c;
+    o.textContent = c;
+    catSel.appendChild(o);
+  });
+
+  var pool = ALL.slice();
+  var idx = 0;
+  var answered = false;
+
+  function filtered() {
+    var y = yearSel.value;
+    var c = catSel.value;
+    var ex = exemptSel.value;
+    return ALL.filter(function (q) {
+      if (y && String(q.examYear) !== y) return false;
+      if (c && q.category !== c) return false;
+      if (ex === "hide" && q.isExempt) return false;
+      return true;
+    });
+  }
+
+  function reshuffle() {
+    pool = filtered();
+    for (var i = pool.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = pool[i];
+      pool[i] = pool[j];
+      pool[j] = t;
+    }
+    idx = 0;
+    answered = false;
+  }
+
+  function showQuestion() {
+    if (!pool.length) {
+      card.hidden = true;
+      posEl.textContent = "条件に一致する問題がありません。";
+      return;
+    }
+    var q = pool[idx];
+    card.hidden = false;
+    answered = false;
+    revealEl.hidden = true;
+    revealEl.textContent = "";
+    var badges = [];
+    if (q.isExempt) badges.push('<span class="q-badge">試験免除出題</span>');
+    if (q.isInvalidated) badges.push('<span class="q-badge q-badge-warn">出題無効</span>');
+    var badgeHtml = badges.length ? '<p class="q-badges">' + badges.join(" ") + "</p>" : "";
+    var tagHtml = q.tags
+      ? '<p style="margin-top:12px;font-size:13px;color:#888;">タグ: ' +
+        String(q.tags).replace(/</g, "&lt;") +
+        "</p>"
+      : "";
+    stemEl.innerHTML = badgeHtml + (q.stemHtml || "") + tagHtml;
+
+    choicesEl.innerHTML = "";
+    for (var k = 0; k < 4; k++) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "app-choice";
+      b.setAttribute("data-i", String(k + 1));
+      var span = document.createElement("span");
+      span.innerHTML = "<strong>（" + (k + 1) + "）</strong> ";
+      b.appendChild(span);
+      b.appendChild(document.createTextNode(String(q.choices[k] || "")));
+      b.addEventListener("click", onChoose);
+      choicesEl.appendChild(b);
+    }
+    posEl.textContent =
+      q.examWareki + " 第" + q.questionNo + "問 · " + (q.category || "") +
+      " · " + (idx + 1) + " / " + pool.length;
+  }
+
+  function onChoose(ev) {
+    if (answered) return;
+    var btn = ev.currentTarget;
+    var pick = parseInt(btn.getAttribute("data-i"), 10);
+    var q = pool[idx];
+    answered = true;
+    var buttons = choicesEl.querySelectorAll(".app-choice");
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].disabled = true;
+    }
+    if (q.isInvalidated || q.correct == null) {
+      btn.classList.add("is-correct");
+      revealEl.innerHTML =
+        "<p><strong>出題無効</strong>となった問題です。学習用に選択肢のみ確認してください。</p>" +
+        "<p>" + String(q.explanation || "").replace(/</g, "&lt;").replace(/\n/g, "<br>") + "</p>";
+    } else {
+      var ok = pick === q.correct;
+      btn.classList.add(ok ? "is-correct" : "is-wrong");
+      if (!ok) {
+        for (var j = 0; j < buttons.length; j++) {
+          if (parseInt(buttons[j].getAttribute("data-i"), 10) === q.correct) {
+            buttons[j].classList.add("is-correct");
+          }
+        }
+      }
+      revealEl.innerHTML =
+        "<p>正答: <strong>（" + q.correct + "）</strong></p>" +
+        "<p>" + String(q.explanation || "").replace(/</g, "&lt;").replace(/\n/g, "<br>") + "</p>";
+    }
+    revealEl.hidden = false;
+  }
+
+  function nextQ() {
+    if (!pool.length) return;
+    idx = (idx + 1) % pool.length;
+    answered = false;
+  }
+
+  yearSel.addEventListener("change", function () {
+    reshuffle();
+    showQuestion();
+  });
+  catSel.addEventListener("change", function () {
+    reshuffle();
+    showQuestion();
+  });
+  exemptSel.addEventListener("change", function () {
+    reshuffle();
+    showQuestion();
+  });
+  btnShuffle.addEventListener("click", function () {
+    reshuffle();
+    showQuestion();
+  });
+  btnNext.addEventListener("click", function () {
+    nextQ();
+    showQuestion();
+  });
+
+  reshuffle();
+  showQuestion();
+})();
+</script>
+</body>
+</html>
