@@ -1,4 +1,6 @@
-# GitHub Pages — Source を「GitHub Actions」に設定してください。
+# GitHub Pages — Settings → Pages → Source を「GitHub Actions」にしてください。
+# リポジトリ: https://github.com/takkenshiken2026-sudo/chintaikanrishi-master
+# 本番ドメイン: https://chintaikanrishi-master.jp/（CNAME ファイルで指定）
 name: Deploy GitHub Pages
 
 on:
