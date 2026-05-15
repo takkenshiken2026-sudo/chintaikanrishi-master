@@ -17,7 +17,6 @@ from pathlib import Path
 from xml.sax.saxutils import escape as xml_escape
 
 ROOT = Path(__file__).resolve().parents[1]
-import sys
 
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -27,6 +26,21 @@ from tools.html_footer import static_footer_block
 GLOSSARY_CSV = ROOT / "data" / "glossary_terms.csv"
 TERMS_DIR = ROOT / "terms"
 BASE_DEFAULT = "https://chintaikanrishi-master.jp"
+
+# index.html の FIELDS（用語カテゴリ →演習アプリの分野チップと揃える）
+FIELD_LABELS = {"law": "賃管法令・制度", "rights": "契約・実務", "limit": "設備・税務・その他"}
+GLOSSARY_CAT_TO_FIELD: dict[str, str] = {
+    "賃貸住宅管理業法": "law",
+    "関連法令": "law",
+    "借地借家法": "rights",
+    "賃貸借契約": "rights",
+    "民法": "rights",
+    "原状回復": "rights",
+    "管理実務": "rights",
+    "建物・設備": "limit",
+    "会計・税務・保険": "limit",
+    "賃貸経営・PM/AM": "limit",
+}
 
 
 def norm(s: str | None) -> str:
@@ -62,6 +76,37 @@ def rel_to_root(rel_file: Path) -> str:
 def rel_css(rel_file: Path) -> str:
     depth = len(rel_file.parent.parts)
     return "/".join([".."] * depth) + "/site-pages.css"
+
+
+def glossary_field_id(category: str) -> str | None:
+    return GLOSSARY_CAT_TO_FIELD.get(norm(category))
+
+
+def glossary_field_badge_html(category: str) -> str:
+    fid = glossary_field_id(category)
+    if not fid:
+        return ""
+    label = FIELD_LABELS.get(fid, fid)
+    return f'<span class="term-field-badge term-field-{fid}">{html.escape(label)}</span>'
+
+
+def static_site_header(*, root_href: str, breadcrumb_items: list[tuple[str, str | None]]) -> str:
+    """賃管マスター静的ページ共通ヘッダー（過去問個別ページと同型）。"""
+    lis = []
+    for text, href in breadcrumb_items:
+        if href:
+            lis.append(f'<li><a href="{html.escape(href)}">{html.escape(text)}</a></li>')
+        else:
+            lis.append(f'<li aria-current="page">{html.escape(text)}</li>')
+    crumbs = "\n      ".join(lis)
+    return f"""<header class="q-static-header">
+  <p class="q-static-brand"><a href="{html.escape(root_href)}">賃管マスター</a>（賃貸不動産経営管理士）</p>
+  <nav aria-label="パンくず">
+    <ol class="q-breadcrumb">
+      {crumbs}
+    </ol>
+  </nav>
+</header>"""
 
 
 def meta_description(text: str, limit: int = 155) -> str:
@@ -148,28 +193,48 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str) -> str:
     rel_html = ""
     if rel_list:
         rel_html = (
-            "<h2 class=\"q-h2\">関連用語</h2><ul class=\"term-related\">"
+            '<h2 id="term-related-h" class="q-h2">関連用語</h2><ul class="term-related">'
             + "".join(f"<li>{html.escape(x)}</li>" for x in rel_list)
             + "</ul>"
         )
 
-    def block(label: str, body: str) -> str:
+    def block(sec_id: str, label: str, body: str) -> str:
         if not body.strip():
             return ""
+        hid = f"term-sec-{sec_id}"
         b = html.escape(body).replace("\n", "<br>\n")
-        return f'<section class="q-block term-block"><h2 class="q-h2">{html.escape(label)}</h2><div class="q-stem">{b}</div></section>'
+        return (
+            f'<section class="q-block term-block" aria-labelledby="{hid}">'
+            f'<h2 id="{hid}" class="q-h2">{html.escape(label)}</h2>'
+            f'<div class="q-stem">{b}</div></section>'
+        )
 
     tags_wrap = ""
     if tags_html:
-        tags_wrap = (
-            '<div class="term-tags-wrap"><p class="q-h2" style="display:inline;font-size:13px;margin-right:8px;">タグ</p>'
-            + tags_html
-            + "</div>"
-        )
+        tags_wrap = '<div class="term-tags-wrap"><span class="term-tags-label">タグ</span>' + tags_html + "</div>"
 
     rel_section = ""
     if rel_html:
-        rel_section = f'<section class="q-block term-block">{rel_html}</section>'
+        rel_section = f'<section class="q-block term-block" aria-labelledby="term-related-h">{rel_html}</section>'
+
+    badge_html = glossary_field_badge_html(category)
+    meta_bits: list[str] = ['<span class="q-id">用語</span>']
+    if badge_html:
+        meta_bits.append(badge_html)
+    if category:
+        meta_bits.append(f"<span>{html.escape(category)}</span>")
+    meta_line = " · ".join(meta_bits)
+
+    site_header = static_site_header(
+        root_href=root_idx,
+        breadcrumb_items=[
+            ("トップ", root_idx),
+            ("用語集", "index.html"),
+            (term, None),
+        ],
+    )
+
+    app_glossary_href = f"{root_idx}#glossary"
 
     json_ld = {
         "@context": "https://schema.org",
@@ -219,27 +284,18 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str) -> str:
 </script>
 </head>
 <body class="q-static-body">
-<header class="q-static-header">
-  <p class="q-static-brand"><a href="{html.escape(root_idx)}">賃管マスター</a></p>
-  <nav aria-label="パンくず">
-    <ol class="q-breadcrumb">
-      <li><a href="{html.escape(root_idx)}">トップ</a></li>
-      <li><a href="index.html">用語集</a></li>
-      <li aria-current="page">{html.escape(term)}</li>
-    </ol>
-  </nav>
-</header>
+{site_header}
 <main class="q-static-main">
-  <p class="q-meta"><span class="q-id">用語</span> · <span>{html.escape(category)}</span></p>
+  <p class="q-meta">{meta_line}</p>
   {imp_html}
   <h1 class="q-h1">{html.escape(term)}<span class="term-reading">（{html.escape(reading)}）</span></h1>
   {tags_wrap}
-  {block("ひとこと", short_def)}
-  {block("定義", definition)}
-  {block("法令・根拠", legal)}
-  {block("試験で押さえる", explanation)}
+  {block("short", "ひとこと", short_def)}
+  {block("def", "定義", definition)}
+  {block("legal", "法令・根拠", legal)}
+  {block("exam", "試験で押さえる", explanation)}
   {rel_section}
-  <p class="q-app-link"><a href="{html.escape(root_idx)}">演習トップへ</a></p>
+  <p class="q-app-link"><a href="{html.escape(app_glossary_href)}">アプリで用語解説を開く</a></p>
 </main>
 {static_footer_block(rel_path)}
 </body>
@@ -259,10 +315,20 @@ def build_terms_index(entries: list[dict], base_url: str) -> str:
         lis = []
         for e in by_cat[cat]:
             href = e["slug_file"]
-            lis.append(f'<li><a href="{html.escape(href)}">{html.escape(e["term"])}</a></li>')
+            fb = glossary_field_badge_html(e["category"])
+            lead = f'<span class="term-list-field">{fb}</span>' if fb else ""
+            lis.append(
+                f"<li>{lead}<a href=\"{html.escape(href)}\">{html.escape(e['term'])}</a></li>"
+            )
         blocks.append(
-            f"<section class=\"q-year term-cat\"><h2>{html.escape(cat)}</h2><ul class=\"term-cat-list\">{''.join(lis)}</ul></section>"
+            f'<section class="glos-cat-section term-cat-section"><h2 class="glos-cat-heading">{html.escape(cat)}</h2>'
+            f'<ul class="term-cat-list term-cat-list--fields">{"".join(lis)}</ul></section>'
         )
+
+    terms_header = static_site_header(
+        root_href="../index.html",
+        breadcrumb_items=[("トップ", "../index.html"), ("用語集", None)],
+    )
 
     canonical = public_url(base_url, "terms/index.html")
     return f"""<!DOCTYPE html>
@@ -276,16 +342,11 @@ def build_terms_index(entries: list[dict], base_url: str) -> str:
 <link rel="stylesheet" href="../site-pages.css">
 </head>
 <body class="q-static-body">
-<header class="q-static-header">
-  <p class="q-static-brand"><a href="../index.html">賃管マスター</a> · <a href="../q/index.html">過去問</a> · <a href="../about.html">概要</a> · <a href="../privacy.html">プライバシー</a></p>
-  <nav aria-label="パンくず"><ol class="q-breadcrumb">
-    <li><a href="../index.html">トップ</a></li>
-    <li aria-current="page">用語集</li>
-  </ol></nav>
-</header>
+{terms_header}
 <main class="q-static-main">
   <h1 class="q-h1">用語集</h1>
   <p class="q-meta">全 {len(entries)} 語</p>
+  <p class="glos-static-intro term-index-intro">演習アプリ内の<strong><a href="../index.html#glossary">用語解説</a></strong>と同じ分野ラベル（賃管法令・制度／契約・実務／設備・税務・その他）で整理しています。検索や折りたたみカードはアプリ側で利用できます。</p>
   {"".join(blocks)}
 </main>
 {static_footer_block(Path("terms/index.html"))}

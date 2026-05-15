@@ -2,20 +2,30 @@
 :root {
   --bg: #ffffff;
   --bg2: #f4f4f5;
+  --bg3: #f4f4f5;
+  --bg4: #e4e4e7;
   --border: rgba(0, 0, 0, 0.09);
   --border2: rgba(0, 0, 0, 0.2);
   --text: #111111;
   --ink: #333333;
+  --sel: #333333;
+  --sel-s: #e8e8e8;
   --text2: #555555;
   --text3: #999999;
   --green: #1a7a40;
   --grn-s: #f0fdf4;
+  --grn-b: rgba(26, 122, 64, 0.14);
   --red: #c0392b;
   --red-s: #fdf2f2;
+  --amb-s: #f0f0f2;
   --r: 6px;
   --r2: 10px;
   --font: "Noto Sans JP", sans-serif;
+  --fs-body: 16px;
+  --fs-sub: 14px;
+  --fs-caption: 12px;
   --sh: 0 1px 3px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --sh2: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 *,
 *::before,
@@ -205,7 +215,85 @@ a:hover {
   background: var(--bg2);
 }
 
-/* 用語集 */
+/* 用語集（静的 terms/ — index.html の用語UI・eisei1 とトークンを揃える） */
+.glos-cat-section {
+  margin-bottom: 20px;
+}
+.glos-cat-heading {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--text3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.glos-static-intro {
+  font-size: var(--fs-sub);
+  line-height: 1.65;
+  color: var(--text2);
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  background: var(--bg3);
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+}
+.glos-static-intro a {
+  color: var(--sel);
+  font-weight: 600;
+  text-decoration: underline;
+}
+.term-index-intro {
+  margin-top: 4px;
+}
+.term-field-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-right: 4px;
+  vertical-align: middle;
+  border: 1px solid var(--border);
+  line-height: 1.3;
+}
+.term-field-law {
+  background: var(--grn-s);
+  color: var(--green);
+  border-color: var(--grn-b);
+}
+.term-field-rights {
+  background: var(--amb-s);
+  color: var(--ink);
+  border-color: var(--border2);
+}
+.term-field-limit {
+  background: var(--bg3);
+  color: var(--text2);
+}
+.term-tags-label {
+  display: inline-block;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--text3);
+  letter-spacing: 0.06em;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+.term-cat-list--fields li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.term-list-field {
+  flex-shrink: 0;
+}
+.term-list-field:empty {
+  display: none;
+}
 .term-reading {
   font-size: 0.85em;
   font-weight: 500;
