@@ -3,7 +3,7 @@
 
 - 測定IDを変えるときは GA4_MEASUREMENT_ID と site-analytics.js 内の DEFAULT_MID を揃える。
 - 新規の手書き HTML では </body> 直前に analytics_snippet(Path('相対パス')) と同等の2行を置くか、
-  生成ページでは static_footer_block の直後に analytics が付くので head に GA を書かない。
+  生成ページでは site_page_footer の直後に analytics が付くので head に GA を書かない。
 """
 
 from __future__ import annotations
@@ -13,31 +13,34 @@ from pathlib import Path
 
 FORM_URL = "https://forms.gle/duTebNY1vKqV6A816"
 
-
-def static_site_header(*, root_href: str, breadcrumb_items: list[tuple[str, str | None]]) -> str:
-    """静的ページ共通ヘッダー（賃管マスター＋副題・パンくず）。terms/・q/・個別過去問で統一。"""
-    lis: list[str] = []
-    for text, href in breadcrumb_items:
-        if href:
-            lis.append(f'<li><a href="{html.escape(href)}">{html.escape(text)}</a></li>')
-        else:
-            lis.append(f'<li aria-current="page">{html.escape(text)}</li>')
-    crumbs = "\n      ".join(lis)
-    return f"""<header class="q-static-header">
-  <p class="q-static-brand"><a href="{html.escape(root_href)}">賃管マスター</a>（賃貸不動産経営管理士）</p>
-  <nav aria-label="パンくず">
-    <ol class="q-breadcrumb">
-      {crumbs}
-    </ol>
-  </nav>
-</header>"""
-
 # GA4 測定ID（site-analytics.js の DEFAULT_MID と揃えること）
 GA4_MEASUREMENT_ID = "G-NYSHQLECDS"
 
 # フッター注記・著作権（共通フッター・静的ガイドの表記揃え）
 FOOTER_DISCLAIMER = "学習用のコンテンツです。出題・法令の正確な内容は公式情報で必ず確認してください。"
 SITE_COPYRIGHT = "© 2026 賃管マスター学習支援（非公式）・chintaikanrishi-master.jp"
+
+# ヘッダーナビ（about.html / index.html のトップナビと同項目）
+SITE_HEADER_NAV: list[tuple[str, str, str]] = [
+    ("トップ", "index.html", "top"),
+    ("このサイトについて", "about.html", "about"),
+    ("過去問一覧", "q/index.html", "q"),
+    ("用語集", "terms/index.html", "terms"),
+    ("関連リンク", "related-sites.html", "related"),
+    ("プライバシー", "privacy.html", "privacy"),
+]
+
+# フッターナビ（index.html の site-footer と同項目）
+SITE_FOOTER_NAV: list[tuple[str, str, str]] = [
+    ("トップ", "index.html", "top"),
+    ("このサイトについて", "about.html", "about"),
+    ("過去問一覧", "q/index.html", "q"),
+    ("用語集", "terms/index.html", "terms"),
+    ("試験ガイド", "articles/index.html", "articles"),
+    ("関連リンク", "related-sites.html", "related"),
+    ("プライバシー", "privacy.html", "privacy"),
+    ("お問い合わせ", FORM_URL, "contact"),
+]
 
 
 def footer_href(rel_path: Path, site_rel: str) -> str:
@@ -69,7 +72,108 @@ def analytics_snippet(rel_path: Path) -> str:
     )
 
 
+def site_page_header(rel_path: Path, *, current: str | None = None) -> str:
+    """トップ（index.html）・about と同型の site-page ヘッダー。"""
+    root = html.escape(footer_href(rel_path, "index.html"))
+    nav_links: list[str] = []
+    for label, dest, key in SITE_HEADER_NAV:
+        if dest.startswith("http"):
+            href = dest
+            nav_links.append(
+                f'<a href="{html.escape(href)}" target="_blank" rel="noopener noreferrer">{html.escape(label)}</a>'
+            )
+        else:
+            href = footer_href(rel_path, dest)
+            cur = ' aria-current="page"' if current == key else ""
+            nav_links.append(f'<a href="{html.escape(href)}"{cur}>{html.escape(label)}</a>')
+    nav_html = "\n          ".join(nav_links)
+    return f"""<header class="site-page-header">
+      <div class="site-page-header-inner">
+        <a class="site-page-brand" href="{root}">
+          <span class="site-page-mark" title="賃管マスターの略表記">賃管</span>
+          <span class="site-page-brand-text">
+            <span class="site-page-brand-name">賃管マスター</span>
+            <span class="site-page-brand-sub">賃貸不動産経営管理士試験</span>
+          </span>
+        </a>
+        <nav class="site-page-nav" aria-label="サイト内ナビゲーション">
+          {nav_html}
+        </nav>
+      </div>
+    </header>"""
+
+
+def site_page_footer(rel_path: Path, *, current: str | None = None) -> str:
+    """トップ（index.html）・about と同型の site-page フッター + GA4。"""
+    links: list[str] = []
+    for label, dest, key in SITE_FOOTER_NAV:
+        if dest.startswith("http"):
+            href = dest
+            links.append(
+                f'<a href="{html.escape(href)}" target="_blank" rel="noopener noreferrer">{html.escape(label)}</a>'
+            )
+        else:
+            href = footer_href(rel_path, dest)
+            cur = ' aria-current="page"' if current == key else ""
+            links.append(f'<a href="{html.escape(href)}"{cur}>{html.escape(label)}</a>')
+    links_html = "\n          ".join(links)
+    return f"""<footer class="site-page-footer">
+      <div class="site-page-footer-inner">
+        <div class="site-page-footer-links">
+          {links_html}
+        </div>
+        <span>{html.escape(SITE_COPYRIGHT)}</span>
+      </div>
+    </footer>
+{analytics_snippet(rel_path)}"""
+
+
+def site_page_wrap_open() -> str:
+    return '<div class="site-page-wrap">'
+
+
+def site_page_wrap_close() -> str:
+    return "</div>"
+
+
+def breadcrumb_html(rel_path: Path, items: list[tuple[str, str | None]]) -> str:
+    """main 内パンくず（q-breadcrumb）。"""
+    lis: list[str] = []
+    for text, href in items:
+        if href:
+            h = footer_href(rel_path, href) if not href.startswith("http") else href
+            lis.append(f'<li><a href="{html.escape(h)}">{html.escape(text)}</a></li>')
+        else:
+            lis.append(f'<li aria-current="page">{html.escape(text)}</li>')
+    crumbs = "\n      ".join(lis)
+    return f"""<nav class="term-page-crumb" aria-label="パンくず">
+    <ol class="q-breadcrumb">
+      {crumbs}
+    </ol>
+  </nav>"""
+
+
+def static_site_header(*, root_href: str, breadcrumb_items: list[tuple[str, str | None]]) -> str:
+    """過去問など従来の q-static ヘッダー（パンくず付き）。"""
+    lis: list[str] = []
+    for text, href in breadcrumb_items:
+        if href:
+            lis.append(f'<li><a href="{html.escape(href)}">{html.escape(text)}</a></li>')
+        else:
+            lis.append(f'<li aria-current="page">{html.escape(text)}</li>')
+    crumbs = "\n      ".join(lis)
+    return f"""<header class="q-static-header">
+  <p class="q-static-brand"><a href="{html.escape(root_href)}">賃管マスター</a>（賃貸不動産経営管理士）</p>
+  <nav aria-label="パンくず">
+    <ol class="q-breadcrumb">
+      {crumbs}
+    </ol>
+  </nav>
+</header>"""
+
+
 def static_footer_block(rel_path: Path) -> str:
+    """過去問など従来の q-static フッター + GA4。"""
     def h(dest: str) -> str:
         return html.escape(footer_href(rel_path, dest))
 

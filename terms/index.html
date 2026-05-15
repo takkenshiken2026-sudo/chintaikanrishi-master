@@ -2837,19 +2837,33 @@
   ]
 }
 </script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../site-pages.css">
 </head>
-<body class="q-static-body">
-<header class="q-static-header">
-  <p class="q-static-brand"><a href="../index.html">賃管マスター</a>（賃貸不動産経営管理士）</p>
-  <nav aria-label="パンくず">
-    <ol class="q-breadcrumb">
-      <li><a href="../index.html">トップ</a></li>
-      <li aria-current="page">用語解説一覧</li>
-    </ol>
-  </nav>
-</header>
-<main class="q-static-main terms-idx-main">
+<body>
+<div class="site-page-wrap">
+<header class="site-page-header">
+      <div class="site-page-header-inner">
+        <a class="site-page-brand" href="../index.html">
+          <span class="site-page-mark" title="賃管マスターの略表記">賃管</span>
+          <span class="site-page-brand-text">
+            <span class="site-page-brand-name">賃管マスター</span>
+            <span class="site-page-brand-sub">賃貸不動産経営管理士試験</span>
+          </span>
+        </a>
+        <nav class="site-page-nav" aria-label="サイト内ナビゲーション">
+          <a href="../index.html">トップ</a>
+          <a href="../about.html">このサイトについて</a>
+          <a href="../q/index.html">過去問一覧</a>
+          <a href="index.html" aria-current="page">用語集</a>
+          <a href="../related-sites.html">関連リンク</a>
+          <a href="../privacy.html">プライバシー</a>
+        </nav>
+      </div>
+    </header>
+<main class="site-page-main terms-idx-main">
   <h1 class="terms-idx-page-title">用語解説一覧（全記事索引）</h1>
   <p class="terms-idx-lead">賃貸不動産経営管理士試験で頻出の用語を分野別にまとめ、各用語の解説記事（静的HTML）へ直接リンクします。上の検索・分野フィルタで目的の用語に素早く到達できます。演習アプリ内の<strong><a href="../index.html#glossary">用語解説</a></strong>では検索や折りたたみカードも利用できます。</p>
 
@@ -3400,23 +3414,25 @@
     </div>
   </section>
 </main>
-<footer class="q-static-footer">
-  <nav class="q-static-footer-nav" aria-label="サイトの他ページ">
-    <a href="../index.html">トップ</a>
-    <a href="../about.html">このサイトについて</a>
-    <a href="../q/index.html">過去問一覧</a>
-    <a href="index.html">用語集</a>
-    <a href="../articles/index.html">試験ガイド</a>
-    <a href="../related-sites.html">関連リンク</a>
-    <a href="../privacy.html">プライバシー</a>
-    <a href="https://forms.gle/duTebNY1vKqV6A816" target="_blank" rel="noopener noreferrer">お問い合わせ</a>
-  </nav>
-  <p><small>学習用のコンテンツです。出題・法令の正確な内容は公式情報で必ず確認してください。</small></p>
-  <p><small>© 2026 賃管マスター学習支援（非公式）・chintaikanrishi-master.jp</small></p>
-</footer>
+<footer class="site-page-footer">
+      <div class="site-page-footer-inner">
+        <div class="site-page-footer-links">
+          <a href="../index.html">トップ</a>
+          <a href="../about.html">このサイトについて</a>
+          <a href="../q/index.html">過去問一覧</a>
+          <a href="index.html" aria-current="page">用語集</a>
+          <a href="../articles/index.html">試験ガイド</a>
+          <a href="../related-sites.html">関連リンク</a>
+          <a href="../privacy.html">プライバシー</a>
+          <a href="https://forms.gle/duTebNY1vKqV6A816" target="_blank" rel="noopener noreferrer">お問い合わせ</a>
+        </div>
+        <span>© 2026 賃管マスター学習支援（非公式）・chintaikanrishi-master.jp</span>
+      </div>
+    </footer>
 <!-- GA4: tools/html_footer.analytics_snippet（測定IDは GA4_MEASUREMENT_ID） -->
 <script>window.__GA4_MEASUREMENT_ID__="G-NYSHQLECDS";</script>
 <script defer src="../site-analytics.js"></script>
+</div>
 <script>
 (() => {
   try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (_e) {}

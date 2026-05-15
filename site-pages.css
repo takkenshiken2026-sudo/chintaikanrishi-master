@@ -101,8 +101,14 @@ a:hover {
   padding: 24px 20px 40px;
 }
 /* 用語索引（terms/index.html）— 二衛マスター /terms と同型のレイアウト */
-.q-static-main.terms-idx-main {
+.site-page-main.terms-idx-main {
   max-width: 1160px;
+}
+.term-page-crumb {
+  margin-bottom: 14px;
+}
+.term-page-main .q-meta {
+  margin-top: 0;
 }
 .terms-idx-page-title {
   font-size: 1.55rem;

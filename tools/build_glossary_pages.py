@@ -21,7 +21,17 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tools.html_footer import static_footer_block, static_site_header
+from tools.html_footer import (
+    breadcrumb_html,
+    site_page_footer,
+    site_page_header,
+    site_page_wrap_close,
+    site_page_wrap_open,
+)
+
+HEAD_FONTS = """<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">"""
 
 GLOSSARY_CSV = ROOT / "data" / "glossary_terms.csv"
 TERMS_DIR = ROOT / "terms"
@@ -123,6 +133,63 @@ def meta_description(text: str, limit: int = 155) -> str:
 
 def split_semicolon(s: str) -> list[str]:
     return [x.strip() for x in (s or "").split(";") if x.strip()]
+
+
+def split_sentences(s: str) -> list[str]:
+    """短い学習ポイント用の日本語文分割。"""
+    text = re.sub(r"\s+", " ", s or "").strip()
+    if not text:
+        return []
+    parts = re.findall(r"[^。！？]+[。！？]?", text)
+    return [p.strip() for p in parts if p.strip()]
+
+
+def study_points(explanation: str, limit: int = 4) -> list[str]:
+    points: list[str] = []
+    for sentence in split_sentences(explanation):
+        s = sentence.rstrip("。")
+        if len(s) < 14:
+            continue
+        if s.endswith("です") and "とは、" in s:
+            continue
+        points.append(s + "。")
+        if len(points) >= limit:
+            break
+    return points
+
+
+def make_term_lookup(entries: list[dict]) -> dict[str, str]:
+    lookup: dict[str, str] = {}
+    for e in entries:
+        term = e["term"]
+        lookup[term] = e["slug_file"]
+        lookup[re.sub(r"\s+", "", term)] = e["slug_file"]
+    return lookup
+
+
+def related_terms_html(related: str, term_lookup: dict[str, str]) -> str:
+    items: list[str] = []
+    for label in split_semicolon(related):
+        href = term_lookup.get(label) or term_lookup.get(re.sub(r"\s+", "", label))
+        if href:
+            items.append(f'<li><a href="{html.escape(href)}">{html.escape(label)}</a></li>')
+        else:
+            items.append(f"<li>{html.escape(label)}</li>")
+    if not items:
+        return ""
+    return (
+        '<h2 id="term-related-h" class="q-h2">関連用語</h2>'
+        '<ul class="term-related">'
+        + "".join(items)
+        + "</ul>"
+    )
+
+
+def legal_basis_html(legal: str) -> str:
+    items = split_semicolon(legal)
+    if len(items) <= 1:
+        return html.escape(legal).replace("\n", "<br>\n")
+    return '<ul class="term-legal-list">' + "".join(f"<li>{html.escape(x)}</li>" for x in items) + "</ul>"
 
 
 def write_sitemap(urls: list[str], out: Path) -> None:
@@ -230,11 +297,13 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str) -> str:
         meta_bits.append(f"<span>{html.escape(category)}</span>")
     meta_line = " · ".join(meta_bits)
 
-    site_header = static_site_header(
-        root_href=root_idx,
-        breadcrumb_items=[
-            ("トップ", root_idx),
-            ("用語解説", "index.html"),
+    page_header = site_page_header(rel_path, current="terms")
+    page_footer = site_page_footer(rel_path, current="terms")
+    crumbs = breadcrumb_html(
+        rel_path,
+        [
+            ("トップ", "index.html"),
+            ("用語解説一覧", "terms/index.html"),
             (term, None),
         ],
     )
@@ -283,14 +352,17 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str) -> str:
 <meta property="og:description" content="{html.escape(desc)}">
 <meta property="og:url" content="{html.escape(canonical)}">
 <meta name="twitter:card" content="summary">
+{HEAD_FONTS}
 <link rel="stylesheet" href="{html.escape(css_href)}">
 <script type="application/ld+json">
 {json.dumps(json_ld, ensure_ascii=False, indent=2)}
 </script>
 </head>
-<body class="q-static-body">
-{site_header}
-<main class="q-static-main">
+<body>
+{site_page_wrap_open()}
+{page_header}
+<main class="site-page-main term-page-main">
+  {crumbs}
   <p class="q-meta">{meta_line}</p>
   {imp_html}
   <h1 class="q-h1">{html.escape(term)}<span class="term-reading">（{html.escape(reading)}）</span></h1>
@@ -302,7 +374,8 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str) -> str:
   {rel_section}
   <p class="q-app-link"><a href="{html.escape(app_glossary_href)}">アプリで用語解説を開く</a></p>
 </main>
-{static_footer_block(rel_path)}
+{page_footer}
+{site_page_wrap_close()}
 </body>
 </html>
 """
@@ -421,10 +494,9 @@ def build_terms_index(entries: list[dict], base_url: str) -> str:
 }})();
 </script>"""
 
-    terms_header = static_site_header(
-        root_href="../index.html",
-        breadcrumb_items=[("トップ", "../index.html"), ("用語解説一覧", None)],
-    )
+    idx_path = Path("terms/index.html")
+    terms_header = site_page_header(idx_path, current="terms")
+    terms_footer = site_page_footer(idx_path, current="terms")
 
     canonical = public_url(base_url, "terms/index.html")
     title = "用語解説一覧（全記事索引）｜賃管マスター（賃貸不動産経営管理士）"
@@ -449,11 +521,13 @@ def build_terms_index(entries: list[dict], base_url: str) -> str:
 <script type="application/ld+json">
 {ld_json}
 </script>
+{HEAD_FONTS}
 <link rel="stylesheet" href="../site-pages.css">
 </head>
-<body class="q-static-body">
+<body>
+{site_page_wrap_open()}
 {terms_header}
-<main class="q-static-main terms-idx-main">
+<main class="site-page-main terms-idx-main">
   <h1 class="terms-idx-page-title">用語解説一覧（全記事索引）</h1>
   <p class="terms-idx-lead">賃貸不動産経営管理士試験で頻出の用語を分野別にまとめ、各用語の解説記事（静的HTML）へ直接リンクします。上の検索・分野フィルタで目的の用語に素早く到達できます。演習アプリ内の<strong><a href="../index.html#glossary">用語解説</a></strong>では検索や折りたたみカードも利用できます。</p>
 
@@ -476,7 +550,8 @@ def build_terms_index(entries: list[dict], base_url: str) -> str:
     </div>
   </section>
 </main>
-{static_footer_block(Path("terms/index.html"))}
+{terms_footer}
+{site_page_wrap_close()}
 {terms_idx_script}
 </body>
 </html>
