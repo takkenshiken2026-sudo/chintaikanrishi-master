@@ -332,6 +332,16 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str, term_lookup: dic
                 "inLanguage": "ja-JP",
             },
             {
+                "@type": "Article",
+                "@id": canonical + "#article",
+                "headline": title,
+                "description": desc,
+                "about": term,
+                "mainEntityOfPage": canonical,
+                "inLanguage": "ja-JP",
+                "isPartOf": public_url(base_url, "terms/index.html"),
+            },
+            {
                 "@type": "BreadcrumbList",
                 "itemListElement": [
                     {"@type": "ListItem", "position": 1, "name": "トップ", "item": public_url(base_url, "index.html")},
@@ -368,10 +378,12 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str, term_lookup: dic
   <p class="q-meta">{meta_line}</p>
   {imp_html}
   <h1 class="q-h1">{html.escape(term)}<span class="term-reading">（{html.escape(reading)}）</span></h1>
+  <p class="term-lead">{html.escape(lead)}</p>
   {tags_wrap}
   {block("short", "ひとこと", short_def)}
+  {raw_block("points", "試験で押さえるポイント", points_html)}
   {block("def", "定義", definition)}
-  {block("legal", "法令・根拠", legal)}
+  {raw_block("legal", "法令・根拠", legal_basis_html(legal))}
   {block("exam", "試験で押さえる", explanation)}
   {rel_section}
   <p class="q-app-link"><a href="{html.escape(app_glossary_href)}">アプリで用語解説を開く</a></p>
