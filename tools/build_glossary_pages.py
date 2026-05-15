@@ -286,6 +286,15 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str, term_lookup: dic
     if rel_html:
         rel_section = f'<section class="q-block term-block" aria-labelledby="term-related-h">{rel_html}</section>'
 
+    lead = (
+        f"{term}は、{short_def.rstrip('。')}。"
+        f"賃貸不動産経営管理士試験では、{category}分野の用語として、意味・根拠・似た用語との違いをセットで押さえると理解しやすくなります。"
+    )
+    points = study_points(explanation)
+    points_html = ""
+    if points:
+        points_html = '<ol class="term-point-list">' + "".join(f"<li>{html.escape(p)}</li>" for p in points) + "</ol>"
+
     badge_html = glossary_field_badge_html(category)
     meta_bits: list[str] = ['<span class="q-id">用語</span>']
     if badge_html:
