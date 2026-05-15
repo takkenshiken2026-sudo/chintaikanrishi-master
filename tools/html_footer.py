@@ -129,7 +129,7 @@ def site_page_header(
     </header>"""
 
 
-def site_page_footer(rel_path: Path, *, current: str | None = None) -> str:
+def site_page_footer(rel_path: Path, *, current: str | None = None, wide: bool = False) -> str:
     """トップ（index.html）・about と同型の site-page フッター + GA4。"""
     links: list[str] = []
     for label, dest, key in SITE_FOOTER_NAV:
@@ -143,7 +143,8 @@ def site_page_footer(rel_path: Path, *, current: str | None = None) -> str:
             cur = ' aria-current="page"' if current == key else ""
             links.append(f'<a href="{html.escape(href)}"{cur}>{html.escape(label)}</a>')
     links_html = "\n          ".join(links)
-    return f"""<footer class="site-page-footer">
+    footer_class = "site-page-footer site-page-footer--wide" if wide else "site-page-footer"
+    return f"""<footer class="{footer_class}">
       <div class="site-page-footer-inner">
         <div class="site-page-footer-links">
           {links_html}
