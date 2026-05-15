@@ -229,6 +229,39 @@ a:hover {
   padding-bottom: 6px;
   border-bottom: 1px solid var(--border);
 }
+.glos-cat-heading--ja {
+  text-transform: none;
+  letter-spacing: 0.06em;
+  font-size: var(--fs-sub);
+  color: var(--ink);
+}
+.q-year-section .q-year-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px 14px;
+}
+.q-year-section .q-year-list a {
+  display: block;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  box-shadow: var(--sh);
+}
+.q-year-section .q-year-list a:hover {
+  border-color: var(--border2);
+  background: var(--bg2);
+}
+.q-index-intro {
+  margin-top: 4px;
+}
 .glos-static-intro {
   font-size: var(--fs-sub);
   line-height: 1.65;

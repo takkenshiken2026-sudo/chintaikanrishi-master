@@ -17,12 +17,11 @@ from pathlib import Path
 from xml.sax.saxutils import escape as xml_escape
 
 ROOT = Path(__file__).resolve().parents[1]
-import sys
 
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tools.html_footer import static_footer_block
+from tools.html_footer import static_footer_block, static_site_header
 
 DATA_CSV = ROOT / "data" / "past_questions.csv"
 Q_ROOT = ROOT / "q"
@@ -191,6 +190,15 @@ def build_question_html(page: dict, rel_path: Path, base_url: str) -> str:
         ],
     }
 
+    site_header = static_site_header(
+        root_href=root_idx,
+        breadcrumb_items=[
+            ("トップ", root_idx),
+            ("過去問一覧", rel_to_q_index(rel_path)),
+            (title_mid, None),
+        ],
+    )
+
     return f"""<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -210,16 +218,7 @@ def build_question_html(page: dict, rel_path: Path, base_url: str) -> str:
 </script>
 </head>
 <body class="q-static-body">
-<header class="q-static-header">
-  <p class="q-static-brand"><a href="{html.escape(root_idx)}">賃管マスター</a>（賃貸不動産経営管理士）</p>
-  <nav aria-label="パンくず">
-    <ol class="q-breadcrumb">
-      <li><a href="{html.escape(root_idx)}">トップ</a></li>
-      <li><a href="{html.escape(rel_to_q_index(rel_path))}">過去問一覧</a></li>
-      <li aria-current="page">{html.escape(title_mid)}</li>
-    </ol>
-  </nav>
-</header>
+{site_header}
 <main class="q-static-main">
   <p class="q-meta"><span class="q-id">ID: <code>{html.escape(page["id"])}</code></span> · <span>{html.escape(page["category"])}</span> · <span>{html.escape(page["type"])}</span></p>
   {badge_html}
@@ -261,13 +260,20 @@ def build_q_index(pages: list[dict], base_url: str) -> str:
     for y in sorted(by_year.keys()):
         links = []
         for p in by_year[y]:
-            href = "/" + p["rel_path"]
+            rel = p["rel_path"]
+            href = rel[2:] if rel.startswith("q/") else rel
             label = f"第{p['qno']}問"
             links.append(f'<li><a href="{html.escape(href)}">{html.escape(label)}</a></li>')
+        heading = f"{y}年（{by_year[y][0]['wareki']}）"
         year_blocks.append(
-            f"<section class=\"q-year\"><h2>{y}年（{html.escape(by_year[y][0]['wareki'])}）</h2>"
-            f"<ol class=\"q-year-list\">{''.join(links)}</ol></section>"
+            f'<section class="glos-cat-section q-year-section"><h2 class="glos-cat-heading glos-cat-heading--ja">{html.escape(heading)}</h2>'
+            f'<ol class="q-year-list">{"".join(links)}</ol></section>'
         )
+
+    q_index_header = static_site_header(
+        root_href="../index.html",
+        breadcrumb_items=[("トップ", "../index.html"), ("過去問一覧", None)],
+    )
 
     return f"""<!DOCTYPE html>
 <html lang="ja">
@@ -280,17 +286,13 @@ def build_q_index(pages: list[dict], base_url: str) -> str:
 <link rel="stylesheet" href="../site-pages.css">
 </head>
 <body class="q-static-body">
-<header class="q-static-header">
-  <p class="q-static-brand"><a href="../index.html">賃管マスター</a> · <a href="../terms/index.html">用語集</a> · <a href="../about.html">概要</a> · <a href="../privacy.html">プライバシー</a></p>
-  <nav aria-label="パンくず"><ol class="q-breadcrumb">
-    <li><a href="../index.html">トップ</a></li>
-    <li aria-current="page">過去問一覧</li>
-  </ol></nav>
-</header>
+{q_index_header}
 <main class="q-static-main">
   <h1 class="q-h1">過去問一覧</h1>
   <p class="q-meta">全 {len(pages)} 問</p>
+  <p class="glos-static-intro q-index-intro">年度別の静的ページです。<strong><a href="../index.html#past">アプリで過去問</a></strong>では年度・科目の絞り込みや学習記録が使えます。</p>
   {"".join(year_blocks)}
+  <p class="q-app-link"><a href="../index.html#past">アプリで過去問を開く</a></p>
 </main>
 {static_footer_block(Path("q/index.html"))}
 </body>

@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tools.html_footer import static_footer_block
+from tools.html_footer import static_footer_block, static_site_header
 
 GLOSSARY_CSV = ROOT / "data" / "glossary_terms.csv"
 TERMS_DIR = ROOT / "terms"
@@ -90,25 +90,6 @@ def glossary_field_badge_html(category: str) -> str:
     return f'<span class="term-field-badge term-field-{fid}">{html.escape(label)}</span>'
 
 
-def static_site_header(*, root_href: str, breadcrumb_items: list[tuple[str, str | None]]) -> str:
-    """賃管マスター静的ページ共通ヘッダー（過去問個別ページと同型）。"""
-    lis = []
-    for text, href in breadcrumb_items:
-        if href:
-            lis.append(f'<li><a href="{html.escape(href)}">{html.escape(text)}</a></li>')
-        else:
-            lis.append(f'<li aria-current="page">{html.escape(text)}</li>')
-    crumbs = "\n      ".join(lis)
-    return f"""<header class="q-static-header">
-  <p class="q-static-brand"><a href="{html.escape(root_href)}">賃管マスター</a>（賃貸不動産経営管理士）</p>
-  <nav aria-label="パンくず">
-    <ol class="q-breadcrumb">
-      {crumbs}
-    </ol>
-  </nav>
-</header>"""
-
-
 def meta_description(text: str, limit: int = 155) -> str:
     one = re.sub(r"\s+", " ", text).strip()
     if len(one) <= limit:
@@ -170,7 +151,7 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str) -> str:
     explanation = entry["explanation"]
     slug_file = entry["slug_file"]
 
-    title = f"{term}（{reading}）｜用語集｜賃管マスター"
+    title = f"{term}（{reading}）｜用語解説｜賃管マスター"
     desc = meta_description(short_def or definition or term)
     canonical = public_url(base_url, f"terms/{slug_file}")
     root_idx = rel_to_root(rel_path)
@@ -229,7 +210,7 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str) -> str:
         root_href=root_idx,
         breadcrumb_items=[
             ("トップ", root_idx),
-            ("用語集", "index.html"),
+            ("用語解説", "index.html"),
             (term, None),
         ],
     )
@@ -258,7 +239,7 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str) -> str:
                 "@type": "BreadcrumbList",
                 "itemListElement": [
                     {"@type": "ListItem", "position": 1, "name": "トップ", "item": public_url(base_url, "index.html")},
-                    {"@type": "ListItem", "position": 2, "name": "用語集", "item": public_url(base_url, "terms/index.html")},
+                    {"@type": "ListItem", "position": 2, "name": "用語解説", "item": public_url(base_url, "terms/index.html")},
                     {"@type": "ListItem", "position": 3, "name": term, "item": canonical},
                 ],
             },
@@ -327,7 +308,7 @@ def build_terms_index(entries: list[dict], base_url: str) -> str:
 
     terms_header = static_site_header(
         root_href="../index.html",
-        breadcrumb_items=[("トップ", "../index.html"), ("用語集", None)],
+        breadcrumb_items=[("トップ", "../index.html"), ("用語解説", None)],
     )
 
     canonical = public_url(base_url, "terms/index.html")
@@ -336,7 +317,7 @@ def build_terms_index(entries: list[dict], base_url: str) -> str:
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>用語集｜賃管マスター（賃貸不動産経営管理士）</title>
+<title>用語解説｜賃管マスター（賃貸不動産経営管理士）</title>
 <meta name="description" content="賃貸不動産経営管理士試験向けの用語集。分野別に用語を一覧できます。">
 <link rel="canonical" href="{html.escape(canonical)}">
 <link rel="stylesheet" href="../site-pages.css">
@@ -344,7 +325,7 @@ def build_terms_index(entries: list[dict], base_url: str) -> str:
 <body class="q-static-body">
 {terms_header}
 <main class="q-static-main">
-  <h1 class="q-h1">用語集</h1>
+  <h1 class="q-h1">用語解説</h1>
   <p class="q-meta">全 {len(entries)} 語</p>
   <p class="glos-static-intro term-index-intro">演習アプリ内の<strong><a href="../index.html#glossary">用語解説</a></strong>と同じ分野ラベル（賃管法令・制度／契約・実務／設備・税務・その他）で整理しています。検索や折りたたみカードはアプリ側で利用できます。</p>
   {"".join(blocks)}

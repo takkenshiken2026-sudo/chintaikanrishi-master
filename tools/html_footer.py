@@ -13,6 +13,25 @@ from pathlib import Path
 
 FORM_URL = "https://forms.gle/duTebNY1vKqV6A816"
 
+
+def static_site_header(*, root_href: str, breadcrumb_items: list[tuple[str, str | None]]) -> str:
+    """静的ページ共通ヘッダー（賃管マスター＋副題・パンくず）。terms/・q/・個別過去問で統一。"""
+    lis: list[str] = []
+    for text, href in breadcrumb_items:
+        if href:
+            lis.append(f'<li><a href="{html.escape(href)}">{html.escape(text)}</a></li>')
+        else:
+            lis.append(f'<li aria-current="page">{html.escape(text)}</li>')
+    crumbs = "\n      ".join(lis)
+    return f"""<header class="q-static-header">
+  <p class="q-static-brand"><a href="{html.escape(root_href)}">賃管マスター</a>（賃貸不動産経営管理士）</p>
+  <nav aria-label="パンくず">
+    <ol class="q-breadcrumb">
+      {crumbs}
+    </ol>
+  </nav>
+</header>"""
+
 # GA4 測定ID（site-analytics.js の DEFAULT_MID と揃えること）
 GA4_MEASUREMENT_ID = "G-NYSHQLECDS"
 
