@@ -617,6 +617,8 @@ def main() -> int:
             }
         )
 
+    term_lookup = make_term_lookup(entries)
+
     TERMS_DIR.mkdir(parents=True, exist_ok=True)
     for stale in TERMS_DIR.glob("g-*.html"):
         stale.unlink()
@@ -624,7 +626,7 @@ def main() -> int:
     for e in entries:
         out_file = TERMS_DIR / e["slug_file"]
         rel_path = out_file.relative_to(ROOT)
-        out_file.write_text(build_term_html(e, rel_path, base), encoding="utf-8")
+        out_file.write_text(build_term_html(e, rel_path, base, term_lookup), encoding="utf-8")
 
     (TERMS_DIR / "index.html").write_text(build_terms_index(entries, base), encoding="utf-8")
 
