@@ -22,6 +22,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from tools.html_footer import (
+    ROBOTS_INDEX_FOLLOW,
     site_page_footer,
     site_page_header,
     site_page_wrap_close,
@@ -65,63 +66,6 @@ GLOSSARY_CAT_ORDER = (
     "賃貸経営・PM/AM",
     "その他",
 )
-
-RELATED_TERM_ALIASES = {
-    "重要事項説明": "重要事項説明（宅建業法）",
-    "一括再委託": "管理業務の一括再委託の禁止",
-    "一括再委託の禁止": "管理業務の一括再委託の禁止",
-    "委任": "委任契約",
-    "信義誠実": "業務処理の原則",
-    "原賃貸借": "原賃貸借契約",
-    "原賃貸借契約終了": "原賃貸借契約の終了と転貸借",
-    "無断転貸": "無断譲渡・無断転貸",
-    "個人根保証": "個人根保証契約",
-    "改正民法": "改正民法（2020年4月施行）",
-    "取消し": "登録の取消し",
-    "詐欺": "詐欺・強迫",
-    "強迫": "詐欺・強迫",
-    "同時履行の抗弁": "同時履行の抗弁権",
-    "賃料滞納": "賃料",
-    "建物の引渡し": "建物の引渡しによる対抗要件",
-    "内縁配偶者の保護": "内縁配偶者の保護（借地借家法36条）",
-    "敷金の承継": "敷金",
-    "賃料の支払い": "賃料",
-    "普通建物賃貸借": "普通建物賃貸借契約",
-    "定期建物賃貸借": "定期建物賃貸借契約",
-    "賃料減額請求権": "賃料減額請求",
-    "高齢者居住法": "高齢者居住法（高齢者住まい法）",
-    "契約書面": "契約書面（定期借家）",
-    "事前説明": "事前説明（定期借家）",
-    "終了通知": "終了通知（定期借家）",
-    "原状回復ガイドライン": "原状回復をめぐるトラブルとガイドライン",
-    "共用部分": "共用部",
-    "住宅宿泊事業法": "住宅宿泊事業法（民泊新法）",
-    "敷金返還": "敷金返還請求権",
-    "ビルマネジメント": "ビルマネジメント（BM）",
-    "事故物件ガイドライン": "人の死の告知に関するガイドライン",
-    "プロパティマネジメント": "プロパティマネジメント（PM）",
-    "アセットマネジメント": "アセットマネジメント（AM）",
-    "BM": "ビルマネジメント（BM）",
-    "市場賃料": "賃料",
-    "立会い": "退去立会い",
-    "残存価値": "残存価値1円",
-    "原状回復精算": "原状回復",
-    "温水洗浄便座": "ウォシュレット（温水洗浄便座）",
-    "品確法": "品確法（住宅の品質確保の促進等に関する法律）",
-    "瑕疵担保責任": "瑕疵担保責任から契約不適合責任へ",
-    "LPガス": "LPガス（プロパンガス）",
-    "高置水槽": "高置水槽方式",
-    "断熱": "断熱性能",
-    "換気": "換気設備",
-    "木造": "木造（W造）",
-    "消防用設備": "消防用設備等点検",
-    "ペアガラス": "ペアガラス（複層ガラス）",
-    "SRC造": "鉄骨鉄筋コンクリート造（SRC造）",
-    "RC造": "鉄筋コンクリート造（RC造）",
-    "封水": "封水切れ",
-    "防犯": "防犯カメラ",
-    "貸家": "貸家建付地",
-}
 
 
 def norm(s: str | None) -> str:
@@ -218,10 +162,6 @@ def make_term_lookup(entries: list[dict]) -> dict[str, str]:
         term = e["term"]
         lookup[term] = e["slug_file"]
         lookup[re.sub(r"\s+", "", term)] = e["slug_file"]
-    for alias, target in RELATED_TERM_ALIASES.items():
-        if target in lookup:
-            lookup[alias] = lookup[target]
-            lookup[re.sub(r"\s+", "", alias)] = lookup[target]
     return lookup
 
 
@@ -291,7 +231,6 @@ def write_sitemap(urls: list[str], out: Path) -> None:
 def collect_sitemap_urls(base: str) -> list[str]:
     urls = [
         f"{base}/",
-        f"{base}/index.html",
         f"{base}/about.html",
         f"{base}/privacy.html",
         f"{base}/related-sites.html",
@@ -463,6 +402,7 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str, term_lookup: dic
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{html.escape(title)}</title>
 <meta name="description" content="{html.escape(desc)}">
+{ROBOTS_INDEX_FOLLOW}
 <link rel="canonical" href="{html.escape(canonical)}">
 <meta property="og:type" content="article">
 <meta property="og:title" content="{html.escape(title)}">

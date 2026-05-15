@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tools.html_footer import static_footer_block, static_site_header
+from tools.html_footer import ROBOTS_INDEX_FOLLOW, static_footer_block, static_site_header
 
 DATA_CSV = ROOT / "data" / "past_questions.csv"
 Q_ROOT = ROOT / "q"
@@ -206,6 +206,7 @@ def build_question_html(page: dict, rel_path: Path, base_url: str) -> str:
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{html.escape(title)}</title>
 <meta name="description" content="{html.escape(desc)}">
+{ROBOTS_INDEX_FOLLOW}
 <link rel="canonical" href="{html.escape(canonical)}">
 <meta property="og:type" content="article">
 <meta property="og:title" content="{html.escape(title)}">
@@ -282,6 +283,7 @@ def build_q_index(pages: list[dict], base_url: str) -> str:
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>過去問一覧｜賃管マスター（賃貸不動産経営管理士）</title>
 <meta name="description" content="賃貸不動産経営管理士試験の過去問を年度別に一覧するページです。">
+{ROBOTS_INDEX_FOLLOW}
 <link rel="canonical" href="{html.escape(public_url(base_url, "q/index.html"))}">
 <link rel="stylesheet" href="../site-pages.css">
 </head>
@@ -341,7 +343,6 @@ def main() -> int:
 
     urls = [
         f"{base}/",
-        f"{base}/index.html",
         f"{base}/about.html",
         f"{base}/privacy.html",
         f"{base}/related-sites.html",

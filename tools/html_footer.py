@@ -20,6 +20,9 @@ GA4_MEASUREMENT_ID = "G-NYSHQLECDS"
 FOOTER_DISCLAIMER = "学習用のコンテンツです。出題・法令の正確な内容は公式情報で必ず確認してください。"
 SITE_COPYRIGHT = "© 2026 賃管マスター学習支援（非公式）・chintaikanrishi-master.jp"
 
+# 静的ページ・生成 HTML 共通（Search Console / クローラ向け）
+ROBOTS_INDEX_FOLLOW = '<meta name="robots" content="index, follow">'
+
 # ヘッダーナビ（about.html / index.html のトップナビと同項目）
 SITE_HEADER_NAV: list[tuple[str, str, str]] = [
     ("トップ", "index.html", "top"),
