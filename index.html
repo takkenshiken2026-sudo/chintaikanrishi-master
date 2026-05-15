@@ -2365,8 +2365,8 @@ const BADGE_DEFS = [
   {id:'streak5',        icon:'zap',      name:'5連続正解',         desc:'5問連続正解'},
   {id:'streak10',       icon:'zap',      name:'10連続正解',        desc:'10問連続正解'},
   {id:'streak20',       icon:'zap',      name:'20連続正解',        desc:'20問連続正解'},
-  {id:'perfect_session',icon:'award',    name:'パーフェクト',      desc:'1セット全問正解'},
-  {id:'perfect10_session',icon:'award',  name:'10問満点',          desc:'10問以上のセットで全問正解'},
+  {id:'perfect_session',icon:'award',    name:'好調セッション',    desc:'3問以上のセットで正答率80%以上'},
+  {id:'perfect10_session',icon:'award',  name:'10問チャレンジ',    desc:'10問以上のセットで正答率90%以上'},
   {id:'day3',           icon:'calendar', name:'3日連続学習',       desc:'3日間連続で学習'},
   {id:'day7',           icon:'calendar', name:'7日連続学習',       desc:'7日間連続で学習'},
   {id:'day14',          icon:'calendar', name:'14日連続学習',      desc:'14日間連続で学習'},
@@ -2445,8 +2445,20 @@ function checkAndAwardBadges(context){
     if(id==='day7'           && dayStreak>=7) earned=true;
     if(id==='day14'          && dayStreak>=14) earned=true;
     if(id==='day30'          && dayStreak>=30) earned=true;
-    if(id==='perfect_session'&& context.sessionResults && context.sessionResults.length>=3 && context.sessionResults.every(r=>r.correct)) earned=true;
-    if(id==='perfect10_session'&& context.sessionResults && context.sessionResults.length>=10 && context.sessionResults.every(r=>r.correct)) earned=true;
+    if(id==='perfect_session'&& context.sessionResults){
+      const n=context.sessionResults.length;
+      if(n>=3){
+        const ok=context.sessionResults.filter(r=>r.correct).length;
+        earned=ok/n>=0.8;
+      }
+    }
+    if(id==='perfect10_session'&& context.sessionResults){
+      const n=context.sessionResults.length;
+      if(n>=10){
+        const ok=context.sessionResults.filter(r=>r.correct).length;
+        earned=ok/n>=0.9;
+      }
+    }
     if(id==='all_fields'){
       const fields=['law','rights','limit'];
       earned=fields.every(f=>Object.entries(u.answers||{}).some(([qid,a])=>{
@@ -2684,7 +2696,7 @@ const MISSION_POOL = {
     {id:'correct3', text:'3問連続正解しよう',          type:'streak',  target:3},
     {id:'correct4', text:'4問連続正解しよう',          type:'streak',  target:4},
     {id:'correct5', text:'5問連続正解しよう',          type:'streak',  target:5},
-    {id:'perfect1', text:'全問正解のセッションを達成', type:'perfect', target:1},
+    {id:'session1', text:'問題セットを1回完了する', type:'session_done', target:1, minTotal:3},
     {id:'orig1',    text:'オリジナル問題を1問解こう',  type:'mode', mode:'orig', target:1},
     {id:'orig2',    text:'オリジナル問題を2問解こう',  type:'mode', mode:'orig', target:2},
     {id:'orig3',    text:'オリジナル問題を3問解こう',  type:'mode', mode:'orig', target:3},
@@ -2767,9 +2779,10 @@ function getMissionProgress(mission, u){
     const cur=Math.max(answerCur, sessionCur);
     return {cur, target:mission.target};
   }
-  if(mission.type==='perfect'){
-    const donePerfect=(u.sessions||[]).filter(s=>s.date>=todayMs&&s.date<tomorrowMs&&s.pct===100).length;
-    return {cur:donePerfect, target:1};
+  if(mission.type==='session_done'){
+    const minTotal=mission.minTotal||3;
+    const done=(u.sessions||[]).filter(s=>s.date>=todayMs&&s.date<tomorrowMs&&s.total>=minTotal).length;
+    return {cur:done, target:mission.target};
   }
   if(mission.type==='review'){
     return {cur:Math.min(todayAnswers.length, mission.target), target:mission.target}; // simplified
@@ -4078,9 +4091,24 @@ function endIchimondouSession() {
 
 function showIchiScore() {
   ichiState.active = false;
-  gotoPage('ichimondou-score');
   const s = ichiState.score;
   const att = ichiState.attempts;
+  const u = getUserData();
+  if (u && att > 0) {
+    const pct = Math.round(s / att * 100);
+    u.sessions = u.sessions || [];
+    u.sessions.push({ date: Date.now(), correct: s, total: att, pct, mode: 'ichi' });
+    saveUser(u);
+    const ichiResults = [
+      ...Array.from({ length: s }, () => ({ correct: true })),
+      ...Array.from({ length: att - s }, () => ({ correct: false })),
+    ];
+    const newBadges = checkAndAwardBadges({ correct: s === att, sessionResults: ichiResults, u });
+    if (newBadges.length) saveUser(u);
+    enqueueBadgeEarnPopups(newBadges);
+    checkMissionAllComplete();
+  }
+  gotoPage('ichimondou-score');
   document.getElementById('ichi-score-num').textContent = s;
   const denom = document.getElementById('ichi-score-denom');
   if (denom) denom.textContent = '/ ' + att + '問中';
