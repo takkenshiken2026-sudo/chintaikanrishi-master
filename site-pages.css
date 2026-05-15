@@ -42,7 +42,7 @@ body {
   font-size: 16px;
   line-height: 1.75;
   color: var(--text);
-  background: #fff;
+  background: #f7f7f8;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
@@ -61,7 +61,7 @@ a:hover {
   font-size: 16px;
   line-height: 1.75;
   color: var(--text);
-  background: #fff;
+  background: #f7f7f8;
   min-height: 100vh;
   margin: 0;
 }
@@ -516,15 +516,16 @@ a:hover {
   margin-right: 6px;
 }
 .term-lead {
-  background: #fff;
-  border: 1px solid var(--border);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--border);
   border-radius: 0;
-  box-shadow: var(--sh);
+  box-shadow: none;
   color: var(--ink);
   font-size: 15px;
   line-height: 1.8;
-  margin: -6px 0 16px;
-  padding: 14px 16px;
+  margin: -2px 0 20px;
+  padding: 0 0 16px;
 }
 .term-tags {
   list-style: none;
@@ -830,7 +831,7 @@ a:hover {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: #f7f7f8;
 }
 .site-page-header {
   position: sticky;
