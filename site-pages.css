@@ -789,12 +789,13 @@ a:hover {
 .site-page-header-inner {
   max-width: 860px;
   margin: 0 auto;
-  padding: 14px 20px 10px;
+  padding: 12px 20px;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: flex-start;
-  gap: 12px;
+  gap: 12px 18px;
 }
 .site-page-header-crumb {
   max-width: 860px;
@@ -823,6 +824,7 @@ a:hover {
   gap: 10px;
   text-decoration: none;
   color: var(--text);
+  flex-shrink: 0;
 }
 .site-page-brand:hover {
   opacity: 0.9;
@@ -858,10 +860,25 @@ a:hover {
 }
 .site-page-nav {
   display: flex;
+  flex: 1 1 auto;
   flex-wrap: wrap;
+  align-items: center;
   gap: 10px 18px;
+  min-width: 0;
   font-size: 13px;
   font-weight: 600;
+}
+.site-page-nav a {
+  white-space: nowrap;
+}
+.site-page-header--wide .site-page-header-inner {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.site-page-header--wide .site-page-header-inner::-webkit-scrollbar {
+  display: none;
 }
 .site-page-nav a {
   color: var(--text2);
@@ -943,28 +960,37 @@ a:hover {
 .site-page-footer {
   border-top: 1px solid var(--border);
   background: #fff;
-  padding: 18px 20px 24px;
+  padding: 14px 20px 18px;
   margin-top: auto;
 }
 .site-page-footer-inner {
   max-width: 860px;
   margin: 0 auto;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   flex-wrap: nowrap;
-  align-items: flex-start;
+  align-items: center;
   justify-content: flex-start;
-  gap: 10px;
+  gap: 10px 14px;
   font-size: 12px;
   color: var(--text3);
   text-align: left;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.site-page-footer-inner::-webkit-scrollbar {
+  display: none;
 }
 .site-page-footer-links {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px 16px;
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 10px 14px;
 }
 .site-page-footer-links a {
+  white-space: nowrap;
   color: var(--text3);
   font-weight: 600;
   text-decoration: none;
@@ -978,17 +1004,23 @@ a:hover {
   text-decoration: none;
   cursor: default;
 }
-.site-page-footer-inner > span {
+.site-page-footer-copy {
+  flex: 0 0 auto;
   font-size: 12px;
   color: var(--text3);
+  white-space: nowrap;
+}
+.site-page-footer-sep {
+  width: 1px;
+  height: 14px;
+  background: var(--border2);
+  flex: 0 0 auto;
+  align-self: center;
+  opacity: 0.85;
 }
 @media (max-width: 560px) {
   .site-page-main h1 {
     font-size: 1.28rem;
-  }
-  .site-page-header-inner {
-    flex-direction: column;
-    align-items: flex-start;
   }
 }
 

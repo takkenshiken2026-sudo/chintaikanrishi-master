@@ -134,6 +134,56 @@ def split_semicolon(s: str) -> list[str]:
     return [x.strip() for x in (s or "").split(";") if x.strip()]
 
 
+def split_sentences(s: str) -> list[str]:
+    text = re.sub(r"\s+", " ", s or "").strip()
+    if not text:
+        return []
+    return [p.strip() for p in re.findall(r"[^。！？]+[。！？]?", text) if p.strip()]
+
+
+def study_points(explanation: str, limit: int = 4) -> list[str]:
+    points: list[str] = []
+    for sentence in split_sentences(explanation):
+        s = sentence.rstrip("。")
+        if len(s) < 14:
+            continue
+        if s.endswith("です") and "とは、" in s:
+            continue
+        points.append(s + "。")
+        if len(points) >= limit:
+            break
+    return points
+
+
+def make_term_lookup(entries: list[dict]) -> dict[str, str]:
+    lookup: dict[str, str] = {}
+    for e in entries:
+        term = e["term"]
+        lookup[term] = e["slug_file"]
+        lookup[re.sub(r"\s+", "", term)] = e["slug_file"]
+    return lookup
+
+
+def related_terms_html(related: str, term_lookup: dict[str, str]) -> str:
+    items: list[str] = []
+    for label in split_semicolon(related):
+        href = term_lookup.get(label) or term_lookup.get(re.sub(r"\s+", "", label))
+        if href:
+            items.append(f'<li><a href="{html.escape(href)}">{html.escape(label)}</a></li>')
+        else:
+            items.append(f"<li>{html.escape(label)}</li>")
+    if not items:
+        return ""
+    return '<h2 id="term-related-h" class="q-h2">関連用語</h2><ul class="term-related">' + "".join(items) + "</ul>"
+
+
+def legal_basis_html(legal: str) -> str:
+    items = split_semicolon(legal)
+    if len(items) <= 1:
+        return html.escape(legal).replace("\n", "<br>\n")
+    return '<ul class="term-legal-list">' + "".join(f"<li>{html.escape(x)}</li>" for x in items) + "</ul>"
+
+
 def write_sitemap(urls: list[str], out: Path) -> None:
     lines = [
         '<?xml version="1.0" encoding="UTF-8"?>',
@@ -171,7 +221,7 @@ def collect_sitemap_urls(base: str) -> list[str]:
     return urls
 
 
-def build_term_html(entry: dict, rel_path: Path, base_url: str) -> str:
+def build_term_html(entry: dict, rel_path: Path, base_url: str, term_lookup: dict[str, str]) -> str:
     term = entry["term"]
     reading = entry["reading"]
     category = entry["category"]
@@ -184,8 +234,10 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str) -> str:
     explanation = entry["explanation"]
     slug_file = entry["slug_file"]
 
-    title = f"{term}（{reading}）｜用語解説｜賃管マスター"
-    desc = meta_description(short_def or definition or term)
+    title = f"{term}とは？意味・根拠・試験ポイント｜賃管マスター"
+    desc = meta_description(
+        f"{term}（{reading}）の意味、法令・根拠、試験で押さえるポイントを賃貸不動産経営管理士向けに整理。{short_def or definition}"
+    )
     canonical = public_url(base_url, f"terms/{slug_file}")
     root_idx = rel_to_root(rel_path)
     css_href = rel_css(rel_path)
@@ -203,14 +255,7 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str) -> str:
             + "</ul>"
         )
 
-    rel_list = split_semicolon(related)
-    rel_html = ""
-    if rel_list:
-        rel_html = (
-            '<h2 id="term-related-h" class="q-h2">関連用語</h2><ul class="term-related">'
-            + "".join(f"<li>{html.escape(x)}</li>" for x in rel_list)
-            + "</ul>"
-        )
+    rel_html = related_terms_html(related, term_lookup)
 
     def block(sec_id: str, label: str, body: str) -> str:
         if not body.strip():
@@ -221,6 +266,16 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str) -> str:
             f'<section class="q-block term-block" aria-labelledby="{hid}">'
             f'<h2 id="{hid}" class="q-h2">{html.escape(label)}</h2>'
             f'<div class="q-stem">{b}</div></section>'
+        )
+
+    def raw_block(sec_id: str, label: str, body_html: str) -> str:
+        if not body_html.strip():
+            return ""
+        hid = f"term-sec-{sec_id}"
+        return (
+            f'<section class="q-block term-block" aria-labelledby="{hid}">'
+            f'<h2 id="{hid}" class="q-h2">{html.escape(label)}</h2>'
+            f'<div class="q-stem">{body_html}</div></section>'
         )
 
     tags_wrap = ""

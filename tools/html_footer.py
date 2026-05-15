@@ -149,7 +149,8 @@ def site_page_footer(rel_path: Path, *, current: str | None = None, wide: bool =
         <div class="site-page-footer-links">
           {links_html}
         </div>
-        <span>{html.escape(SITE_COPYRIGHT)}</span>
+        <span class="site-page-footer-sep" aria-hidden="true"></span>
+        <span class="site-page-footer-copy">{html.escape(SITE_COPYRIGHT)}</span>
       </div>
     </footer>
 {analytics_snippet(rel_path)}"""
