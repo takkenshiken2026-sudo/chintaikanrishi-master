@@ -3501,13 +3501,26 @@ const PAGE_SEO = {
   }
 };
 
+function publicCanonicalUrl(seoPath) {
+  const base = 'https://chintaikanrishi-master.jp';
+  const p = (seoPath || '/').trim();
+  if (!p || p === '/' || p === '/index.html') return base + '/';
+  // SPA の /#past 等はトップに正規化（ハッシュは別URLとして扱わない）
+  if (p.startsWith('/#')) return base + '/';
+  if (p.includes('#')) {
+    const pathOnly = p.split('#')[0];
+    return pathOnly ? base + pathOnly : base + '/';
+  }
+  return base + (p.startsWith('/') ? p : '/' + p);
+}
+
 function _updatePageMeta(id) {
   const seo = PAGE_SEO[id] || PAGE_SEO['quiz-start'];
   // titleを更新
   document.title = seo.title;
-  // canonicalを現在のパスに更新
+  // canonicalを現在のパスに更新（ハッシュのみの仮想パスはトップへ）
   const canonicalEl = document.getElementById('canonical-link');
-  if (canonicalEl) canonicalEl.href = 'https://chintaikanrishi-master.jp' + (seo.path || '/');
+  if (canonicalEl) canonicalEl.href = publicCanonicalUrl(seo.path);
   // 常設h1を更新（クローラー向け・現在ページを正確に反映）
   const docH1 = document.getElementById('doc-main-h1');
   if (docH1) docH1.textContent = seo.title;
