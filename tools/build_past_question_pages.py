@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-chintaikanrishi-master-data.js と同一ロジックで静的問題ページ q/past/... を生成し、
+data/past_questions.csv から静的問題ページ q/past/... を生成し、
 q/index.html・sitemap.xml・robots.txt を更新する。
 """
 

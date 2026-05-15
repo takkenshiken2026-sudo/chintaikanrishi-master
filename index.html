@@ -1904,7 +1904,7 @@ body.is-solving .site-footer{display:none!important}
         <h2>主な機能</h2>
         <ul>
           <li><strong>過去問演習</strong>：年度別・科目別に絞り込んで効率的に学習</li>
-          <li><strong>オリジナル問題</strong>：賃管法令・契約実務・設備等の単元別練習（デモ収録）</li>
+          <li><strong>オリジナル問題</strong>：賃管法令・契約実務・設備等の分野別練習（独自問題集）</li>
           <li><strong>模擬試験</strong>：科目配分に沿った16問模試（令和7年度プール）</li>
           <li><strong>用語解説</strong>：重要用語を図解でわかりやすく解説</li>
           <li><strong>記録・学習分析</strong>：学習日記・バッジ・レベルに加え、正答率や科目別成績で進捗を可視化</li>
@@ -2922,8 +2922,8 @@ function getTopicStats(){
     if(!key) return;
     if(!stats[key]) stats[key]={count:0,years:new Set(),noYear:0};
     stats[key].count+=1;
-    if(q.year) stats[key].years.add(q.year);
-    else stats[key].noYear+=1;
+    if (typeof q.year === 'number' && Number.isFinite(q.year)) stats[key].years.add(q.year);
+    else if (!isCsvOrigPoolQuestion(q) && (q.year == null || q.year === '')) stats[key].noYear += 1;
   });
   Object.values(stats).forEach(s=>{ s.years=[...s.years].sort((a,b)=>a-b); });
   window._topicStatsCacheV4=stats;
@@ -2950,7 +2950,7 @@ function getFrequencyEvidence(q){
   }else if(qCount>=2&&maxC>=2){
     stars=Math.round(1+(qCount-1)*4/Math.max(1,maxC-1));
     detail=`同一クラスタに類似論点の問題が${qCount}問収録（データ内で同一クラスタは最大${maxC}問）。`;
-  }else if(q.year){
+  }else if(typeof q.year==='number'&&Number.isFinite(q.year)){
     stars=2;
     detail=`収録データでは当該論点クラスタは主に${q.year}年度のみ確認。頻出の広さは限定的とみなします。`;
   }else{
@@ -2958,7 +2958,7 @@ function getFrequencyEvidence(q){
     detail=`オリジナル問題または年度なし。過去出題年は未設定のため、類題数ベースで中立寄り（★3）に調整する場合があります。`;
   }
   stars=clampStarRating(stars);
-  const yearsDisp=yearList.length?yearList.join('・')+'年':(q.year?q.year+'年のみ':'年度なし');
+  const yearsDisp=yearList.length?yearList.join('・')+'年':(typeof q.year==='number'&&Number.isFinite(q.year)?q.year+'年のみ':(isCsvOrigPoolQuestion(q)?'オリジナル':'年度なし'));
   const title=`頻出度★${stars}（1〜5）：${detail} 参照：${yearsDisp} / クラスタキー「${key}」`;
   return {
     key,
@@ -4423,6 +4423,7 @@ function renderTrendChart(svgId,sessions){
 /** 過去問の年度表示（CSV取り込み時は人間可読ラベル） */
 function formatPastYearLabel(y){
   if(y==null||y==='')return'';
+  if(y==='orig')return'オリジナル';
   const L=(typeof CSV_IMPORTED_YEAR_LABELS!=='undefined'&&CSV_IMPORTED_YEAR_LABELS)?CSV_IMPORTED_YEAR_LABELS:null;
   if(L&&L[y])return L[y];
   return y+'年';
@@ -4559,7 +4560,7 @@ function beginOrigQuiz(){
   if(typeof mockState!=='undefined'){ mockState.patternId=null; mockState.queue=[]; mockState.idx=0; clearInterval(mockState.timerInt); }
   const pool=getCsvOrigPracticePool();
   if(!pool.length){
-    alert('条件に該当するオリジナル問題がありません。data/past_questions.csv の取り込みと、分野の選択を確認してください。');
+    alert('条件に該当するオリジナル問題がありません。data/original_questions.csv の有無・内容と、分野の選択を確認してください。');
     return;
   }
   const ordered = shuffleArray(pool.slice());

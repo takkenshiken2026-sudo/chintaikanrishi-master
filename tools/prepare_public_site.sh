@@ -29,10 +29,6 @@ do
   fi
   cp "$f" "$OUT/"
 done
-# レガシー互換・参照用（存在すればコピー）
-if [[ -e "$ROOT/chintaikanrishi-master-data.js" ]]; then
-  cp "$ROOT/chintaikanrishi-master-data.js" "$OUT/"
-fi
 if [[ -d "$ROOT/articles" ]]; then
   cp -R "$ROOT/articles" "$OUT/"
 fi
