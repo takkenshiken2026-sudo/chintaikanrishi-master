@@ -100,7 +100,7 @@ def rel_to_root(rel_file: Path) -> str:
 
 def rel_css(rel_file: Path) -> str:
     depth = len(rel_file.parent.parts)
-    return "/".join([".."] * depth) + "/site-pages.css?v=20260515-readable"
+    return "/".join([".."] * depth) + "/site-pages.css?v=20260515-topgray"
 
 
 def glossary_field_id(category: str) -> str | None:
@@ -586,7 +586,7 @@ def build_terms_index(entries: list[dict], base_url: str) -> str:
 {ld_json}
 </script>
 {HEAD_FONTS}
-<link rel="stylesheet" href="../site-pages.css?v=20260515-readable">
+<link rel="stylesheet" href="../site-pages.css?v=20260515-topgray">
 </head>
 <body>
 {site_page_wrap_open()}

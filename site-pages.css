@@ -42,7 +42,7 @@ body {
   font-size: 16px;
   line-height: 1.75;
   color: var(--text);
-  background: #f7f7f8;
+  background: #f0f0f1;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
@@ -61,7 +61,7 @@ a:hover {
   font-size: 16px;
   line-height: 1.75;
   color: var(--text);
-  background: #f7f7f8;
+  background: #f0f0f1;
   min-height: 100vh;
   margin: 0;
 }
@@ -831,7 +831,7 @@ a:hover {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #f7f7f8;
+  background: #f0f0f1;
 }
 .site-page-header {
   position: sticky;
