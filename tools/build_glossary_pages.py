@@ -42,6 +42,21 @@ GLOSSARY_CAT_TO_FIELD: dict[str, str] = {
     "賃貸経営・PM/AM": "limit",
 }
 
+# 用語索引ページの科目チップ・見出しの並び（CSV のカテゴリ名と一致）
+GLOSSARY_CAT_ORDER = (
+    "賃貸住宅管理業法",
+    "関連法令",
+    "借地借家法",
+    "賃貸借契約",
+    "民法",
+    "原状回復",
+    "管理実務",
+    "建物・設備",
+    "会計・税務・保険",
+    "賃貸経営・PM/AM",
+    "その他",
+)
+
 
 def norm(s: str | None) -> str:
     return (s or "").strip()
@@ -88,6 +103,15 @@ def glossary_field_badge_html(category: str) -> str:
         return ""
     label = FIELD_LABELS.get(fid, fid)
     return f'<span class="term-field-badge term-field-{fid}">{html.escape(label)}</span>'
+
+
+def ordered_term_categories(by_cat: dict[str, list]) -> list[str]:
+    keys = set(by_cat.keys())
+    out: list[str] = [c for c in GLOSSARY_CAT_ORDER if c in keys]
+    for c in sorted(keys):
+        if c not in out:
+            out.append(c)
+    return out
 
 
 def meta_description(text: str, limit: int = 155) -> str:
@@ -291,46 +315,169 @@ def build_terms_index(entries: list[dict], base_url: str) -> str:
     for c in by_cat:
         by_cat[c].sort(key=lambda x: x["term"])
 
-    blocks = []
-    for cat in sorted(by_cat.keys()):
+    cat_keys = ordered_term_categories(by_cat)
+    body_sections: list[str] = []
+    for i, cat in enumerate(cat_keys):
         lis = []
         for e in by_cat[cat]:
             href = e["slug_file"]
-            fb = glossary_field_badge_html(e["category"])
-            lead = f'<span class="term-list-field">{fb}</span>' if fb else ""
             lis.append(
-                f"<li>{lead}<a href=\"{html.escape(href)}\">{html.escape(e['term'])}</a></li>"
+                f'    <li><a href="{html.escape(href)}">{html.escape(e["term"])}</a></li>'
             )
-        blocks.append(
-            f'<section class="glos-cat-section term-cat-section"><h2 class="glos-cat-heading">{html.escape(cat)}</h2>'
-            f'<ul class="term-cat-list term-cat-list--fields">{"".join(lis)}</ul></section>'
+        hid = f"terms-idx-cat-{i}"
+        body_sections.append(
+            f'<section class="terms-idx-cat" aria-labelledby="{hid}">\n'
+            f'  <h2 id="{hid}">{html.escape(cat)}</h2>\n'
+            f'  <ul class="terms-idx-list">\n'
+            + "\n".join(lis)
+            + "\n  </ul>\n</section>"
         )
+    body_html = "\n".join(body_sections)
+
+    chip_lines = [
+        '    <button type="button" class="terms-idx-chip on" data-cat="all">すべて</button>'
+    ]
+    for cat in cat_keys:
+        chip_lines.append(
+            "    "
+            f'<button type="button" class="terms-idx-chip" data-cat="{html.escape(cat, quote=True)}">'
+            f"{html.escape(cat)}</button>"
+        )
+    chips_html = "\n".join(chip_lines)
+
+    list_items_ld: list[dict] = []
+    pos = 1
+    for cat in cat_keys:
+        for e in by_cat[cat]:
+            list_items_ld.append(
+                {
+                    "@type": "ListItem",
+                    "position": pos,
+                    "name": e["term"],
+                    "item": public_url(base_url, f"terms/{e['slug_file']}"),
+                }
+            )
+            pos += 1
+    ld = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "賃貸不動産経営管理士試験 用語解説一覧",
+        "description": "試験で出やすい用語ごとの解説記事への索引です。",
+        "numberOfItems": len(entries),
+        "itemListElement": list_items_ld,
+    }
+    ld_json = json.dumps(ld, ensure_ascii=False, indent=2)
+
+    n_terms = len(entries)
+    terms_idx_script = f"""<script>
+(() => {{
+  try {{ if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; }} catch (_e) {{}}
+  window.scrollTo(0, 0);
+  const q = document.getElementById('terms-idx-q');
+  const chips = Array.from(document.querySelectorAll('.terms-idx-chip[data-cat]'));
+  const cats = Array.from(document.querySelectorAll('.terms-idx-cat'));
+  const totalEl = document.getElementById('terms-idx-total');
+  const hitEl = document.getElementById('terms-idx-hit');
+  let activeCat = 'all';
+  function norm(s) {{
+    return (s || '').toString().trim().toLowerCase();
+  }}
+  function apply() {{
+    const query = norm(q.value);
+    let shown = 0;
+    cats.forEach((sec) => {{
+      const cat = sec.querySelector('h2')?.textContent || '';
+      const catOk = activeCat === 'all' || cat === activeCat;
+      const items = Array.from(sec.querySelectorAll('li'));
+      let anyInCat = 0;
+      items.forEach((li) => {{
+        const a = li.querySelector('a');
+        const t = norm(a?.textContent || '');
+        const ok = catOk && (!query || t.includes(query));
+        li.classList.toggle('hide', !ok);
+        if (ok) {{
+          anyInCat++;
+          shown++;
+        }}
+      }});
+      sec.classList.toggle('hide', anyInCat === 0);
+    }});
+    if (totalEl) totalEl.textContent = String({n_terms});
+    if (hitEl) {{
+      hitEl.textContent =
+        (query || activeCat !== 'all') ? '表示：' + shown + '件' : '';
+    }}
+  }}
+  q.addEventListener('input', apply);
+  chips.forEach((btn) => {{
+    btn.addEventListener('click', () => {{
+      chips.forEach((b) => b.classList.remove('on'));
+      btn.classList.add('on');
+      activeCat = btn.dataset.cat || 'all';
+      apply();
+    }});
+  }});
+  apply();
+}})();
+</script>"""
 
     terms_header = static_site_header(
         root_href="../index.html",
-        breadcrumb_items=[("トップ", "../index.html"), ("用語解説", None)],
+        breadcrumb_items=[("トップ", "../index.html"), ("用語解説一覧", None)],
     )
 
     canonical = public_url(base_url, "terms/index.html")
+    title = "用語解説一覧（全記事索引）｜賃管マスター（賃貸不動産経営管理士）"
+    desc = (
+        "賃貸不動産経営管理士試験の重要用語を一覧し、各用語の解説記事へリンクします。"
+        "賃管法令・契約実務・設備税務などの語句を整理しています。"
+    )
     return f"""<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>用語解説｜賃管マスター（賃貸不動産経営管理士）</title>
-<meta name="description" content="賃貸不動産経営管理士試験向けの用語集。分野別に用語を一覧できます。">
+<title>{html.escape(title)}</title>
+<meta name="description" content="{html.escape(desc)}">
+<meta name="robots" content="index, follow">
 <link rel="canonical" href="{html.escape(canonical)}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{html.escape(canonical)}">
+<meta property="og:title" content="{html.escape(title)}">
+<meta property="og:description" content="試験で出やすい用語ごとの解説記事への索引です。">
+<meta property="og:locale" content="ja_JP">
+<script type="application/ld+json">
+{ld_json}
+</script>
 <link rel="stylesheet" href="../site-pages.css">
 </head>
 <body class="q-static-body">
 {terms_header}
-<main class="q-static-main">
-  <h1 class="q-h1">用語解説</h1>
-  <p class="q-meta">全 {len(entries)} 語</p>
-  <p class="glos-static-intro term-index-intro">演習アプリ内の<strong><a href="../index.html#glossary">用語解説</a></strong>と同じ分野ラベル（賃管法令・制度／契約・実務／設備・税務・その他）で整理しています。検索や折りたたみカードはアプリ側で利用できます。</p>
-  {"".join(blocks)}
+<main class="q-static-main terms-idx-main">
+  <h1 class="terms-idx-page-title">用語解説一覧（全記事索引）</h1>
+  <p class="terms-idx-lead">賃貸不動産経営管理士試験で頻出の用語を分野別にまとめ、各用語の解説記事（静的HTML）へ直接リンクします。上の検索・分野フィルタで目的の用語に素早く到達できます。演習アプリ内の<strong><a href="../index.html#glossary">用語解説</a></strong>では検索や折りたたみカードも利用できます。</p>
+
+  <div class="terms-idx-meta-row">
+    <span class="terms-idx-pill">全 <span id="terms-idx-total">{n_terms}</span> 記事</span>
+    <div class="terms-idx-search" role="search" aria-label="用語検索">
+      <input id="terms-idx-q" type="search" inputmode="search" placeholder="例：定期借家、原状回復、賃貸住宅管理業法…" autocomplete="off">
+    </div>
+  </div>
+
+  <div class="terms-idx-chips" aria-label="分野フィルタ">
+{chips_html}
+  </div>
+
+  <section class="terms-idx-panel" aria-label="用語一覧">
+{body_html}
+    <div class="terms-idx-panel-footer">
+      <span id="terms-idx-hit"></span>
+      <div class="terms-idx-panel-footer-app">学習アプリ本体は <a href="../index.html">トップ</a> から利用できます。</div>
+    </div>
+  </section>
 </main>
 {static_footer_block(Path("terms/index.html"))}
+{terms_idx_script}
 </body>
 </html>
 """

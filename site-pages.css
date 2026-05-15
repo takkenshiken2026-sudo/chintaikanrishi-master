@@ -100,6 +100,161 @@ a:hover {
   margin: 0 auto;
   padding: 24px 20px 40px;
 }
+/* 用語索引（terms/index.html）— 二衛マスター /terms と同型のレイアウト */
+.q-static-main.terms-idx-main {
+  max-width: 1160px;
+}
+.terms-idx-page-title {
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 4px 0 10px;
+  line-height: 1.45;
+  color: var(--text);
+}
+.terms-idx-lead {
+  font-size: 15px;
+  color: var(--text2);
+  margin-bottom: 16px;
+  line-height: 1.7;
+}
+.terms-idx-lead a {
+  color: var(--sel);
+  font-weight: 600;
+}
+.terms-idx-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  align-items: center;
+  margin: 16px 0 18px;
+}
+.terms-idx-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 10px;
+}
+.terms-idx-search {
+  flex: 1;
+  min-width: min(420px, 100%);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.terms-idx-search input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--r2);
+  border: 1.5px solid var(--border2);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  font-size: 15px;
+  font-family: inherit;
+}
+.terms-idx-search input:focus {
+  border-color: rgba(0, 0, 0, 0.35);
+}
+.terms-idx-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.terms-idx-chip {
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid var(--border2);
+  background: var(--bg);
+  color: var(--text2);
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  line-height: 1.3;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.terms-idx-chip:hover {
+  background: var(--bg2);
+  color: var(--text);
+}
+.terms-idx-chip.on {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+.terms-idx-panel {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  box-shadow: var(--sh);
+  padding: 18px 18px 14px;
+  margin-top: 14px;
+}
+.terms-idx-cat {
+  margin-top: 16px;
+}
+.terms-idx-cat:first-child {
+  margin-top: 4px;
+}
+.terms-idx-cat h2 {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: 0.06em;
+  text-transform: none;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+.terms-idx-list {
+  list-style: none;
+  columns: 2;
+  column-gap: 22px;
+  margin: 0 0 10px;
+  padding: 0;
+}
+.terms-idx-list li {
+  break-inside: avoid;
+  margin: 0 0 8px;
+}
+.terms-idx-list a {
+  text-decoration: none;
+  color: var(--ink);
+  font-weight: 400;
+  font-size: 14px;
+}
+.terms-idx-list a:hover {
+  text-decoration: underline;
+}
+.terms-idx-panel-footer {
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--text3);
+  text-align: center;
+}
+.terms-idx-panel-footer-app {
+  margin-top: 10px;
+}
+.terms-idx-panel .hide {
+  display: none !important;
+}
+@media (max-width: 760px) {
+  .terms-idx-list {
+    columns: 1;
+  }
+  .terms-idx-search {
+    min-width: 100%;
+  }
+}
 .q-meta {
   font-size: 13px;
   color: var(--text2);
@@ -280,6 +435,25 @@ a:hover {
 .term-index-intro {
   margin-top: 4px;
 }
+.term-cat-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.term-cat-head .glos-cat-heading {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.term-cat-head-badge {
+  flex-shrink: 0;
+}
 .term-field-badge {
   display: inline-block;
   font-size: 11px;
@@ -315,19 +489,7 @@ a:hover {
   margin-right: 10px;
   vertical-align: middle;
 }
-.term-cat-list--fields li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.term-list-field {
-  flex-shrink: 0;
-}
-.term-list-field:empty {
-  display: none;
-}
-.term-reading {
+.term-tags-label {
   font-size: 0.85em;
   font-weight: 500;
   color: var(--text2);
@@ -384,8 +546,10 @@ a:hover {
   font-size: 14px;
   font-weight: 600;
   color: var(--ink);
+  box-shadow: var(--sh);
 }
 .term-cat-list a:hover {
+  border-color: var(--border2);
   background: var(--bg2);
 }
 .term-block .term-related {
