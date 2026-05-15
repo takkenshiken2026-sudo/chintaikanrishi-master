@@ -67,9 +67,73 @@ GLOSSARY_CAT_ORDER = (
     "その他",
 )
 
+RELATED_TERM_ALIASES: dict[str, str] = {
+    "一括再委託": "管理業務の一括再委託の禁止",
+    "一括再委託の禁止": "管理業務の一括再委託の禁止",
+    "原状回復ガイドライン": "原状回復をめぐるトラブルとガイドライン",
+    "原賃貸借": "原賃貸借契約",
+    "原賃貸借契約終了": "原賃貸借契約の終了と転貸借",
+    "重要事項説明": "重要事項説明（宅建業法）",
+    "定期建物賃貸借": "定期建物賃貸借契約",
+    "普通建物賃貸借": "普通建物賃貸借契約",
+    "同時履行の抗弁": "同時履行の抗弁権",
+    "改正民法": "改正民法（2020年4月施行）",
+    "無断転貸": "無断譲渡・無断転貸",
+    "個人根保証": "個人根保証契約",
+    "住宅宿泊事業法": "住宅宿泊事業法（民泊新法）",
+    "ビルマネジメント": "ビルマネジメント（BM）",
+    "プロパティマネジメント": "プロパティマネジメント（PM）",
+    "LPガス": "LPガス（プロパンガス）",
+    "RC造": "鉄筋コンクリート造（RC造）",
+    "SRC造": "鉄骨鉄筋コンクリート造（SRC造）",
+    "DX": "DXによる賃貸住宅経営",
+    "バリアフリー新法": "バリアフリー",
+    "不動産鑑定": "不動産鑑定評価",
+    "事故物件ガイドライン": "人の死の告知に関するガイドライン",
+    "人の死の告知ガイドライン": "人の死の告知に関するガイドライン",
+    "クリーニング費用特約": "クリーニング費用",
+    "借主負担": "借主負担特約",
+    "借地権者": "借地権",
+    "封水": "封水切れ",
+    "建物の引渡し": "建物の引渡しによる対抗要件",
+    "強迫": "詐欺・強迫",
+    "従業者": "従業者証明書",
+    "換気": "換気設備",
+    "断熱": "断熱性能",
+    "更新拒絶": "更新拒絶通知",
+    "消防用設備": "消防用設備等点検",
+    "特定空家": "特定空家等",
+    "瑕疵担保責任": "瑕疵担保責任から契約不適合責任へ",
+    "管理規約": "管理規約・使用細則",
+    "規約": "管理規約・使用細則",
+    "紛争解決": "ADR（裁判外紛争解決手続）",
+    "近隣対応": "近隣対応・周辺対応",
+    "高置水槽": "高置水槽方式",
+    "防犯": "防犯カメラ",
+    "長期・短期譲渡所得": "譲渡所得",
+}
+
 
 def norm(s: str | None) -> str:
     return (s or "").strip()
+
+
+def lookup_key(s: str) -> str:
+    return re.sub(r"\s+", "", s)
+
+
+def term_alias_variants(term: str) -> set[str]:
+    variants = {term, lookup_key(term)}
+    no_paren = re.sub(r"（[^）]+）|\([^)]*\)", "", term).strip()
+    if no_paren and no_paren != term:
+        variants.add(no_paren)
+        variants.add(lookup_key(no_paren))
+    for part in re.findall(r"（([^）]+)）|\(([^)]*)\)", term):
+        inner = next((x for x in part if x), "").strip()
+        if inner:
+            variants.add(inner)
+            variants.add(lookup_key(inner))
+    return {v for v in variants if v}
 
 
 def term_slug(term: str, reading: str, used: dict[str, str]) -> str:
@@ -158,17 +222,43 @@ def study_points(explanation: str, limit: int = 4) -> list[str]:
 
 def make_term_lookup(entries: list[dict]) -> dict[str, str]:
     lookup: dict[str, str] = {}
+    conflicts: set[str] = set()
+    exact_keys: set[str] = set()
+
+    def add(key: str, href: str, *, exact: bool = False) -> None:
+        if not key or key in conflicts:
+            return
+        existing = lookup.get(key)
+        if existing and existing != href:
+            if key in exact_keys:
+                return
+            lookup.pop(key, None)
+            conflicts.add(key)
+            return
+        lookup[key] = href
+        if exact:
+            exact_keys.add(key)
+
     for e in entries:
         term = e["term"]
-        lookup[term] = e["slug_file"]
-        lookup[re.sub(r"\s+", "", term)] = e["slug_file"]
+        add(term, e["slug_file"], exact=True)
+        add(lookup_key(term), e["slug_file"], exact=True)
+    for e in entries:
+        term = e["term"]
+        for key in term_alias_variants(term):
+            add(key, e["slug_file"])
+    for alias, target in RELATED_TERM_ALIASES.items():
+        target_href = lookup.get(target) or lookup.get(lookup_key(target))
+        if target_href:
+            add(alias, target_href)
+            add(lookup_key(alias), target_href)
     return lookup
 
 
 def related_terms_html(related: str, term_lookup: dict[str, str]) -> str:
     items: list[str] = []
     for label in split_semicolon(related):
-        href = term_lookup.get(label) or term_lookup.get(re.sub(r"\s+", "", label))
+        href = term_lookup.get(label) or term_lookup.get(lookup_key(label))
         if href:
             items.append(f'<li><a href="{html.escape(href)}">{html.escape(label)}</a></li>')
         else:
