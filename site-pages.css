@@ -292,6 +292,9 @@ a:hover {
   margin-bottom: 16px;
   box-shadow: var(--sh);
 }
+.term-page-main .q-block {
+  border-radius: 0;
+}
 .q-stem,
 .q-exp {
   white-space: normal;
@@ -518,8 +521,7 @@ a:hover {
 .term-lead {
   background: #fff;
   border: 1px solid var(--border);
-  border-left: 4px solid var(--ink);
-  border-radius: var(--r);
+  border-radius: 0;
   box-shadow: var(--sh);
   color: var(--ink);
   font-size: 15px;
@@ -593,6 +595,28 @@ a:hover {
 .term-point-list li:last-child,
 .term-legal-list li:last-child {
   margin-bottom: 0;
+}
+.term-faq-item {
+  border-top: 1px solid var(--border);
+  padding: 10px 0;
+}
+.term-faq-item:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+.term-faq-item:last-child {
+  padding-bottom: 0;
+}
+.term-faq-item summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--ink);
+}
+.term-faq-item div {
+  color: var(--text2);
+  font-size: 15px;
+  line-height: 1.75;
+  margin-top: 8px;
 }
 .term-block .q-h2 {
   margin-bottom: 8px;
@@ -809,6 +833,7 @@ a:hover {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: #fff;
 }
 .site-page-header {
   position: sticky;
@@ -948,7 +973,7 @@ a:hover {
 .site-page-section {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: var(--r2);
+  border-radius: 0;
   padding: 22px 22px 20px;
   margin-bottom: 16px;
   box-shadow: var(--sh);
