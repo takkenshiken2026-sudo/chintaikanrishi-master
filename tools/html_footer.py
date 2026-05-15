@@ -72,8 +72,30 @@ def analytics_snippet(rel_path: Path) -> str:
     )
 
 
-def site_page_header(rel_path: Path, *, current: str | None = None) -> str:
-    """トップ（index.html）・about と同型の site-page ヘッダー。"""
+def _breadcrumb_ol(rel_path: Path, items: list[tuple[str, str | None]]) -> str:
+    lis: list[str] = []
+    for text, href in items:
+        if href:
+            h = footer_href(rel_path, href) if not href.startswith("http") else href
+            lis.append(f'<li><a href="{html.escape(h)}">{html.escape(text)}</a></li>')
+        else:
+            lis.append(f'<li aria-current="page">{html.escape(text)}</li>')
+    crumbs = "\n        ".join(lis)
+    return f"""<nav class="site-page-header-crumb" aria-label="パンくず">
+      <ol class="q-breadcrumb">
+        {crumbs}
+      </ol>
+    </nav>"""
+
+
+def site_page_header(
+    rel_path: Path,
+    *,
+    current: str | None = None,
+    breadcrumb_items: list[tuple[str, str | None]] | None = None,
+    wide: bool = False,
+) -> str:
+    """トップ（index.html）・about と同型の site-page ヘッダー（任意でパンくず付き）。"""
     root = html.escape(footer_href(rel_path, "index.html"))
     nav_links: list[str] = []
     for label, dest, key in SITE_HEADER_NAV:
@@ -87,7 +109,11 @@ def site_page_header(rel_path: Path, *, current: str | None = None) -> str:
             cur = ' aria-current="page"' if current == key else ""
             nav_links.append(f'<a href="{html.escape(href)}"{cur}>{html.escape(label)}</a>')
     nav_html = "\n          ".join(nav_links)
-    return f"""<header class="site-page-header">
+    crumb_block = ""
+    if breadcrumb_items:
+        crumb_block = "\n      " + _breadcrumb_ol(rel_path, breadcrumb_items)
+    header_class = "site-page-header site-page-header--wide" if wide else "site-page-header"
+    return f"""<header class="{header_class}">
       <div class="site-page-header-inner">
         <a class="site-page-brand" href="{root}">
           <span class="site-page-mark" title="賃管マスターの略表記">賃管</span>
@@ -99,7 +125,7 @@ def site_page_header(rel_path: Path, *, current: str | None = None) -> str:
         <nav class="site-page-nav" aria-label="サイト内ナビゲーション">
           {nav_html}
         </nav>
-      </div>
+      </div>{crumb_block}
     </header>"""
 
 
@@ -137,20 +163,8 @@ def site_page_wrap_close() -> str:
 
 
 def breadcrumb_html(rel_path: Path, items: list[tuple[str, str | None]]) -> str:
-    """main 内パンくず（q-breadcrumb）。"""
-    lis: list[str] = []
-    for text, href in items:
-        if href:
-            h = footer_href(rel_path, href) if not href.startswith("http") else href
-            lis.append(f'<li><a href="{html.escape(h)}">{html.escape(text)}</a></li>')
-        else:
-            lis.append(f'<li aria-current="page">{html.escape(text)}</li>')
-    crumbs = "\n      ".join(lis)
-    return f"""<nav class="term-page-crumb" aria-label="パンくず">
-    <ol class="q-breadcrumb">
-      {crumbs}
-    </ol>
-  </nav>"""
+    """後方互換。新規は site_page_header(..., breadcrumb_items=...) を使用。"""
+    return _breadcrumb_ol(rel_path, items)
 
 
 def static_site_header(*, root_href: str, breadcrumb_items: list[tuple[str, str | None]]) -> str:

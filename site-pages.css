@@ -796,6 +796,23 @@ a:hover {
   gap: 16px;
   flex-wrap: wrap;
 }
+.site-page-header-crumb {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 20px 12px;
+}
+.site-page-header-crumb .q-breadcrumb a {
+  color: var(--text2);
+  text-decoration: none;
+}
+.site-page-header-crumb .q-breadcrumb a:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
+.site-page-header--wide .site-page-header-inner,
+.site-page-header--wide .site-page-header-crumb {
+  max-width: 1160px;
+}
 .site-page-brand {
   display: flex;
   align-items: center;

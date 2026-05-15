@@ -22,7 +22,6 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from tools.html_footer import (
-    breadcrumb_html,
     site_page_footer,
     site_page_header,
     site_page_wrap_close,
@@ -229,7 +228,7 @@ def collect_sitemap_urls(base: str) -> list[str]:
     return urls
 
 
-def build_term_html(entry: dict, rel_path: Path, base_url: str) -> str:
+def build_term_html(entry: dict, rel_path: Path, base_url: str, term_lookup: dict[str, str]) -> str:
     term = entry["term"]
     reading = entry["reading"]
     category = entry["category"]
@@ -242,8 +241,10 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str) -> str:
     explanation = entry["explanation"]
     slug_file = entry["slug_file"]
 
-    title = f"{term}（{reading}）｜用語解説｜賃管マスター"
-    desc = meta_description(short_def or definition or term)
+    title = f"{term}とは？意味・根拠・試験ポイント｜賃管マスター"
+    desc = meta_description(
+        f"{term}（{reading}）の意味、法令・根拠、試験で押さえるポイントを賃貸不動産経営管理士向けに整理。{short_def or definition}"
+    )
     canonical = public_url(base_url, f"terms/{slug_file}")
     root_idx = rel_to_root(rel_path)
     css_href = rel_css(rel_path)
@@ -261,14 +262,7 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str) -> str:
             + "</ul>"
         )
 
-    rel_list = split_semicolon(related)
-    rel_html = ""
-    if rel_list:
-        rel_html = (
-            '<h2 id="term-related-h" class="q-h2">関連用語</h2><ul class="term-related">'
-            + "".join(f"<li>{html.escape(x)}</li>" for x in rel_list)
-            + "</ul>"
-        )
+    rel_html = related_terms_html(related, term_lookup)
 
     def block(sec_id: str, label: str, body: str) -> str:
         if not body.strip():
@@ -281,6 +275,16 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str) -> str:
             f'<div class="q-stem">{b}</div></section>'
         )
 
+    def raw_block(sec_id: str, label: str, body_html: str) -> str:
+        if not body_html.strip():
+            return ""
+        hid = f"term-sec-{sec_id}"
+        return (
+            f'<section class="q-block term-block" aria-labelledby="{hid}">'
+            f'<h2 id="{hid}" class="q-h2">{html.escape(label)}</h2>'
+            f'<div class="q-stem">{body_html}</div></section>'
+        )
+
     tags_wrap = ""
     if tags_html:
         tags_wrap = '<div class="term-tags-wrap"><span class="term-tags-label">タグ</span>' + tags_html + "</div>"
@@ -288,6 +292,15 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str) -> str:
     rel_section = ""
     if rel_html:
         rel_section = f'<section class="q-block term-block" aria-labelledby="term-related-h">{rel_html}</section>'
+
+    lead = (
+        f"{term}は、{short_def.rstrip('。')}。"
+        f"賃貸不動産経営管理士試験では、{category}分野の用語として、意味・根拠・似た用語との違いをセットで押さえると理解しやすくなります。"
+    )
+    points = study_points(explanation)
+    points_html = ""
+    if points:
+        points_html = '<ol class="term-point-list">' + "".join(f"<li>{html.escape(p)}</li>" for p in points) + "</ol>"
 
     badge_html = glossary_field_badge_html(category)
     meta_bits: list[str] = ['<span class="q-id">用語</span>']
@@ -297,16 +310,13 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str) -> str:
         meta_bits.append(f"<span>{html.escape(category)}</span>")
     meta_line = " · ".join(meta_bits)
 
-    page_header = site_page_header(rel_path, current="terms")
+    crumb_items = [
+        ("トップ", "index.html"),
+        ("用語解説一覧", "terms/index.html"),
+        (term, None),
+    ]
+    page_header = site_page_header(rel_path, current="terms", breadcrumb_items=crumb_items)
     page_footer = site_page_footer(rel_path, current="terms")
-    crumbs = breadcrumb_html(
-        rel_path,
-        [
-            ("トップ", "index.html"),
-            ("用語解説一覧", "terms/index.html"),
-            (term, None),
-        ],
-    )
 
     app_glossary_href = f"{root_idx}#glossary"
 
@@ -362,7 +372,6 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str) -> str:
 {site_page_wrap_open()}
 {page_header}
 <main class="site-page-main term-page-main">
-  {crumbs}
   <p class="q-meta">{meta_line}</p>
   {imp_html}
   <h1 class="q-h1">{html.escape(term)}<span class="term-reading">（{html.escape(reading)}）</span></h1>
@@ -495,7 +504,12 @@ def build_terms_index(entries: list[dict], base_url: str) -> str:
 </script>"""
 
     idx_path = Path("terms/index.html")
-    terms_header = site_page_header(idx_path, current="terms")
+    terms_header = site_page_header(
+        idx_path,
+        current="terms",
+        breadcrumb_items=[("トップ", "index.html"), ("用語解説一覧", None)],
+        wide=True,
+    )
     terms_footer = site_page_footer(idx_path, current="terms")
 
     canonical = public_url(base_url, "terms/index.html")
