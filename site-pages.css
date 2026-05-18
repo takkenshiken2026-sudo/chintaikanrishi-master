@@ -264,8 +264,7 @@ a:hover {
     columns: 1;
   }
   .term-info-list {
-    grid-template-columns: 1fr;
-    gap: 3px;
+    display: block;
   }
 }
 .q-meta {
@@ -280,27 +279,33 @@ a:hover {
   border-radius: 4px;
 }
 .q-h1 {
-  font-size: 1.35rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  margin-bottom: 20px;
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
   line-height: 1.45;
 }
 .q-h2 {
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0 0 10px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
   color: var(--ink);
 }
 .q-block {
   background: #fff;
   border: 1px solid var(--border);
-  border-radius: 0;
-  padding: 16px 18px;
+  border-radius: var(--r2);
+  padding: 22px 22px 20px;
   margin-bottom: 16px;
   box-shadow: var(--sh);
 }
 .q-stem,
 .q-exp {
+  color: var(--text2);
+  font-size: 15px;
+  line-height: 1.75;
   white-space: normal;
   word-break: break-word;
 }
@@ -525,14 +530,13 @@ a:hover {
 .term-lead {
   background: transparent;
   border: 0;
-  border-bottom: 1px solid var(--border);
   border-radius: 0;
   box-shadow: none;
-  color: var(--ink);
+  color: var(--text2);
   font-size: 15px;
-  line-height: 1.8;
-  margin: -2px 0 20px;
-  padding: 0 0 16px;
+  line-height: 1.65;
+  margin: 0 0 28px;
+  padding: 0;
 }
 .term-tags {
   list-style: none;
@@ -593,6 +597,8 @@ a:hover {
   padding-left: 1.35em;
   columns: 2;
   column-gap: 24px;
+  color: var(--text2);
+  font-size: 15px;
 }
 .term-toc li {
   break-inside: avoid;
@@ -606,30 +612,53 @@ a:hover {
   text-decoration: underline;
 }
 .term-info-list {
-  display: grid;
-  grid-template-columns: minmax(120px, 180px) 1fr;
-  gap: 8px 14px;
   margin: 0;
 }
 .term-info-list dt {
-  color: var(--text2);
-  font-size: 13px;
-  font-weight: 800;
+  display: inline;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+}
+.term-info-list dt::after {
+  content: "";
 }
 .term-info-list dd {
-  color: var(--text);
+  display: inline;
+  color: var(--text2);
   font-size: 15px;
   line-height: 1.75;
   margin: 0;
 }
+.term-info-list dd::after {
+  content: "";
+  display: block;
+  margin-bottom: 10px;
+}
+.term-info-list dd:last-child::after {
+  margin-bottom: 0;
+}
+.term-info-list dd .term-source-list {
+  display: inline-block;
+  margin-top: 0;
+  vertical-align: top;
+}
 .term-source-list,
 .term-action-list,
 .term-related-pages {
-  margin: 0;
-  padding-left: 1.25em;
+  margin: 0 0 12px 1.1em;
+  padding-left: 0;
+  color: var(--text2);
+  font-size: 15px;
 }
 .term-source-list {
   margin-top: 8px;
+}
+.term-action-intro {
+  color: var(--text2);
+  font-size: 15px;
+  line-height: 1.75;
+  margin: 0 0 12px;
 }
 .term-source-list li,
 .term-action-list li,
@@ -650,8 +679,10 @@ a:hover {
 }
 .term-point-list,
 .term-legal-list {
-  margin: 0;
-  padding-left: 1.25em;
+  margin: 0 0 12px 1.1em;
+  padding-left: 0;
+  color: var(--text2);
+  font-size: 15px;
 }
 .term-point-list li,
 .term-legal-list li {
@@ -682,9 +713,6 @@ a:hover {
   font-size: 15px;
   line-height: 1.75;
   margin-top: 8px;
-}
-.term-block .q-h2 {
-  margin-bottom: 8px;
 }
 
 /* 演習アプリ（index.html） */

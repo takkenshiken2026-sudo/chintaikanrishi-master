@@ -400,6 +400,10 @@ def article_basic_html(category: str, importance: str) -> str:
 
 
 def action_items_html(term: str, category: str) -> str:
+    intro = (
+        f"この記事では、{term}の基本的な意味を確認し、試験で問われやすい観点と復習時の確認ポイントを整理できます。"
+        "読み終えたら、関連用語と過去問を合わせて確認し、知識を選択肢で使える状態に近づけてください。"
+    )
     items = [
         f"{term}のひとこと定義を確認する",
         f"{category or '関連分野'}での位置づけを押さえる",
@@ -411,6 +415,7 @@ def action_items_html(term: str, category: str) -> str:
     return (
         '<section class="q-block term-block" aria-labelledby="term-seo-actions">'
         '<h2 id="term-seo-actions" class="q-h2">この記事でできること</h2>'
+        f'<p class="term-action-intro">{html.escape(intro)}</p>'
         f'<ul class="term-action-list">{lis}</ul>'
         "</section>"
     )
