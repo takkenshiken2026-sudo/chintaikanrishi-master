@@ -1301,3 +1301,31 @@ a:hover {
 .term-compare-table td {
   color: #333333;
 }
+
+/* 用語詳細ページの本文色 */
+.term-page-main,
+.term-page-main .q-meta,
+.term-page-main .term-imp,
+.term-page-main .term-reading,
+.term-page-main .term-tags-label,
+.term-page-main .term-tags li,
+.term-page-main .q-h2,
+.term-page-main .q-stem,
+.term-page-main .term-faq-item summary,
+.term-page-main .term-faq-item div,
+.term-page-main .term-info-list dt,
+.term-page-main .term-info-list dd,
+.term-page-main .term-toc,
+.term-page-main .term-toc a,
+.term-page-main .term-related,
+.term-page-main .term-related a,
+.term-page-main .term-related-pages,
+.term-page-main .term-related-pages a,
+.term-page-main .q-app-link,
+.term-page-main .q-app-link a {
+  color: #333333;
+}
+
+.term-page-main .term-compare-table thead th {
+  color: #ffffff;
+}
