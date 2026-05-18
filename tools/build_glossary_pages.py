@@ -318,7 +318,6 @@ def faq_section_html(items: list[dict[str, str]]) -> str:
 def term_toc_html(has_legal: bool, has_related: bool) -> str:
     items = [
         ("term-seo-trust", "この記事の信頼性について"),
-        ("term-seo-official", "公式情報の確認"),
         ("term-seo-actions", "この記事でできること"),
         ("term-sec-short", "ひとこと"),
         ("term-sec-points", "試験で押さえるポイント"),
@@ -333,6 +332,7 @@ def term_toc_html(has_legal: bool, has_related: bool) -> str:
             ("term-sec-mistakes", "頻出の誤りと迷いやすい点"),
             ("term-sec-faq", "よくある質問"),
             ("term-seo-basic", "記事の基本情報"),
+            ("term-seo-official", "公式情報の確認"),
         ]
     )
     if has_related:
@@ -690,7 +690,6 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str, term_lookup: dic
   {tags_wrap}
   {term_toc_html(bool(legal), bool(rel_html))}
   {reliability_html()}
-  {official_info_html()}
   {action_items_html(term, category)}
   {block("short", "ひとこと", short_def)}
   {raw_block("points", "試験で押さえるポイント", points_html)}
@@ -700,8 +699,9 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str, term_lookup: dic
   {block("exam", "試験で押さえる", explanation)}
   {common_mistakes_html(term, category)}
   {raw_block("faq", "よくある質問", faq_html)}
-  {rel_section}
   {article_basic_html(category, importance)}
+  {official_info_html()}
+  {rel_section}
   {related_pages_html()}
   <p class="q-app-link"><a href="{html.escape(app_glossary_href)}">アプリで用語解説を開く</a></p>
 </main>

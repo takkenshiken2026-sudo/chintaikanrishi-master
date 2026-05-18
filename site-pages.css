@@ -336,7 +336,7 @@ a:hover {
   padding: 16px 20px 28px;
   margin-top: 24px;
   text-align: center;
-  color: var(--text3);
+  color: var(--text2);
   font-size: 12px;
   display: flex;
   flex-direction: column;
@@ -974,7 +974,7 @@ a:hover {
 }
 .app-footer-note {
   font-size: 12px;
-  color: var(--text3);
+  color: var(--text2);
   margin-top: 24px;
   text-align: center;
 }
@@ -987,7 +987,7 @@ a:hover {
   font-weight: 600;
 }
 .app-site-footer a {
-  color: var(--text2);
+  color: var(--ink);
   text-decoration: none;
 }
 .app-site-footer a:hover {
@@ -996,7 +996,7 @@ a:hover {
 }
 .app-site-footer-sep {
   margin: 0 10px;
-  color: var(--text3);
+  color: var(--text2);
   font-weight: 400;
 }
 .app-pos {
@@ -1207,7 +1207,7 @@ a:hover {
   justify-content: flex-start;
   gap: 10px 14px;
   font-size: 12px;
-  color: var(--text3);
+  color: var(--text2);
   text-align: left;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -1225,23 +1225,23 @@ a:hover {
 }
 .site-page-footer-links a {
   white-space: nowrap;
-  color: var(--text3);
+  color: var(--ink);
   font-weight: 600;
   text-decoration: none;
 }
 .site-page-footer-links a:hover {
-  color: var(--text2);
+  color: var(--text);
   text-decoration: underline;
 }
 .site-page-footer-links a[aria-current="page"] {
-  color: var(--text2);
+  color: var(--text);
   text-decoration: none;
   cursor: default;
 }
 .site-page-footer-copy {
   flex: 0 0 auto;
   font-size: 12px;
-  color: var(--text3);
+  color: var(--text2);
   white-space: nowrap;
 }
 .site-page-footer-sep {
