@@ -319,10 +319,10 @@ def term_toc_html(has_legal: bool, has_related: bool) -> str:
     items = [
         ("term-seo-trust", "この記事の信頼性について"),
         ("term-seo-official", "公式情報の確認"),
-        ("term-seo-basic", "記事の基本情報"),
         ("term-seo-actions", "この記事でできること"),
         ("term-sec-short", "ひとこと"),
         ("term-sec-points", "試験で押さえるポイント"),
+        ("term-sec-compare", "比較して押さえるポイント"),
         ("term-sec-def", "定義"),
     ]
     if has_legal:
@@ -330,7 +330,9 @@ def term_toc_html(has_legal: bool, has_related: bool) -> str:
     items.extend(
         [
             ("term-sec-exam", "試験で押さえる"),
+            ("term-sec-mistakes", "頻出の誤りと迷いやすい点"),
             ("term-sec-faq", "よくある質問"),
+            ("term-seo-basic", "記事の基本情報"),
         ]
     )
     if has_related:
@@ -390,13 +392,15 @@ def article_basic_html(category: str, importance: str) -> str:
     return (
         '<section class="q-block term-block" aria-labelledby="term-seo-basic">'
         '<h2 id="term-seo-basic" class="q-h2">記事の基本情報</h2>'
-        '<dl class="term-info-list">'
-        "<dt>記事種別</dt><dd>用語詳細記事</dd>"
-        f"<dt>対象試験</dt><dd>賃貸不動産経営管理士試験</dd>"
-        f"<dt>主な分野</dt><dd>{html.escape(category or 'その他')}</dd>"
-        f"<dt>重要度</dt><dd>{html.escape(importance or '確認対象')}</dd>"
-        f"<dt>検索意図</dt><dd>用語の意味、根拠、試験での押さえ方を短時間で確認する</dd>"
-        "</dl>"
+        '<div class="term-table-scroll"><table class="term-meta-table">'
+        "<tbody>"
+        "<tr><th>対象試験</th><td>賃貸不動産経営管理士試験</td></tr>"
+        f"<tr><th>分野</th><td>{html.escape(category or 'その他')}</td></tr>"
+        "<tr><th>記事種別</th><td>用語詳細記事</td></tr>"
+        f"<tr><th>重要度</th><td>{html.escape(importance or '確認対象')}</td></tr>"
+        "<tr><th>検索意図</th><td>用語の意味、試験で問われる観点、復習時の確認ポイントを整理すること。</td></tr>"
+        "</tbody>"
+        "</table></div>"
         "</section>"
     )
 
@@ -432,6 +436,40 @@ def related_pages_html() -> str:
         '<li><a href="../articles/index.html">試験ガイドで公式情報と学習手順を確認する</a></li>'
         '<li><a href="../q/index.html">過去問一覧で出題形式を確認する</a></li>'
         "</ul>"
+        "</section>"
+    )
+
+
+def compare_points_html(term: str, category: str, legal: str, related: str) -> str:
+    legal_text = legal or "関連する制度・根拠を本文で確認"
+    related_text = "、".join(split_semicolon(related)[:3]) or "関連用語とあわせて確認"
+    return (
+        '<section class="q-block term-block" aria-labelledby="term-sec-compare">'
+        '<h2 id="term-sec-compare" class="q-h2">比較して押さえるポイント</h2>'
+        '<div class="term-table-scroll"><table class="term-compare-table">'
+        "<thead><tr><th>観点</th><th>確認すること</th></tr></thead>"
+        "<tbody>"
+        f"<tr><td>意味</td><td>{html.escape(term)}が何を指す用語かを、ひとこと定義で確認します。</td></tr>"
+        f"<tr><td>分野</td><td>{html.escape(category or '関連分野')}の中で、どの制度・実務に関係するかを整理します。</td></tr>"
+        f"<tr><td>根拠</td><td>{html.escape(legal_text)}。年度や法改正が関係する内容は公式情報も確認します。</td></tr>"
+        f"<tr><td>関連語</td><td>{html.escape(related_text)}との違いを見比べると、選択肢の言い換えに対応しやすくなります。</td></tr>"
+        "</tbody>"
+        "</table></div>"
+        "</section>"
+    )
+
+
+def common_mistakes_html(term: str, category: str) -> str:
+    items = [
+        f"{term}の名称だけを暗記し、誰に対する義務・手続なのかを確認しない。",
+        f"{category or '関連分野'}の別制度と混同し、対象者・時期・効果を取り違える。",
+        "過去問の選択肢で言い換えられたときに、定義と根拠を結び付けて判断できない。",
+    ]
+    lis = "".join(f"<li>{html.escape(item)}</li>" for item in items)
+    return (
+        '<section class="q-block term-block" aria-labelledby="term-sec-mistakes">'
+        '<h2 id="term-sec-mistakes" class="q-h2">頻出の誤りと迷いやすい点</h2>'
+        f'<ul class="term-mistake-list">{lis}</ul>'
         "</section>"
     )
 
@@ -653,15 +691,17 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str, term_lookup: dic
   {term_toc_html(bool(legal), bool(rel_html))}
   {reliability_html()}
   {official_info_html()}
-  {article_basic_html(category, importance)}
   {action_items_html(term, category)}
   {block("short", "ひとこと", short_def)}
   {raw_block("points", "試験で押さえるポイント", points_html)}
+  {compare_points_html(term, category, legal, related)}
   {block("def", "定義", definition)}
   {raw_block("legal", "法令・根拠", legal_basis_html(legal))}
   {block("exam", "試験で押さえる", explanation)}
+  {common_mistakes_html(term, category)}
   {raw_block("faq", "よくある質問", faq_html)}
   {rel_section}
+  {article_basic_html(category, importance)}
   {related_pages_html()}
   <p class="q-app-link"><a href="{html.escape(app_glossary_href)}">アプリで用語解説を開く</a></p>
 </main>

@@ -104,6 +104,9 @@ a:hover {
 .site-page-main.terms-idx-main {
   max-width: 1160px;
 }
+.site-page-main.term-page-main {
+  max-width: 840px;
+}
 .term-page-crumb {
   margin-bottom: 14px;
 }
@@ -664,18 +667,67 @@ a:hover {
 }
 .term-reliability-table th {
   width: 180px;
-  background: var(--bg2);
-  color: var(--ink);
+  background: #f8fafc;
+  color: #1f2937;
   font-weight: 700;
   white-space: nowrap;
 }
-.term-reliability-table .term-source-list {
+.term-meta-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  color: var(--text2);
+  font-size: 15px;
+  line-height: 1.7;
+}
+.term-meta-table th,
+.term-meta-table td {
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+.term-meta-table th {
+  width: 160px;
+  background: #f8fafc;
+  color: #1f2937;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.term-compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  color: var(--text2);
+  font-size: 15px;
+  line-height: 1.7;
+}
+.term-compare-table th,
+.term-compare-table td {
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+.term-compare-table thead th {
+  background: #333333;
+  color: #ffffff;
+  font-weight: 700;
+}
+.term-compare-table tbody td:first-child {
+  color: #1f2937;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.term-reliability-table .term-source-list,
+.term-meta-table .term-source-list {
   margin-top: 0;
   margin-bottom: 0;
 }
 .term-source-list,
 .term-action-list,
-.term-related-pages {
+.term-related-pages,
+.term-mistake-list {
   margin: 0 0 12px 1.1em;
   padding-left: 0;
   color: var(--text2);
@@ -692,12 +744,14 @@ a:hover {
 }
 .term-source-list li,
 .term-action-list li,
-.term-related-pages li {
+.term-related-pages li,
+.term-mistake-list li {
   margin-bottom: 7px;
 }
 .term-source-list li:last-child,
 .term-action-list li:last-child,
-.term-related-pages li:last-child {
+.term-related-pages li:last-child,
+.term-mistake-list li:last-child {
   margin-bottom: 0;
 }
 .term-related-pages a {
