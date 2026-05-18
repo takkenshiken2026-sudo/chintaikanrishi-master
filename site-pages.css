@@ -1274,3 +1274,30 @@ a:hover {
   color: var(--text);
   text-decoration: underline;
 }
+
+/* フッター遷移先ページの本文色 */
+.site-page-main,
+.site-page-lead,
+.site-page-section p,
+.site-page-section ul,
+.site-page-section ol,
+.site-page-note,
+.q-stem,
+.q-exp,
+.terms-idx-lead,
+.terms-idx-panel-footer,
+.glos-static-intro,
+.term-lead,
+.term-action-intro,
+.term-source-list,
+.term-action-list,
+.term-related-pages,
+.term-mistake-list,
+.term-reliability-table,
+.term-reliability-table td,
+.term-meta-table,
+.term-meta-table td,
+.term-compare-table,
+.term-compare-table td {
+  color: #333333;
+}
