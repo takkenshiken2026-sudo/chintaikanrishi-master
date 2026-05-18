@@ -260,6 +260,13 @@ a:hover {
   .terms-idx-search {
     min-width: 100%;
   }
+  .term-toc {
+    columns: 1;
+  }
+  .term-info-list {
+    grid-template-columns: 1fr;
+    gap: 3px;
+  }
 }
 .q-meta {
   font-size: 13px;
@@ -579,6 +586,66 @@ a:hover {
   text-decoration: none;
 }
 .term-block .term-related a:hover {
+  text-decoration: underline;
+}
+.term-toc {
+  margin: 0;
+  padding-left: 1.35em;
+  columns: 2;
+  column-gap: 24px;
+}
+.term-toc li {
+  break-inside: avoid;
+  margin-bottom: 6px;
+}
+.term-toc a {
+  font-weight: 600;
+  text-decoration: none;
+}
+.term-toc a:hover {
+  text-decoration: underline;
+}
+.term-info-list {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) 1fr;
+  gap: 8px 14px;
+  margin: 0;
+}
+.term-info-list dt {
+  color: var(--text2);
+  font-size: 13px;
+  font-weight: 800;
+}
+.term-info-list dd {
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.75;
+  margin: 0;
+}
+.term-source-list,
+.term-action-list,
+.term-related-pages {
+  margin: 0;
+  padding-left: 1.25em;
+}
+.term-source-list {
+  margin-top: 8px;
+}
+.term-source-list li,
+.term-action-list li,
+.term-related-pages li {
+  margin-bottom: 7px;
+}
+.term-source-list li:last-child,
+.term-action-list li:last-child,
+.term-related-pages li:last-child {
+  margin-bottom: 0;
+}
+.term-related-pages a {
+  font-weight: 600;
+  text-decoration: none;
+}
+.term-related-pages a:hover {
   text-decoration: underline;
 }
 .term-point-list,

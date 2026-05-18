@@ -36,6 +36,17 @@ HEAD_FONTS = """<link rel="preconnect" href="https://fonts.googleapis.com">
 GLOSSARY_CSV = ROOT / "data" / "glossary_terms.csv"
 TERMS_DIR = ROOT / "terms"
 BASE_DEFAULT = "https://chintaikanrishi-master.jp"
+AUTHOR_NAME = "賃管マスター編集部"
+AUTHOR_PROFILE = "賃貸不動産経営管理士試験の過去問形式演習、用語解説、学習導線を整理する編集チームです。"
+REVIEWER_NAME = "賃管マスター確認担当"
+REVIEWER_PROFILE = "公開前に公式情報への誘導、断定表現、内部リンク、FAQ、更新日の有無を確認します。"
+FACT_CHECKED_AT = "2026-05-18"
+REVISION_NOTE = "SEO記事テンプレート運用ルールに合わせ、目次・信頼性・公式情報・FAQ・関連記事を整備。"
+UPDATE_POLICY = "試験実施団体や公的機関の情報、関係法令、公開問題の傾向が更新されたタイミングで本文と参照元を見直します。"
+OFFICIAL_SOURCES = (
+    ("賃貸不動産経営管理士協議会（公式）", "https://www.chintaikanrishi.jp/"),
+    ("国土交通省 住宅局", "https://www.mlit.go.jp/jutakukentiku/house/"),
+)
 
 # index.html の FIELDS（用語カテゴリ →演習アプリの分野チップと揃える）
 FIELD_LABELS = {"law": "賃管法令・制度", "rights": "契約・実務", "limit": "設備・税務・その他"}
@@ -296,12 +307,126 @@ def faq_section_html(items: list[dict[str, str]]) -> str:
     body = []
     for item in items:
         body.append(
-            '<details class="term-faq-item">'
+            '<details class="term-faq-item" open>'
             f'<summary>{html.escape(item["question"])}</summary>'
             f'<div>{html.escape(item["answer"])}</div>'
             "</details>"
         )
     return "".join(body)
+
+
+def term_toc_html(has_legal: bool, has_related: bool) -> str:
+    items = [
+        ("term-seo-trust", "この記事の信頼性について"),
+        ("term-seo-official", "公式情報の確認"),
+        ("term-seo-basic", "記事の基本情報"),
+        ("term-seo-actions", "この記事でできること"),
+        ("term-sec-short", "ひとこと"),
+        ("term-sec-points", "試験で押さえるポイント"),
+        ("term-sec-def", "定義"),
+    ]
+    if has_legal:
+        items.append(("term-sec-legal", "法令・根拠"))
+    items.extend(
+        [
+            ("term-sec-exam", "試験で押さえる"),
+            ("term-sec-faq", "よくある質問"),
+        ]
+    )
+    if has_related:
+        items.append(("term-related-h", "関連用語"))
+    items.append(("term-related-pages-h", "関連記事・次に読むページ"))
+    links = "".join(f'<li><a href="#{sec_id}">{html.escape(label)}</a></li>' for sec_id, label in items)
+    return (
+        '<section class="q-block term-block term-toc-block" aria-labelledby="term-toc-h">'
+        '<h2 id="term-toc-h" class="q-h2">目次</h2>'
+        f'<ol class="term-toc">{links}</ol>'
+        "</section>"
+    )
+
+
+def reliability_html() -> str:
+    sources = "".join(
+        f'<li><a href="{html.escape(url)}" target="_blank" rel="noopener noreferrer">{html.escape(label)}</a></li>'
+        for label, url in OFFICIAL_SOURCES
+    )
+    return (
+        '<section class="q-block term-block" aria-labelledby="term-seo-trust">'
+        '<h2 id="term-seo-trust" class="q-h2">この記事の信頼性について</h2>'
+        '<dl class="term-info-list">'
+        f"<dt>執筆者</dt><dd>{html.escape(AUTHOR_NAME)}</dd>"
+        f"<dt>執筆者プロフィール</dt><dd>{html.escape(AUTHOR_PROFILE)}</dd>"
+        f"<dt>確認者</dt><dd>{html.escape(REVIEWER_NAME)}</dd>"
+        f"<dt>確認者プロフィール</dt><dd>{html.escape(REVIEWER_PROFILE)}</dd>"
+        f"<dt>事実確認日</dt><dd>{html.escape(FACT_CHECKED_AT)}</dd>"
+        f"<dt>主な参照元</dt><dd><ul class=\"term-source-list\">{sources}</ul></dd>"
+        f"<dt>独自メモ</dt><dd>{html.escape(REVISION_NOTE)}</dd>"
+        f"<dt>更新方針</dt><dd>{html.escape(UPDATE_POLICY)}</dd>"
+        "</dl>"
+        "</section>"
+    )
+
+
+def official_info_html() -> str:
+    sources = "".join(
+        f'<li><a href="{html.escape(url)}" target="_blank" rel="noopener noreferrer">{html.escape(label)}</a></li>'
+        for label, url in OFFICIAL_SOURCES
+    )
+    return (
+        '<section class="q-block term-block" aria-labelledby="term-seo-official">'
+        '<h2 id="term-seo-official" class="q-h2">公式情報の確認</h2>'
+        '<div class="q-stem">'
+        "試験日程、受験資格、手数料、合格基準、登録制度、法令改正は年度によって変わることがあります。"
+        "本ページは学習補助として用語の意味と試験での見方を整理するものです。最終的な内容は、次の一次情報で確認してください。"
+        f'<ul class="term-source-list">{sources}</ul>'
+        "</div>"
+        "</section>"
+    )
+
+
+def article_basic_html(category: str, importance: str) -> str:
+    return (
+        '<section class="q-block term-block" aria-labelledby="term-seo-basic">'
+        '<h2 id="term-seo-basic" class="q-h2">記事の基本情報</h2>'
+        '<dl class="term-info-list">'
+        "<dt>記事種別</dt><dd>用語詳細記事</dd>"
+        f"<dt>対象試験</dt><dd>賃貸不動産経営管理士試験</dd>"
+        f"<dt>主な分野</dt><dd>{html.escape(category or 'その他')}</dd>"
+        f"<dt>重要度</dt><dd>{html.escape(importance or '確認対象')}</dd>"
+        f"<dt>検索意図</dt><dd>用語の意味、根拠、試験での押さえ方を短時間で確認する</dd>"
+        "</dl>"
+        "</section>"
+    )
+
+
+def action_items_html(term: str, category: str) -> str:
+    items = [
+        f"{term}のひとこと定義を確認する",
+        f"{category or '関連分野'}での位置づけを押さえる",
+        "法令・根拠がある場合は条文名や制度名を確認する",
+        "関連用語と見比べて、似た表現との違いを整理する",
+        "過去問形式の演習に戻り、選択肢の言い換えに対応できるか確認する",
+    ]
+    lis = "".join(f"<li>{html.escape(item)}</li>" for item in items)
+    return (
+        '<section class="q-block term-block" aria-labelledby="term-seo-actions">'
+        '<h2 id="term-seo-actions" class="q-h2">この記事でできること</h2>'
+        f'<ul class="term-action-list">{lis}</ul>'
+        "</section>"
+    )
+
+
+def related_pages_html() -> str:
+    return (
+        '<section class="q-block term-block" aria-labelledby="term-related-pages-h">'
+        '<h2 id="term-related-pages-h" class="q-h2">関連記事・次に読むページ</h2>'
+        '<ul class="term-related-pages">'
+        '<li><a href="index.html">用語解説一覧で関連語を探す</a></li>'
+        '<li><a href="../articles/index.html">試験ガイドで公式情報と学習手順を確認する</a></li>'
+        '<li><a href="../q/index.html">過去問一覧で出題形式を確認する</a></li>'
+        "</ul>"
+        "</section>"
+    )
 
 
 def write_sitemap(urls: list[str], out: Path) -> None:
@@ -461,6 +586,10 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str, term_lookup: dic
                 "mainEntityOfPage": canonical,
                 "inLanguage": "ja-JP",
                 "isPartOf": public_url(base_url, "terms/index.html"),
+                "author": {"@type": "Organization", "name": AUTHOR_NAME},
+                "reviewedBy": {"@type": "Organization", "name": REVIEWER_NAME},
+                "dateModified": FACT_CHECKED_AT,
+                "citation": [url for _label, url in OFFICIAL_SOURCES],
             },
             {
                 "@type": "BreadcrumbList",
@@ -514,13 +643,19 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str, term_lookup: dic
   <h1 class="q-h1">{html.escape(term)}<span class="term-reading">（{html.escape(reading)}）</span></h1>
   <p class="term-lead">{html.escape(lead)}</p>
   {tags_wrap}
+  {term_toc_html(bool(legal), bool(rel_html))}
+  {reliability_html()}
+  {official_info_html()}
+  {article_basic_html(category, importance)}
+  {action_items_html(term, category)}
   {block("short", "ひとこと", short_def)}
   {raw_block("points", "試験で押さえるポイント", points_html)}
   {block("def", "定義", definition)}
   {raw_block("legal", "法令・根拠", legal_basis_html(legal))}
   {block("exam", "試験で押さえる", explanation)}
-  {raw_block("faq", "よくある確認ポイント", faq_html)}
+  {raw_block("faq", "よくある質問", faq_html)}
   {rel_section}
+  {related_pages_html()}
   <p class="q-app-link"><a href="{html.escape(app_glossary_href)}">アプリで用語解説を開く</a></p>
 </main>
 {page_footer}
