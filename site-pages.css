@@ -643,6 +643,36 @@ a:hover {
   margin-top: 0;
   vertical-align: top;
 }
+.term-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+.term-reliability-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  color: var(--text2);
+  font-size: 15px;
+  line-height: 1.7;
+}
+.term-reliability-table th,
+.term-reliability-table td {
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+.term-reliability-table th {
+  width: 180px;
+  background: var(--bg2);
+  color: var(--ink);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.term-reliability-table .term-source-list {
+  margin-top: 0;
+  margin-bottom: 0;
+}
 .term-source-list,
 .term-action-list,
 .term-related-pages {

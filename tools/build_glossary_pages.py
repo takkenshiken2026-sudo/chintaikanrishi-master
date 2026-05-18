@@ -353,16 +353,18 @@ def reliability_html() -> str:
     return (
         '<section class="q-block term-block" aria-labelledby="term-seo-trust">'
         '<h2 id="term-seo-trust" class="q-h2">この記事の信頼性について</h2>'
-        '<dl class="term-info-list">'
-        f"<dt>執筆者</dt><dd>{html.escape(AUTHOR_NAME)}</dd>"
-        f"<dt>執筆者プロフィール</dt><dd>{html.escape(AUTHOR_PROFILE)}</dd>"
-        f"<dt>確認者</dt><dd>{html.escape(REVIEWER_NAME)}</dd>"
-        f"<dt>確認者プロフィール</dt><dd>{html.escape(REVIEWER_PROFILE)}</dd>"
-        f"<dt>事実確認日</dt><dd>{html.escape(FACT_CHECKED_AT)}</dd>"
-        f"<dt>主な参照元</dt><dd><ul class=\"term-source-list\">{sources}</ul></dd>"
-        f"<dt>独自メモ</dt><dd>{html.escape(REVISION_NOTE)}</dd>"
-        f"<dt>更新方針</dt><dd>{html.escape(UPDATE_POLICY)}</dd>"
-        "</dl>"
+        '<div class="term-table-scroll"><table class="term-reliability-table">'
+        "<tbody>"
+        f"<tr><th>執筆者</th><td>{html.escape(AUTHOR_NAME)}</td></tr>"
+        f"<tr><th>執筆者プロフィール</th><td>{html.escape(AUTHOR_PROFILE)}</td></tr>"
+        f"<tr><th>確認者</th><td>{html.escape(REVIEWER_NAME)}</td></tr>"
+        f"<tr><th>確認者プロフィール</th><td>{html.escape(REVIEWER_PROFILE)}</td></tr>"
+        f"<tr><th>事実確認日</th><td>{html.escape(FACT_CHECKED_AT)}</td></tr>"
+        f"<tr><th>主な参照元</th><td><ul class=\"term-source-list\">{sources}</ul></td></tr>"
+        f"<tr><th>独自メモ</th><td>{html.escape(REVISION_NOTE)}</td></tr>"
+        f"<tr><th>更新方針</th><td>{html.escape(UPDATE_POLICY)}</td></tr>"
+        "</tbody>"
+        "</table></div>"
         "</section>"
     )
 
