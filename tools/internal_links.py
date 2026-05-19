@@ -74,9 +74,10 @@ GENRE_GUIDE: dict[str, str] = {
     "試験概要": "exam-overview",
     "試験対策": "study-plan",
     "過去問活用": "past-questions-how-to-use",
-    "学習法": "study-plan",
+    "学習法": "glossary-how-to-use",
     "科目別対策": "law-subject",
     "法令対策": "law-subject",
+    "重要論点": "genjo-kaifuku-guide",
 }
 
 FIELD_GUIDE: dict[str, str] = {

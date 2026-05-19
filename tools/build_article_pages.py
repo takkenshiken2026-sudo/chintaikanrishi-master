@@ -534,10 +534,6 @@ def build_index_html(articles: list[dict[str, str]]) -> str:
     </div>
     <p id="article-index-empty" class="article-index-empty hide">条件に合う記事がありません。検索語を短くするか、ジャンルを「すべて」に戻してください。</p>
   </section>
-  <section class="site-page-section" aria-labelledby="sec-template-note">
-    <h2 id="sec-template-note">共通テンプレの増やし方</h2>
-    <p>試験概要、受験資格、日程・申込、合格率・難易度、出題範囲、独学対策、過去問活用、直前対策、当日の持ち物、合格後の手続きなどをジャンルとして追加できます。</p>
-  </section>
 </main>
 {site_page_footer(rel_path, current="articles")}
 {site_page_wrap_close()}
