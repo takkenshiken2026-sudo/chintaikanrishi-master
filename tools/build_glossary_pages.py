@@ -28,6 +28,7 @@ from tools.html_footer import (
     site_page_wrap_close,
     site_page_wrap_open,
 )
+from tools.internal_links import build_term_past_index, related_past_questions_html
 
 HEAD_FONTS = """<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -427,13 +428,27 @@ def action_items_html(term: str, category: str) -> str:
     )
 
 
-def related_pages_html() -> str:
+def related_pages_html(category: str) -> str:
+    fid = glossary_field_id(category)
+    hub_items: list[str] = []
+    hub_slugs = {
+        "law": ("law-subject", "賃管法令・制度の学習ハブ"),
+        "rights": ("rights-subject", "契約・実務の学習ハブ"),
+        "limit": ("limit-subject", "設備・税務・その他の学習ハブ"),
+    }
+    if fid and fid in hub_slugs:
+        slug, label = hub_slugs[fid]
+        hub_items.append(
+            f'<li><a href="../articles/{html.escape(slug)}/">'
+            f"{html.escape(label)}</a></li>"
+        )
     return (
         '<section class="q-block term-block" aria-labelledby="term-related-pages-h">'
         '<h2 id="term-related-pages-h" class="q-h2">関連記事・次に読むページ</h2>'
         '<ul class="term-related-pages">'
         '<li><a href="index.html">用語解説一覧で関連語を探す</a></li>'
-        '<li><a href="../articles/index.html">試験ガイドで公式情報と学習手順を確認する</a></li>'
+        + "".join(hub_items)
+        + '<li><a href="../articles/index.html">試験ガイドで公式情報と学習手順を確認する</a></li>'
         '<li><a href="../q/index.html">過去問一覧で出題形式を確認する</a></li>'
         "</ul>"
         "</section>"
@@ -507,10 +522,24 @@ def collect_sitemap_urls(base: str) -> list[str]:
     for p in sorted(TERMS_DIR.glob("g-*.html")):
         rel = p.relative_to(ROOT).as_posix()
         urls.append(f"{base}/{rel}")
+    guide_csv = ROOT / "data" / "guide_articles.csv"
+    if guide_csv.is_file():
+        import csv as _csv
+
+        for row in _csv.DictReader(guide_csv.read_text(encoding="utf-8-sig").splitlines()):
+            slug = norm(row.get("slug"))
+            if slug and (ROOT / "articles" / slug / "index.html").is_file():
+                urls.append(f"{base}/articles/{slug}/")
     return urls
 
 
-def build_term_html(entry: dict, rel_path: Path, base_url: str, term_lookup: dict[str, str]) -> str:
+def build_term_html(
+    entry: dict,
+    rel_path: Path,
+    base_url: str,
+    term_lookup: dict[str, str],
+    past_hits: list[dict] | None = None,
+) -> str:
     term = entry["term"]
     reading = entry["reading"]
     category = entry["category"]
@@ -702,7 +731,8 @@ def build_term_html(entry: dict, rel_path: Path, base_url: str, term_lookup: dic
   {article_basic_html(category, importance)}
   {official_info_html()}
   {rel_section}
-  {related_pages_html()}
+  {related_past_questions_html(term, category, rel_path, past_hits or [])}
+  {related_pages_html(category)}
   <p class="q-app-link"><a href="{html.escape(app_glossary_href)}">アプリで用語解説を開く</a></p>
 </main>
 {page_footer}
@@ -935,6 +965,7 @@ def main() -> int:
         )
 
     term_lookup = make_term_lookup(entries)
+    past_index = build_term_past_index(entries)
 
     TERMS_DIR.mkdir(parents=True, exist_ok=True)
     for stale in TERMS_DIR.glob("g-*.html"):
@@ -943,7 +974,11 @@ def main() -> int:
     for e in entries:
         out_file = TERMS_DIR / e["slug_file"]
         rel_path = out_file.relative_to(ROOT)
-        out_file.write_text(build_term_html(e, rel_path, base, term_lookup), encoding="utf-8")
+        hits = past_index.get(e["term"], [])
+        out_file.write_text(
+            build_term_html(e, rel_path, base, term_lookup, past_hits=hits),
+            encoding="utf-8",
+        )
 
     (TERMS_DIR / "index.html").write_text(build_terms_index(entries, base), encoding="utf-8")
 

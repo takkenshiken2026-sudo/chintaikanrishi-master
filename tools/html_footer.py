@@ -29,6 +29,7 @@ SITE_HEADER_NAV: list[tuple[str, str, str]] = [
     ("このサイトについて", "about.html", "about"),
     ("過去問一覧", "q/index.html", "q"),
     ("用語集", "terms/index.html", "terms"),
+    ("試験ガイド", "articles/index.html", "articles"),
     ("関連リンク", "related-sites.html", "related"),
     ("プライバシー", "privacy.html", "privacy"),
 ]
