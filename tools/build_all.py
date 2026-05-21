@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""コンテンツ生成の一括実行（CSV → 静的HTML）。"""
+"""One-command build for the exam-site template."""
 
 from __future__ import annotations
 
@@ -10,21 +10,26 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
-STEPS = [
-    ("write_guide_articles_csv", [sys.executable, "tools/write_guide_articles_csv.py"]),
-    ("build_article_pages", [sys.executable, "tools/build_article_pages.py"]),
-    ("build_glossary_pages", [sys.executable, "tools/build_glossary_pages.py"]),
-]
+
+def run(cmd: list[str]) -> None:
+    print("+", " ".join(cmd))
+    subprocess.run(cmd, cwd=ROOT, check=True)
 
 
 def main() -> int:
-    for name, cmd in STEPS:
-        print(f"=== {name} ===")
-        r = subprocess.run(cmd, cwd=ROOT)
-        if r.returncode != 0:
-            print(f"Failed: {name}", file=sys.stderr)
-            return r.returncode
-    print("All steps completed.")
+    py = sys.executable
+    run([py, "tools/validate_csv.py"])
+    run([py, "tools/apply_site_config.py"])
+    run([py, "tools/csv_to_exam_site_past_js.py"])
+    run([py, "tools/csv_to_exam_site_ichimondou_js.py"])
+    run([py, "tools/build_past_question_pages.py"])
+    run([py, "tools/build_article_pages.py"])
+    run([py, "tools/build_glossary_pages.py"])
+    run([py, "tools/build_sitemap.py"])
+    run([py, "tools/validate_generated_seo.py"])
+    run([py, "tools/validate_internal_links.py"])
+    run([py, "tools/validate_public_content.py"])
+    run(["bash", "tools/prepare_public_site.sh"])
     return 0
 
 

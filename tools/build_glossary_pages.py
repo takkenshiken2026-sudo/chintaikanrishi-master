@@ -3,6 +3,8 @@
 """
 data/glossary_terms.csv から用語ページ terms/g-*.html と terms/index.html を生成し、
 過去問と合わせた sitemap.xml を書き直す。
+
+用語一覧（terms/index.html）は検索・分野絞り込みのみ。件数が増えてもページネーションは付けない。
 """
 
 from __future__ import annotations
@@ -10,9 +12,11 @@ from __future__ import annotations
 import csv
 import hashlib
 import html
+import shutil
 import json
 import re
 import sys
+from datetime import date
 from pathlib import Path
 from xml.sax.saxutils import escape as xml_escape
 
@@ -23,12 +27,23 @@ if str(ROOT) not in sys.path:
 
 from tools.html_footer import (
     ROBOTS_INDEX_FOLLOW,
+    breadcrumb_html,
     site_page_footer,
     site_page_header,
     site_page_wrap_close,
     site_page_wrap_open,
 )
-from tools.internal_links import build_term_past_index, related_past_questions_html
+from tools.site_config import (
+    brand_name,
+    category_order,
+    category_to_field_map,
+    clean_origin,
+    css_safe_field_id,
+    exam_name,
+    external_links,
+    field_labels,
+    primary_external_link,
+)
 
 HEAD_FONTS = """<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,58 +51,24 @@ HEAD_FONTS = """<link rel="preconnect" href="https://fonts.googleapis.com">
 
 GLOSSARY_CSV = ROOT / "data" / "glossary_terms.csv"
 TERMS_DIR = ROOT / "terms"
-BASE_DEFAULT = "https://chintaikanrishi-master.jp"
-AUTHOR_NAME = "賃管マスター編集部"
-AUTHOR_PROFILE = "賃貸不動産経営管理士試験の過去問形式演習、用語解説、学習導線を整理する編集チームです。"
-REVIEWER_NAME = "賃管マスター確認担当"
-REVIEWER_PROFILE = "公開前に公式情報への誘導、断定表現、内部リンク、FAQ、更新日の有無を確認します。"
-FACT_CHECKED_AT = "2026-05-18"
-REVISION_NOTE = "SEO記事テンプレート運用ルールに合わせ、目次・信頼性・公式情報・FAQ・関連記事を整備。"
-UPDATE_POLICY = "試験実施団体や公的機関の情報、関係法令、公開問題の傾向が更新されたタイミングで本文と参照元を見直します。"
-OFFICIAL_SOURCES = (
-    ("賃貸不動産経営管理士協議会（公式）", "https://www.chintaikanrishi.jp/"),
-    ("国土交通省 住宅局", "https://www.mlit.go.jp/jutakukentiku/house/"),
-)
+BASE_DEFAULT = clean_origin()
 
-# index.html の FIELDS（用語カテゴリ →演習アプリの分野チップと揃える）
-FIELD_LABELS = {"law": "賃管法令・制度", "rights": "契約・実務", "limit": "設備・税務・その他"}
-GLOSSARY_CAT_TO_FIELD: dict[str, str] = {
-    "賃貸住宅管理業法": "law",
-    "関連法令": "law",
-    "借地借家法": "rights",
-    "賃貸借契約": "rights",
-    "民法": "rights",
-    "原状回復": "rights",
-    "管理実務": "rights",
-    "建物・設備": "limit",
-    "会計・税務・保険": "limit",
-    "賃貸経営・PM/AM": "limit",
-}
+# site-config.json の fields[].aliases / name と揃える
+FIELD_LABELS = field_labels()
+GLOSSARY_CAT_TO_FIELD: dict[str, str] = category_to_field_map()
 
 # 用語索引ページの科目チップ・見出しの並び（CSV のカテゴリ名と一致）
-GLOSSARY_CAT_ORDER = (
-    "賃貸住宅管理業法",
-    "関連法令",
-    "借地借家法",
-    "賃貸借契約",
-    "民法",
-    "原状回復",
-    "管理実務",
-    "建物・設備",
-    "会計・税務・保険",
-    "賃貸経営・PM/AM",
-    "その他",
-)
+GLOSSARY_CAT_ORDER = tuple(category_order())
 
 RELATED_TERM_ALIASES: dict[str, str] = {
-    "一括再委託": "管理業務の一括再委託の禁止",
-    "一括再委託の禁止": "管理業務の一括再委託の禁止",
-    "原状回復ガイドライン": "原状回復をめぐるトラブルとガイドライン",
-    "原賃貸借": "原賃貸借契約",
-    "原賃貸借契約終了": "原賃貸借契約の終了と転貸借",
+    "一括再委託": "学習範囲の一括再委託の禁止",
+    "一括再委託の禁止": "学習範囲の一括再委託の禁止",
+    "実務論点ガイドライン": "実務論点をめぐるトラブルとガイドライン",
+    "原契約": "原契約契約",
+    "原契約契約終了": "原契約契約の終了と転貸借",
     "重要事項説明": "重要事項説明（宅建業法）",
-    "定期建物賃貸借": "定期建物賃貸借契約",
-    "普通建物賃貸借": "普通建物賃貸借契約",
+    "定期建物契約": "定期建物契約契約",
+    "普通建物契約": "普通建物契約契約",
     "同時履行の抗弁": "同時履行の抗弁権",
     "改正民法": "改正民法（2020年4月施行）",
     "無断転貸": "無断譲渡・無断転貸",
@@ -98,7 +79,7 @@ RELATED_TERM_ALIASES: dict[str, str] = {
     "LPガス": "LPガス（プロパンガス）",
     "RC造": "鉄筋コンクリート造（RC造）",
     "SRC造": "鉄骨鉄筋コンクリート造（SRC造）",
-    "DX": "DXによる賃貸住宅経営",
+    "DX": "DXによる学習テーマ経営",
     "バリアフリー新法": "バリアフリー",
     "不動産鑑定": "不動産鑑定評価",
     "事故物件ガイドライン": "人の死の告知に関するガイドライン",
@@ -176,7 +157,12 @@ def rel_to_root(rel_file: Path) -> str:
 
 def rel_css(rel_file: Path) -> str:
     depth = len(rel_file.parent.parts)
-    return "/".join([".."] * depth) + "/site-pages.css?v=20260515-topgray"
+    return "/".join([".."] * depth) + f"/site-pages.css?v={TERMS_INDEX_CSS_VER}"
+
+
+def rel_theme_css(rel_file: Path) -> str:
+    depth = len(rel_file.parent.parts)
+    return "/".join([".."] * depth) + "/site-theme.css"
 
 
 def glossary_field_id(category: str) -> str | None:
@@ -188,7 +174,7 @@ def glossary_field_badge_html(category: str) -> str:
     if not fid:
         return ""
     label = FIELD_LABELS.get(fid, fid)
-    return f'<span class="term-field-badge term-field-{fid}">{html.escape(label)}</span>'
+    return f'<span class="term-field-badge term-field-{css_safe_field_id(fid)}">{html.escape(label)}</span>'
 
 
 def ordered_term_categories(by_cat: dict[str, list]) -> list[str]:
@@ -209,6 +195,97 @@ def meta_description(text: str, limit: int = 155) -> str:
 
 def split_semicolon(s: str) -> list[str]:
     return [x.strip() for x in (s or "").split(";") if x.strip()]
+
+
+TERMS_INDEX_CSS_VER = "20260521-terms-tools-fix"
+TERMS_INDEX_JS_VER = "20260521-terms-3col"
+
+
+def parse_term_tags(raw: str) -> list[str]:
+    return [t.strip() for t in re.split(r"[,、/|]", raw or "") if t.strip()]
+
+
+def sort_terms_index_entries(entries: list[dict]) -> list[dict]:
+    return sorted(
+        entries,
+        key=lambda e: (
+            e.get("category") or "",
+            e.get("reading") or e.get("term") or "",
+        ),
+    )
+
+
+def render_terms_index_tbody(entries: list[dict]) -> str:
+    """JS 未実行時も一覧が見えるよう、全件の tbody をサーバー側で生成する（1語1行・3列）。"""
+    items = sort_terms_index_entries(entries)
+    rows: list[str] = []
+
+    for item in items:
+        href = html.escape(item["slug_file"])
+        href_attr = f' data-entry-href="{href}"'
+        reading = item.get("reading") or ""
+        reading_html = (
+            f'<span class="terms-idx-reading">{html.escape(reading)}</span>'
+            if reading
+            else ""
+        )
+        short_def = html.escape(item.get("short_def") or "")
+        rows.append(
+            "<tr class=\"terms-idx-table-row\">"
+            f'<td class="terms-idx-td-term" data-label="用語（よみ）"{href_attr} tabindex="0">'
+            f'<div class="terms-idx-term-cell"><a href="{href}">{html.escape(item["term"])}</a>'
+            f"{reading_html}</div></td>"
+            f'<td class="terms-idx-td-cat" data-label="分野"{href_attr}>'
+            f'{html.escape(item.get("category") or "")}</td>'
+            f'<td class="terms-idx-td-snippet" data-label="定義（抜粋）"{href_attr}>'
+            f"{short_def}</td>"
+            "</tr>"
+        )
+    return "\n".join(rows)
+
+
+def terms_index_item_dict(entry: dict) -> dict:
+    tags = parse_term_tags(entry.get("tags") or "")
+    search_bits = [
+        entry["term"],
+        entry.get("reading") or "",
+        entry.get("category") or "",
+        entry.get("short_def") or "",
+        *tags,
+    ]
+    return {
+        "term": entry["term"],
+        "reading": entry.get("reading") or "",
+        "category": entry.get("category") or "",
+        "tags": tags,
+        "shortDef": entry.get("short_def") or "",
+        "href": entry["slug_file"],
+        "fieldHub": entry.get("field_hub") or "",
+        "search": " ".join(x for x in search_bits if x),
+    }
+
+
+def build_terms_list_item(entry: dict) -> str:
+    href = html.escape(entry["slug_file"])
+    term = html.escape(entry["term"])
+    reading = html.escape(entry.get("reading") or "")
+    snippet = html.escape(entry.get("short_def") or "")
+    reading_html = (
+        f'<span class="terms-idx-reading">{reading}</span>' if reading else ""
+    )
+    snippet_html = (
+        f'<span class="terms-idx-snippet">{snippet}</span>' if snippet else ""
+    )
+    search_attr = html.escape(
+        terms_index_item_dict(entry)["search"], quote=True
+    )
+    return (
+        f'    <li class="terms-idx-item" data-search="{search_attr}">'
+        f'<a href="{href}">'
+        f'<span class="terms-idx-item-main">'
+        f'<span class="terms-idx-term">{term}</span>{reading_html}'
+        f"</span>{snippet_html}</a></li>"
+    )
 
 
 def split_sentences(s: str) -> list[str]:
@@ -267,17 +344,140 @@ def make_term_lookup(entries: list[dict]) -> dict[str, str]:
     return lookup
 
 
-def related_terms_html(related: str, term_lookup: dict[str, str]) -> str:
+def field_hub_slug(category: str) -> str:
+    fid = glossary_field_id(category)
+    if fid:
+        return f"field-{css_safe_field_id(fid)}"
+    safe = css_safe_field_id(re.sub(r"\s+", "-", norm(category)))
+    return f"field-{safe}" if safe and safe != "field" else "field-other"
+
+
+def load_guide_slugs() -> list[dict[str, str]]:
+    path = ROOT / "data" / "guide_articles.csv"
+    if not path.is_file():
+        return []
+    text = path.read_text(encoding="utf-8-sig")
+    rows: list[dict[str, str]] = []
+    for row in csv.DictReader(text.splitlines()):
+        slug = norm(row.get("slug"))
+        title = norm(row.get("title"))
+        if slug and title:
+            try:
+                priority = int(norm(row.get("priority")) or 9999)
+            except ValueError:
+                priority = 9999
+            rows.append(
+                {
+                    "slug": slug,
+                    "title": title,
+                    "genre": norm(row.get("genre")),
+                    "tags": norm(row.get("tags")),
+                    "priority": priority,
+                }
+            )
+    rows.sort(key=lambda r: r["priority"])
+    return rows
+
+
+GUIDE_LINK_FALLBACK_SLUGS = (
+    "exam-overview",
+    "study-plan",
+    "past-question-strategy",
+    "glossary-how-to",
+    "self-study-roadmap",
+)
+
+
+def guide_related_link_items(category: str, guides: list[dict[str, str]], *, limit: int = 3) -> list[str]:
+    if not guides:
+        return []
+    by_slug = {g["slug"]: g for g in guides}
+    picked: list[str] = []
+    seen: set[str] = set()
+    cat = norm(category)
+    for g in guides:
+        blob = f"{g['genre']} {g['tags']} {g['title']}"
+        if cat and cat in blob:
+            slug = g["slug"]
+            if slug not in seen:
+                seen.add(slug)
+                picked.append(
+                    f'<a class="related-link" href="../articles/{html.escape(slug)}/">'
+                    f"{html.escape(g['title'])}</a>"
+                )
+        if len(picked) >= limit:
+            return picked
+    for slug in GUIDE_LINK_FALLBACK_SLUGS:
+        if len(picked) >= limit:
+            break
+        g = by_slug.get(slug)
+        if not g or slug in seen:
+            continue
+        seen.add(slug)
+        picked.append(
+            f'<a class="related-link" href="../articles/{html.escape(slug)}/">'
+            f"{html.escape(g['title'])}</a>"
+        )
+    return picked
+
+
+def next_links_html(
+    root_idx: str,
+    field_hub: str | None,
+    category: str,
+    guide_links: list[str],
+) -> str:
+    links = [
+        '<a class="related-link" href="index.html">用語解説一覧へ戻る</a>',
+    ]
+    if field_hub and category:
+        links.append(
+            f'<a class="related-link" href="{html.escape(field_hub)}/index.html">'
+            f"{html.escape(category)}の用語一覧</a>"
+        )
+    links.append(f'<a class="related-link" href="{html.escape(root_idx)}#past">過去問演習で確認する</a>')
+    links.extend(guide_links)
+    return (
+        '<div class="related-box" aria-labelledby="term-next-title">'
+        '<div id="term-next-title" class="related-box-title">次に確認するページ</div>'
+        f'<div class="related-links">{"".join(links)}</div></div>'
+    )
+
+
+def related_terms_html(
+    related: str,
+    term_lookup: dict[str, str],
+    *,
+    current: dict,
+    entries: list[dict],
+    limit: int = 6,
+) -> str:
     items: list[str] = []
+    seen: set[str] = set()
     for label in split_semicolon(related):
         href = term_lookup.get(label) or term_lookup.get(lookup_key(label))
-        if href:
-            items.append(f'<li><a href="{html.escape(href)}">{html.escape(label)}</a></li>')
-        else:
-            items.append(f"<li>{html.escape(label)}</li>")
+        if href and href not in seen:
+            seen.add(href)
+            items.append(f'<a class="related-link" href="{html.escape(href)}">{html.escape(label)}</a>')
+        elif label and label not in {e["term"] for e in entries}:
+            items.append(f'<span class="related-link related-link-static">{html.escape(label)}</span>')
+    if len(items) < 2:
+        category = current.get("category") or ""
+        for e in entries:
+            if e["slug_file"] == current.get("slug_file"):
+                continue
+            if category and e.get("category") != category:
+                continue
+            href = e["slug_file"]
+            if href in seen:
+                continue
+            seen.add(href)
+            items.append(f'<a class="related-link" href="{html.escape(href)}">{html.escape(e["term"])}</a>')
+            if len(items) >= limit:
+                break
     if not items:
         return ""
-    return '<h2 id="term-related-h" class="q-h2">関連用語</h2><ul class="term-related">' + "".join(items) + "</ul>"
+    return "".join(items)
 
 
 def legal_basis_html(legal: str) -> str:
@@ -316,221 +516,22 @@ def faq_section_html(items: list[dict[str, str]]) -> str:
     return "".join(body)
 
 
-def term_toc_html(has_legal: bool, has_related: bool) -> str:
-    items = [
-        ("term-seo-trust", "この記事の信頼性について"),
-        ("term-seo-actions", "この記事でできること"),
-        ("term-sec-short", "ひとこと"),
-        ("term-sec-points", "試験で押さえるポイント"),
-        ("term-sec-compare", "比較して押さえるポイント"),
-        ("term-sec-def", "定義"),
-    ]
-    if has_legal:
-        items.append(("term-sec-legal", "法令・根拠"))
-    items.extend(
-        [
-            ("term-sec-exam", "試験で押さえる"),
-            ("term-sec-mistakes", "頻出の誤りと迷いやすい点"),
-            ("term-sec-faq", "よくある質問"),
-            ("term-seo-basic", "記事の基本情報"),
-            ("term-seo-official", "公式情報の確認"),
-        ]
-    )
-    if has_related:
-        items.append(("term-related-h", "関連用語"))
-    items.append(("term-related-pages-h", "関連記事・次に読むページ"))
-    links = "".join(f'<li><a href="#{sec_id}">{html.escape(label)}</a></li>' for sec_id, label in items)
-    return (
-        '<section class="q-block term-block term-toc-block" aria-labelledby="term-toc-h">'
-        '<h2 id="term-toc-h" class="q-h2">目次</h2>'
-        f'<ol class="term-toc">{links}</ol>'
-        "</section>"
-    )
+def custom_faq_items(entry: dict, fallback: list[dict[str, str]]) -> list[dict[str, str]]:
+    items: list[dict[str, str]] = []
+    for idx in range(1, 4):
+        q = norm(entry.get(f"faq_{idx}_question"))
+        a = norm(entry.get(f"faq_{idx}_answer"))
+        if q and a:
+            items.append({"question": q, "answer": a})
+    return items or fallback
 
 
-def reliability_html() -> str:
-    sources = "".join(
-        f'<li><a href="{html.escape(url)}" target="_blank" rel="noopener noreferrer">{html.escape(label)}</a></li>'
-        for label, url in OFFICIAL_SOURCES
-    )
-    return (
-        '<section class="q-block term-block" aria-labelledby="term-seo-trust">'
-        '<h2 id="term-seo-trust" class="q-h2">この記事の信頼性について</h2>'
-        '<div class="term-table-scroll"><table class="term-reliability-table">'
-        "<tbody>"
-        f"<tr><th>執筆者</th><td>{html.escape(AUTHOR_NAME)}</td></tr>"
-        f"<tr><th>執筆者プロフィール</th><td>{html.escape(AUTHOR_PROFILE)}</td></tr>"
-        f"<tr><th>確認者</th><td>{html.escape(REVIEWER_NAME)}</td></tr>"
-        f"<tr><th>確認者プロフィール</th><td>{html.escape(REVIEWER_PROFILE)}</td></tr>"
-        f"<tr><th>事実確認日</th><td>{html.escape(FACT_CHECKED_AT)}</td></tr>"
-        f"<tr><th>主な参照元</th><td><ul class=\"term-source-list\">{sources}</ul></td></tr>"
-        f"<tr><th>独自メモ</th><td>{html.escape(REVISION_NOTE)}</td></tr>"
-        f"<tr><th>更新方針</th><td>{html.escape(UPDATE_POLICY)}</td></tr>"
-        "</tbody>"
-        "</table></div>"
-        "</section>"
-    )
+def semicolon_list_html(value: str) -> str:
+    items = split_semicolon(value)
+    if not items:
+        return ""
+    return '<ol class="term-point-list">' + "".join(f"<li>{html.escape(item)}</li>" for item in items) + "</ol>"
 
-
-def official_info_html() -> str:
-    sources = "".join(
-        f'<li><a href="{html.escape(url)}" target="_blank" rel="noopener noreferrer">{html.escape(label)}</a></li>'
-        for label, url in OFFICIAL_SOURCES
-    )
-    return (
-        '<section class="q-block term-block" aria-labelledby="term-seo-official">'
-        '<h2 id="term-seo-official" class="q-h2">公式情報の確認</h2>'
-        '<div class="q-stem">'
-        "試験日程、受験資格、手数料、合格基準、登録制度、法令改正は年度によって変わることがあります。"
-        "本ページは学習補助として用語の意味と試験での見方を整理するものです。最終的な内容は、次の一次情報で確認してください。"
-        f'<ul class="term-source-list">{sources}</ul>'
-        "</div>"
-        "</section>"
-    )
-
-
-def article_basic_html(category: str, importance: str) -> str:
-    return (
-        '<section class="q-block term-block" aria-labelledby="term-seo-basic">'
-        '<h2 id="term-seo-basic" class="q-h2">記事の基本情報</h2>'
-        '<div class="term-table-scroll"><table class="term-meta-table">'
-        "<tbody>"
-        "<tr><th>対象試験</th><td>賃貸不動産経営管理士試験</td></tr>"
-        f"<tr><th>分野</th><td>{html.escape(category or 'その他')}</td></tr>"
-        "<tr><th>記事種別</th><td>用語詳細記事</td></tr>"
-        f"<tr><th>重要度</th><td>{html.escape(importance or '確認対象')}</td></tr>"
-        "<tr><th>検索意図</th><td>用語の意味、試験で問われる観点、復習時の確認ポイントを整理すること。</td></tr>"
-        "</tbody>"
-        "</table></div>"
-        "</section>"
-    )
-
-
-def action_items_html(term: str, category: str) -> str:
-    intro = (
-        f"この記事では、{term}の基本的な意味を確認し、試験で問われやすい観点と復習時の確認ポイントを整理できます。"
-        "読み終えたら、関連用語と過去問を合わせて確認し、知識を選択肢で使える状態に近づけてください。"
-    )
-    items = [
-        f"{term}のひとこと定義を確認する",
-        f"{category or '関連分野'}での位置づけを押さえる",
-        "法令・根拠がある場合は条文名や制度名を確認する",
-        "関連用語と見比べて、似た表現との違いを整理する",
-        "過去問形式の演習に戻り、選択肢の言い換えに対応できるか確認する",
-    ]
-    lis = "".join(f"<li>{html.escape(item)}</li>" for item in items)
-    return (
-        '<section class="q-block term-block" aria-labelledby="term-seo-actions">'
-        '<h2 id="term-seo-actions" class="q-h2">この記事でできること</h2>'
-        f'<p class="term-action-intro">{html.escape(intro)}</p>'
-        f'<ul class="term-action-list">{lis}</ul>'
-        "</section>"
-    )
-
-
-def related_pages_html(category: str) -> str:
-    fid = glossary_field_id(category)
-    hub_items: list[str] = []
-    hub_slugs = {
-        "law": ("law-subject", "賃管法令・制度の学習ハブ"),
-        "rights": ("rights-subject", "契約・実務の学習ハブ"),
-        "limit": ("limit-subject", "設備・税務・その他の学習ハブ"),
-    }
-    if fid and fid in hub_slugs:
-        slug, label = hub_slugs[fid]
-        hub_items.append(
-            f'<li><a href="../articles/{html.escape(slug)}/">'
-            f"{html.escape(label)}</a></li>"
-        )
-    return (
-        '<section class="q-block term-block" aria-labelledby="term-related-pages-h">'
-        '<h2 id="term-related-pages-h" class="q-h2">関連記事・次に読むページ</h2>'
-        '<ul class="term-related-pages">'
-        '<li><a href="index.html">用語解説一覧で関連語を探す</a></li>'
-        + "".join(hub_items)
-        + '<li><a href="../articles/index.html">試験ガイドで公式情報と学習手順を確認する</a></li>'
-        '<li><a href="../q/index.html">過去問一覧で出題形式を確認する</a></li>'
-        "</ul>"
-        "</section>"
-    )
-
-
-def compare_points_html(term: str, category: str, legal: str, related: str) -> str:
-    legal_text = legal or "関連する制度・根拠を本文で確認"
-    related_text = "、".join(split_semicolon(related)[:3]) or "関連用語とあわせて確認"
-    return (
-        '<section class="q-block term-block" aria-labelledby="term-sec-compare">'
-        '<h2 id="term-sec-compare" class="q-h2">比較して押さえるポイント</h2>'
-        '<div class="term-table-scroll"><table class="term-compare-table">'
-        "<thead><tr><th>観点</th><th>確認すること</th></tr></thead>"
-        "<tbody>"
-        f"<tr><td>意味</td><td>{html.escape(term)}が何を指す用語かを、ひとこと定義で確認します。</td></tr>"
-        f"<tr><td>分野</td><td>{html.escape(category or '関連分野')}の中で、どの制度・実務に関係するかを整理します。</td></tr>"
-        f"<tr><td>根拠</td><td>{html.escape(legal_text)}。年度や法改正が関係する内容は公式情報も確認します。</td></tr>"
-        f"<tr><td>関連語</td><td>{html.escape(related_text)}との違いを見比べると、選択肢の言い換えに対応しやすくなります。</td></tr>"
-        "</tbody>"
-        "</table></div>"
-        "</section>"
-    )
-
-
-def common_mistakes_html(term: str, category: str) -> str:
-    items = [
-        f"{term}の名称だけを暗記し、誰に対する義務・手続なのかを確認しない。",
-        f"{category or '関連分野'}の別制度と混同し、対象者・時期・効果を取り違える。",
-        "過去問の選択肢で言い換えられたときに、定義と根拠を結び付けて判断できない。",
-    ]
-    lis = "".join(f"<li>{html.escape(item)}</li>" for item in items)
-    return (
-        '<section class="q-block term-block" aria-labelledby="term-sec-mistakes">'
-        '<h2 id="term-sec-mistakes" class="q-h2">頻出の誤りと迷いやすい点</h2>'
-        f'<ul class="term-mistake-list">{lis}</ul>'
-        "</section>"
-    )
-
-
-def write_sitemap(urls: list[str], out: Path) -> None:
-    lines = [
-        '<?xml version="1.0" encoding="UTF-8"?>',
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-    ]
-    for u in sorted(set(urls)):
-        lines.append("  <url>")
-        lines.append(f"    <loc>{xml_escape(u)}</loc>")
-        lines.append("    <changefreq>monthly</changefreq>")
-        lines.append("  </url>")
-    lines.append("</urlset>")
-    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
-
-
-def collect_sitemap_urls(base: str) -> list[str]:
-    urls = [
-        f"{base}/",
-        f"{base}/about.html",
-        f"{base}/privacy.html",
-        f"{base}/related-sites.html",
-        f"{base}/articles/index.html",
-        f"{base}/q/index.html",
-    ]
-    qroot = ROOT / "q"
-    if qroot.is_dir():
-        for p in sorted(qroot.rglob("index.html")):
-            rel = p.relative_to(ROOT).as_posix()
-            urls.append(f"{base}/{rel}")
-    if (TERMS_DIR / "index.html").is_file():
-        urls.append(f"{base}/terms/index.html")
-    for p in sorted(TERMS_DIR.glob("g-*.html")):
-        rel = p.relative_to(ROOT).as_posix()
-        urls.append(f"{base}/{rel}")
-    guide_csv = ROOT / "data" / "guide_articles.csv"
-    if guide_csv.is_file():
-        import csv as _csv
-
-        for row in _csv.DictReader(guide_csv.read_text(encoding="utf-8-sig").splitlines()):
-            slug = norm(row.get("slug"))
-            if slug and (ROOT / "articles" / slug / "index.html").is_file():
-                urls.append(f"{base}/articles/{slug}/")
-    return urls
 
 
 def build_term_html(
@@ -538,7 +539,8 @@ def build_term_html(
     rel_path: Path,
     base_url: str,
     term_lookup: dict[str, str],
-    past_hits: list[dict] | None = None,
+    entries: list[dict],
+    guides: list[dict[str, str]],
 ) -> str:
     term = entry["term"]
     reading = entry["reading"]
@@ -551,68 +553,103 @@ def build_term_html(
     importance = entry["importance"]
     explanation = entry["explanation"]
     slug_file = entry["slug_file"]
+    article_title = norm(entry.get("article_title"))
+    article_lead = norm(entry.get("article_lead"))
+    term_detail_body = norm(entry.get("term_detail_body"))
+    exam_points = norm(entry.get("exam_points"))
+    common_mistakes = norm(entry.get("common_mistakes"))
+    memory_tip = norm(entry.get("memory_tip"))
+    example_question = norm(entry.get("example_question"))
+    example_answer = norm(entry.get("example_answer"))
 
-    title = f"{term}とは？意味・根拠・試験ポイント｜賃管マスター"
+    title = f"{article_title or term + 'とは？意味・根拠・試験ポイント'}｜{brand_name()}"
     desc = meta_description(
-        f"{term}（{reading}）の意味、法令・根拠、試験で押さえるポイントを賃貸不動産経営管理士向けに整理。{short_def or definition}"
+        f"{term}（{reading}）の意味、法令・根拠、試験で押さえるポイントを{exam_name()}向けに整理。{short_def or definition}"
     )
     canonical = public_url(base_url, f"terms/{slug_file}")
     root_idx = rel_to_root(rel_path)
     css_href = rel_css(rel_path)
-
-    imp_html = ""
-    if importance:
-        imp_html = f'<p class="term-imp"><span class="term-imp-label">重要度</span> {html.escape(importance)}</p>'
+    theme_href = rel_theme_css(rel_path)
 
     tags_list = split_semicolon(tags)
-    tags_html = ""
-    if tags_list:
-        tags_html = (
-            "<ul class=\"term-tags\">"
-            + "".join(f"<li>{html.escape(t)}</li>" for t in tags_list)
-            + "</ul>"
-        )
+    field_hub = entry.get("field_hub") or ""
+    rel_html = related_terms_html(
+        related, term_lookup, current=entry, entries=entries
+    )
+    guide_links = guide_related_link_items(category, guides)
 
-    rel_html = related_terms_html(related, term_lookup)
-
-    def block(sec_id: str, label: str, body: str) -> str:
+    def text_paragraphs(body: str) -> str:
         if not body.strip():
             return ""
-        hid = f"term-sec-{sec_id}"
-        b = html.escape(body).replace("\n", "<br>\n")
-        return (
-            f'<section class="q-block term-block" aria-labelledby="{hid}">'
-            f'<h2 id="{hid}" class="q-h2">{html.escape(label)}</h2>'
-            f'<div class="q-stem">{b}</div></section>'
-        )
+        paras = [p.strip() for p in re.split(r"\n{2,}", body.strip()) if p.strip()]
+        if not paras:
+            paras = [body.strip()]
+        return "\n".join(f"<p>{html.escape(p).replace(chr(10), '<br>')}</p>" for p in paras)
 
-    def raw_block(sec_id: str, label: str, body_html: str) -> str:
+    def article_section(sec_id: str, label: str, body_html: str, number: int | None = None) -> str:
         if not body_html.strip():
             return ""
         hid = f"term-sec-{sec_id}"
+        num_html = f'<span class="section-heading-num">{number}</span>' if number is not None else ""
+        section_class = "seo-article-section term-definition-section" if sec_id == "definition" else "seo-article-section"
         return (
-            f'<section class="q-block term-block" aria-labelledby="{hid}">'
-            f'<h2 id="{hid}" class="q-h2">{html.escape(label)}</h2>'
-            f'<div class="q-stem">{body_html}</div></section>'
+            f'<section class="{section_class}" aria-labelledby="{hid}">'
+            f'<h2 id="{hid}">{num_html}{html.escape(label)}</h2>'
+            f"{body_html}</section>"
         )
 
-    tags_wrap = ""
-    if tags_html:
-        tags_wrap = '<div class="term-tags-wrap"><span class="term-tags-label">タグ</span>' + tags_html + "</div>"
+    info_rows: list[tuple[str, str]] = [
+        ("対象試験", exam_name()),
+    ]
+    if category:
+        info_rows.append(("分野", category))
+    if importance:
+        info_rows.append(("重要度", importance))
+    if legal:
+        info_rows.append(("法令・根拠", " / ".join(split_semicolon(legal))))
+    if tags_list:
+        info_rows.append(("関連タグ", " / ".join(tags_list)))
+    info_table = ""
+    if info_rows:
+        info_table = (
+            '<section class="seo-article-section" aria-labelledby="article-info-title">'
+            '<h2 id="article-info-title">記事の基本情報</h2>'
+            '<table class="seo-info-table"><tbody>'
+            + "".join(
+                f"<tr><th>{html.escape(k)}</th><td>{html.escape(v)}</td></tr>"
+                for k, v in info_rows
+            )
+            + "</tbody></table></section>"
+        )
 
     rel_section = ""
     if rel_html:
-        rel_section = f'<section class="q-block term-block" aria-labelledby="term-related-h">{rel_html}</section>'
+        rel_section = (
+            '<div class="related-box" aria-labelledby="term-related-title"><div id="term-related-title" class="related-box-title">関連用語</div>'
+            f'<div class="related-links term-related-links">{rel_html}</div></div>'
+        )
 
     lead = (
         f"{term}は、{short_def.rstrip('。')}。"
-        f"賃貸不動産経営管理士試験では、{category}分野の用語として、意味・根拠・似た用語との違いをセットで押さえると理解しやすくなります。"
+        f"{exam_name()}では、{category}分野の用語として、意味・根拠・似た用語との違いをセットで押さえると理解しやすくなります。"
     )
     points = study_points(explanation)
     points_html = ""
-    if points:
+    if exam_points:
+        points_html = semicolon_list_html(exam_points)
+    elif points:
         points_html = '<ol class="term-point-list">' + "".join(f"<li>{html.escape(p)}</li>" for p in points) + "</ol>"
-    faq_items = faq_items_for_term(term, reading, short_def, definition, explanation)
+    detail_html = text_paragraphs(term_detail_body or definition)
+    mistakes_html = text_paragraphs(common_mistakes)
+    memory_html = f"<blockquote><p>{html.escape(memory_tip)}</p></blockquote>" if memory_tip else ""
+    example_html = ""
+    if example_question or example_answer:
+        example_html = (
+            '<div class="related-box"><div class="related-box-title">例題</div>'
+            f"<p><strong>問題：</strong>{html.escape(example_question)}</p>"
+            f"<p><strong>答え：</strong>{html.escape(example_answer)}</p></div>"
+        )
+    faq_items = custom_faq_items(entry, faq_items_for_term(term, reading, short_def, definition, explanation))
     faq_html = faq_section_html(faq_items)
 
     badge_html = glossary_field_badge_html(category)
@@ -623,56 +660,151 @@ def build_term_html(
         meta_bits.append(f"<span>{html.escape(category)}</span>")
     meta_line = " · ".join(meta_bits)
 
-    crumb_items = [
+    crumb_items: list[tuple[str, str | None]] = [
         ("トップ", "index.html"),
         ("用語解説一覧", "terms/index.html"),
-        (term, None),
     ]
-    page_header = site_page_header(rel_path, current="terms", breadcrumb_items=crumb_items)
+    if field_hub and category:
+        crumb_items.append((category, f"{field_hub}/index.html"))
+    crumb_items.append((term, None))
+    page_header = site_page_header(rel_path, current="terms")
+    page_breadcrumb = breadcrumb_html(rel_path, crumb_items)
     page_footer = site_page_footer(rel_path, current="terms")
 
-    app_glossary_href = f"{root_idx}#glossary"
+    updated = date.today().isoformat()
 
-    json_ld = {
-        "@context": "https://schema.org",
-        "@graph": [
+    quality_html = (
+        '<section class="seo-quality-panel" aria-labelledby="quality-panel-title">'
+        '<h2 id="quality-panel-title">この記事の信頼性について</h2>'
+        '<table class="seo-info-table"><tbody>'
+        f"<tr><th>執筆</th><td>{html.escape(brand_name())}編集部（学習用語、過去問の復習導線、試験ガイドを整理する編集チーム）</td></tr>"
+        f"<tr><th>確認</th><td>{html.escape(brand_name())}編集部（公開前に公式情報、法令情報、サイト内の関連ページとの整合性を確認）</td></tr>"
+        f"<tr><th>事実確認日</th><td>{html.escape(updated)}</td></tr>"
+    )
+
+    official_links = external_links() or [primary_external_link()]
+    quality_source_items = "".join(
+        f'<li><a href="{html.escape(link["url"])}" target="_blank" rel="noopener noreferrer">{html.escape(link["label"])}</a></li>'
+        for link in official_links
+    )
+    quality_html += f'<tr><th>主な参照元</th><td><ul class="quality-source-list">{quality_source_items}</ul></td></tr></tbody></table></section>'
+    official_items = "".join(
+        f'<li><a href="{html.escape(link["url"])}" target="_blank" rel="noopener noreferrer">{html.escape(link["label"])}</a>'
+        + (f' … {html.escape(link.get("description", ""))}' if link.get("description") else "")
+        + "</li>"
+        for link in official_links
+    )
+    official_html = (
+        '<section class="seo-article-section" aria-labelledby="official-info-title">'
+        '<h2 id="official-info-title">公式情報の確認</h2>'
+        f"<p>{html.escape(term)}は、{html.escape(exam_name())}の学習で押さえたい用語です。制度、数値、義務の有無は年度や法令改正で変わることがあるため、受験前には公式情報も確認してください。</p>"
+        f"<ul>{official_items}</ul>"
+        "<blockquote><p><strong>注意：</strong>"
+        "本ページは学習用の要点整理です。出題範囲・法令・公式見解は変更される場合があります。"
+        "本番前には必ず試験実施団体や法令原文などの公式情報を確認してください。"
+        "</p></blockquote></section>"
+    )
+
+    can_do_html = (
+        '<section class="seo-action-box" aria-labelledby="action-box-title">'
+        '<h2 id="action-box-title">この記事でできること</h2>'
+        f"<p>この記事では、{html.escape(term)}の基本的な意味を確認し、頻出ポイントや注意点を使って試験で迷いやすい部分を整理できます。読み終えたら、関連用語と過去問を合わせて確認し、知識を選択肢で使える状態に近づけてください。</p>"
+        '<ul>'
+        f"<li>{html.escape(term)}の定義と位置づけを確認する</li>"
+        "<li>試験で問われやすい条件や表現を整理する</li>"
+        "<li>頻出の誤り選択肢や混同しやすい点を復習する</li>"
+        "<li>関連する用語解説や過去問へ進む</li>"
+        "</ul></section>"
+    )
+
+    content_sections: list[str] = []
+    body_toc_items: list[tuple[str, str]] = []
+    for sec_id, label, body_html in [
+        ("summary", "まず押さえる要点", text_paragraphs(short_def)),
+        ("points", "試験で押さえるポイント", points_html),
+        ("definition", "定義と基本理解", detail_html),
+        ("legal", "法令・根拠", legal_basis_html(legal)),
+        ("exam", "選択肢で問われやすい点", text_paragraphs(explanation)),
+        ("mistakes", "よくある誤解・注意点", mistakes_html),
+        ("memory", "覚え方・整理のコツ", memory_html),
+        ("example", "例題で確認", example_html),
+    ]:
+        html_text = article_section(sec_id, label, body_html, len(content_sections) + 1)
+        if html_text:
+            content_sections.append(html_text)
+            body_toc_items.append((f"term-sec-{sec_id}", label))
+    content_sections_html = "\n    ".join(content_sections)
+
+    toc_items: list[tuple[str, str]] = [
+        ("quality-panel-title", "この記事の信頼性について"),
+        ("action-box-title", "この記事でできること"),
+        *body_toc_items,
+        ("term-sec-faq", "よくある質問"),
+        ("article-info-title", "記事の基本情報"),
+        ("official-info-title", "公式情報の確認"),
+    ]
+    if rel_section:
+        toc_items.append(("term-related-title", "関連用語"))
+    toc_items.append(("term-next-title", "次に確認するページ"))
+    toc_links = "".join(f'<li><a href="#{html.escape(anchor)}">{html.escape(label)}</a></li>' for anchor, label in toc_items)
+    toc_html = (
+        '<nav class="seo-toc" aria-labelledby="seo-toc-title">'
+        '<h2 id="seo-toc-title">目次</h2>'
+        f"<ol>{toc_links}</ol></nav>"
+    )
+
+    next_links = next_links_html(root_idx, field_hub or None, category, guide_links)
+
+    official_links_ld = external_links() or [primary_external_link()]
+    defined_term: dict = {
+        "@type": "DefinedTerm",
+        "@id": canonical + "#term",
+        "name": term,
+        "description": desc,
+        "url": canonical,
+        "inDefinedTermSet": public_url(base_url, "terms/index.html"),
+        "dateModified": updated,
+    }
+    if reading:
+        defined_term["alternateName"] = reading
+    if category:
+        defined_term["category"] = category
+    defined_term["author"] = {"@type": "Organization", "name": brand_name() + "編集部"}
+    citations = [link["url"] for link in official_links_ld if link.get("url")]
+    if citations:
+        defined_term["citation"] = citations
+    breadcrumb_items = [
+        {"@type": "ListItem", "position": 1, "name": "トップ", "item": public_url(base_url, "index.html")},
+        {"@type": "ListItem", "position": 2, "name": "用語解説", "item": public_url(base_url, "terms/index.html")},
+    ]
+    pos = 3
+    if field_hub and category:
+        breadcrumb_items.append(
             {
-                "@type": "DefinedTerm",
-                "@id": canonical + "#term",
-                "name": term,
-                "description": meta_description(definition or short_def, 300),
-                "inDefinedTermSet": public_url(base_url, "terms/index.html"),
-            },
-            {
-                "@type": "WebPage",
-                "@id": canonical + "#webpage",
-                "url": canonical,
-                "name": title,
-                "description": desc,
-                "inLanguage": "ja-JP",
-            },
-            {
-                "@type": "Article",
-                "@id": canonical + "#article",
-                "headline": title,
-                "description": desc,
-                "about": term,
-                "mainEntityOfPage": canonical,
-                "inLanguage": "ja-JP",
-                "isPartOf": public_url(base_url, "terms/index.html"),
-                "author": {"@type": "Organization", "name": AUTHOR_NAME},
-                "reviewedBy": {"@type": "Organization", "name": REVIEWER_NAME},
-                "dateModified": FACT_CHECKED_AT,
-                "citation": [url for _label, url in OFFICIAL_SOURCES],
-            },
-            {
-                "@type": "BreadcrumbList",
-                "itemListElement": [
-                    {"@type": "ListItem", "position": 1, "name": "トップ", "item": public_url(base_url, "index.html")},
-                    {"@type": "ListItem", "position": 2, "name": "用語解説", "item": public_url(base_url, "terms/index.html")},
-                    {"@type": "ListItem", "position": 3, "name": term, "item": canonical},
-                ],
-            },
+                "@type": "ListItem",
+                "position": pos,
+                "name": category,
+                "item": public_url(base_url, f"terms/{field_hub}/index.html"),
+            }
+        )
+        pos += 1
+    breadcrumb_items.append({"@type": "ListItem", "position": pos, "name": term, "item": canonical})
+    graph: list[dict] = [
+        defined_term,
+        {
+            "@type": "WebPage",
+            "@id": canonical + "#webpage",
+            "url": canonical,
+            "name": title,
+            "description": desc,
+            "inLanguage": "ja-JP",
+            "dateModified": updated,
+            "mainEntity": {"@id": canonical + "#term"},
+        },
+        {"@type": "BreadcrumbList", "itemListElement": breadcrumb_items},
+    ]
+    if faq_items:
+        graph.append(
             {
                 "@type": "FAQPage",
                 "@id": canonical + "#faq",
@@ -684,9 +816,9 @@ def build_term_html(
                     }
                     for item in faq_items
                 ],
-            },
-        ],
-    }
+            }
+        )
+    json_ld = {"@context": "https://schema.org", "@graph": graph}
 
     return f"""<!DOCTYPE html>
 <html lang="ja">
@@ -702,38 +834,126 @@ def build_term_html(
 <meta property="og:description" content="{html.escape(desc)}">
 <meta property="og:url" content="{html.escape(canonical)}">
 <meta name="twitter:card" content="summary">
-{HEAD_FONTS}
-<link rel="stylesheet" href="{html.escape(css_href)}">
 <script type="application/ld+json">
 {json.dumps(json_ld, ensure_ascii=False, indent=2)}
 </script>
+{HEAD_FONTS}
+<link rel="stylesheet" href="{html.escape(css_href)}">
+<link rel="stylesheet" href="{html.escape(theme_href)}">
 </head>
 <body>
 {site_page_wrap_open()}
 {page_header}
-<main class="site-page-main term-page-main">
-  <p class="q-meta">{meta_line}</p>
-  {imp_html}
-  <h1 class="q-h1">{html.escape(term)}<span class="term-reading">（{html.escape(reading)}）</span></h1>
-  <p class="term-lead">{html.escape(lead)}</p>
-  {tags_wrap}
-  {term_toc_html(bool(legal), bool(rel_html))}
-  {reliability_html()}
-  {action_items_html(term, category)}
-  {block("short", "ひとこと", short_def)}
-  {raw_block("points", "試験で押さえるポイント", points_html)}
-  {compare_points_html(term, category, legal, related)}
-  {block("def", "定義", definition)}
-  {raw_block("legal", "法令・根拠", legal_basis_html(legal))}
-  {block("exam", "試験で押さえる", explanation)}
-  {common_mistakes_html(term, category)}
-  {raw_block("faq", "よくある質問", faq_html)}
-  {article_basic_html(category, importance)}
-  {official_info_html()}
-  {rel_section}
-  {related_past_questions_html(term, category, rel_path, past_hits or [])}
-  {related_pages_html(category)}
-  <p class="q-app-link"><a href="{html.escape(app_glossary_href)}">アプリで用語解説を開く</a></p>
+<main class="seo-article-main">
+  {page_breadcrumb}
+  <article class="seo-article-card article-body">
+    <div class="article-meta">
+      <span class="meta-category">用語解説</span>
+      <span class="meta-updated">更新日：{html.escape(updated)}</span>
+      <span class="meta-updated">{meta_line}</span>
+    </div>
+    <h1 class="article-title">{html.escape(article_title or term + 'とは？意味・根拠・試験ポイントを整理')}</h1>
+    <p class="article-lead"><strong>{html.escape(term)}</strong>{f"（{html.escape(reading)}）" if reading else ""}について、定義・根拠・試験での押さえ方をまとめます。{html.escape(article_lead or lead)}</p>
+    {toc_html}
+    {quality_html}
+    {can_do_html}
+    {content_sections_html}
+    {article_section("faq", "よくある質問", faq_html)}
+    {info_table}
+    {official_html}
+    {rel_section}
+    {next_links}
+  </article>
+</main>
+{page_footer}
+{site_page_wrap_close()}
+</body>
+</html>
+"""
+
+
+
+def build_field_hub_html(
+    category: str,
+    field_slug: str,
+    cat_entries: list[dict],
+    base_url: str,
+) -> str:
+    rel_path = Path("terms") / field_slug / "index.html"
+    updated = date.today().isoformat()
+    canonical = public_url(base_url, f"terms/{field_slug}/index.html")
+    title = f"{category}の用語一覧｜{brand_name()}（{exam_name()}）"
+    desc = meta_description(
+        f"{exam_name()}の{category}分野に関する用語を一覧し、各用語の解説記事へリンクします。"
+    )
+    lis = [
+        f'    <li><a href="../{html.escape(e["slug_file"])}">{html.escape(e["term"])}</a></li>'
+        for e in sorted(cat_entries, key=lambda x: x["term"])
+    ]
+    list_html = "\n".join(lis)
+    crumb_items = [
+        ("トップ", "index.html"),
+        ("用語解説一覧", "terms/index.html"),
+        (category, None),
+    ]
+    page_header = site_page_header(rel_path, current="terms")
+    page_breadcrumb = breadcrumb_html(rel_path, crumb_items)
+    page_footer = site_page_footer(rel_path, current="terms")
+    ld = {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "CollectionPage",
+                "@id": canonical + "#collection",
+                "name": title,
+                "description": desc,
+                "url": canonical,
+                "dateModified": updated,
+                "inLanguage": "ja-JP",
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {"@type": "ListItem", "position": 1, "name": "トップ", "item": public_url(base_url, "index.html")},
+                    {"@type": "ListItem", "position": 2, "name": "用語解説", "item": public_url(base_url, "terms/index.html")},
+                    {"@type": "ListItem", "position": 3, "name": category, "item": canonical},
+                ],
+            },
+        ],
+    }
+    return f"""<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{html.escape(title)}</title>
+<meta name="description" content="{html.escape(desc)}">
+{ROBOTS_INDEX_FOLLOW}
+<link rel="canonical" href="{html.escape(canonical)}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{html.escape(title)}">
+<meta property="og:description" content="{html.escape(desc)}">
+<meta property="og:url" content="{html.escape(canonical)}">
+<script type="application/ld+json">
+{json.dumps(ld, ensure_ascii=False, indent=2)}
+</script>
+{HEAD_FONTS}
+<link rel="stylesheet" href="{html.escape(rel_css(rel_path))}">
+<link rel="stylesheet" href="{html.escape(rel_theme_css(rel_path))}">
+</head>
+<body>
+{site_page_wrap_open()}
+{page_header}
+<main class="site-page-main terms-idx-main">
+  {page_breadcrumb}
+  <h1 class="terms-idx-page-title">{html.escape(category)}の用語一覧</h1>
+  <p class="terms-idx-lead">{html.escape(exam_name())}の{html.escape(category)}分野で押さえたい用語をまとめています。各リンクから用語の意味・試験ポイント・関連用語を確認できます。</p>
+  <p class="terms-idx-lead"><a href="../index.html">用語解説一覧（全分野）</a>へ戻る</p>
+  <section class="terms-idx-panel" aria-label="{html.escape(category)}の用語一覧">
+    <ul class="terms-idx-list">
+{list_html}
+    </ul>
+  </section>
 </main>
 {page_footer}
 {site_page_wrap_close()}
@@ -750,32 +970,31 @@ def build_terms_index(entries: list[dict], base_url: str) -> str:
         by_cat[c].sort(key=lambda x: x["term"])
 
     cat_keys = ordered_term_categories(by_cat)
-    body_sections: list[str] = []
-    for i, cat in enumerate(cat_keys):
-        lis = []
+    n_terms = len(entries)
+    n_cats = len(cat_keys)
+
+    seo_links: list[str] = []
+    for cat in cat_keys:
         for e in by_cat[cat]:
-            href = e["slug_file"]
-            lis.append(
-                f'    <li><a href="{html.escape(href)}">{html.escape(e["term"])}</a></li>'
+            seo_links.append(
+                f'<li><a href="{html.escape(e["slug_file"])}">{html.escape(e["term"])}</a></li>'
             )
-        hid = f"terms-idx-cat-{i}"
-        body_sections.append(
-            f'<section class="terms-idx-cat" aria-labelledby="{hid}">\n'
-            f'  <h2 id="{hid}">{html.escape(cat)}</h2>\n'
-            f'  <ul class="terms-idx-list">\n'
-            + "\n".join(lis)
-            + "\n  </ul>\n</section>"
-        )
-    body_html = "\n".join(body_sections)
+    seo_html = (
+        '<ul class="terms-idx-seo-list">\n    '
+        + "\n    ".join(seo_links)
+        + "\n  </ul>"
+    )
 
     chip_lines = [
-        '    <button type="button" class="terms-idx-chip on" data-cat="all">すべて</button>'
+        '    <button type="button" class="terms-idx-chip on" data-cat="all">すべて<b>'
+        f"{n_terms}</b></button>"
     ]
     for cat in cat_keys:
+        count = len(by_cat[cat])
         chip_lines.append(
             "    "
             f'<button type="button" class="terms-idx-chip" data-cat="{html.escape(cat, quote=True)}">'
-            f"{html.escape(cat)}</button>"
+            f"{html.escape(cat)}<b>{count}</b></button>"
         )
     chips_html = "\n".join(chip_lines)
 
@@ -795,80 +1014,31 @@ def build_terms_index(entries: list[dict], base_url: str) -> str:
     ld = {
         "@context": "https://schema.org",
         "@type": "ItemList",
-        "name": "賃貸不動産経営管理士試験 用語解説一覧",
+        "name": f"{exam_name()} 用語解説一覧",
         "description": "試験で出やすい用語ごとの解説記事への索引です。",
-        "numberOfItems": len(entries),
+        "numberOfItems": n_terms,
         "itemListElement": list_items_ld,
     }
     ld_json = json.dumps(ld, ensure_ascii=False, indent=2)
-
-    n_terms = len(entries)
-    terms_idx_script = f"""<script>
-(() => {{
-  try {{ if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; }} catch (_e) {{}}
-  window.scrollTo(0, 0);
-  const q = document.getElementById('terms-idx-q');
-  const chips = Array.from(document.querySelectorAll('.terms-idx-chip[data-cat]'));
-  const cats = Array.from(document.querySelectorAll('.terms-idx-cat'));
-  const totalEl = document.getElementById('terms-idx-total');
-  const hitEl = document.getElementById('terms-idx-hit');
-  let activeCat = 'all';
-  function norm(s) {{
-    return (s || '').toString().trim().toLowerCase();
-  }}
-  function apply() {{
-    const query = norm(q.value);
-    let shown = 0;
-    cats.forEach((sec) => {{
-      const cat = sec.querySelector('h2')?.textContent || '';
-      const catOk = activeCat === 'all' || cat === activeCat;
-      const items = Array.from(sec.querySelectorAll('li'));
-      let anyInCat = 0;
-      items.forEach((li) => {{
-        const a = li.querySelector('a');
-        const t = norm(a?.textContent || '');
-        const ok = catOk && (!query || t.includes(query));
-        li.classList.toggle('hide', !ok);
-        if (ok) {{
-          anyInCat++;
-          shown++;
-        }}
-      }});
-      sec.classList.toggle('hide', anyInCat === 0);
-    }});
-    if (totalEl) totalEl.textContent = String({n_terms});
-    if (hitEl) {{
-      hitEl.textContent =
-        (query || activeCat !== 'all') ? '表示：' + shown + '件' : '';
-    }}
-  }}
-  q.addEventListener('input', apply);
-  chips.forEach((btn) => {{
-    btn.addEventListener('click', () => {{
-      chips.forEach((b) => b.classList.remove('on'));
-      btn.classList.add('on');
-      activeCat = btn.dataset.cat || 'all';
-      apply();
-    }});
-  }});
-  apply();
-}})();
-</script>"""
+    json_data = json.dumps(
+        [terms_index_item_dict(e) for e in entries], ensure_ascii=False
+    )
+    tbody_html = render_terms_index_tbody(entries)
 
     idx_path = Path("terms/index.html")
-    terms_header = site_page_header(
-        idx_path,
-        current="terms",
-        breadcrumb_items=[("トップ", "index.html"), ("用語解説一覧", None)],
-        wide=True,
-    )
+    terms_header = site_page_header(idx_path, current="terms", wide=True)
     terms_footer = site_page_footer(idx_path, current="terms", wide=True)
+    page_breadcrumb = breadcrumb_html(idx_path, [("トップ", "index.html"), ("用語解説", None)])
 
     canonical = public_url(base_url, "terms/index.html")
-    title = "用語解説一覧（全記事索引）｜賃管マスター（賃貸不動産経営管理士）"
+    title = f"用語解説｜{brand_name()}（{exam_name()}）"
     desc = (
-        "賃貸不動産経営管理士試験の重要用語を一覧し、各用語の解説記事へリンクします。"
-        "賃管法令・契約実務・設備税務などの語句を整理しています。"
+        f"{exam_name()}の重要用語を一覧し、各用語の解説記事へリンクします。"
+        "分野別に整理し、検索と絞り込みで目的の語句を探せます。"
+    )
+    lead = (
+        f"{exam_name()}の試験で押さえたい重要用語を、分野別にまとめています。"
+        "検索と分野の絞り込みで目的の用語を探し、各解説記事で意味や試験での使い方を確認できます。"
     )
     return f"""<!DOCTYPE html>
 <html lang="ja">
@@ -882,47 +1052,74 @@ def build_terms_index(entries: list[dict], base_url: str) -> str:
 <meta property="og:type" content="website">
 <meta property="og:url" content="{html.escape(canonical)}">
 <meta property="og:title" content="{html.escape(title)}">
-<meta property="og:description" content="試験で出やすい用語ごとの解説記事への索引です。">
+<meta property="og:description" content="{html.escape(desc)}">
 <meta property="og:locale" content="ja_JP">
 <script type="application/ld+json">
 {ld_json}
 </script>
 {HEAD_FONTS}
-<link rel="stylesheet" href="../site-pages.css?v=20260515-topgray">
+<link rel="stylesheet" href="../site-pages.css?v={TERMS_INDEX_CSS_VER}">
+<link rel="stylesheet" href="../site-theme.css">
+<script>document.documentElement.classList.add("js");</script>
 </head>
-<body>
+<body class="terms-index-page" data-terms-total="{n_terms}">
 {site_page_wrap_open()}
 {terms_header}
-<main class="site-page-main terms-idx-main">
-  <h1 class="terms-idx-page-title">用語解説一覧（全記事索引）</h1>
-  <p class="terms-idx-lead">賃貸不動産経営管理士試験で頻出の用語を分野別にまとめ、各用語の解説記事（静的HTML）へ直接リンクします。上の検索・分野フィルタで目的の用語に素早く到達できます。演習アプリ内の<strong><a href="../index.html#glossary">用語解説</a></strong>では検索や折りたたみカードも利用できます。</p>
-
-  <div class="terms-idx-meta-row">
-    <span class="terms-idx-pill">全 <span id="terms-idx-total">{n_terms}</span> 記事</span>
-    <div class="terms-idx-search" role="search" aria-label="用語検索">
-      <input id="terms-idx-q" type="search" inputmode="search" placeholder="例：定期借家、原状回復、賃貸住宅管理業法…" autocomplete="off">
+<main class="site-page-main">
+  {page_breadcrumb}
+  <h1>用語解説</h1>
+  <p class="site-page-lead">{html.escape(lead)}</p>
+  <section class="terms-index-panel" aria-labelledby="terms-index-heading">
+    <div class="terms-index-head">
+      <div>
+        <h2 id="terms-index-heading">用語一覧</h2>
+        <p>全{n_terms}語・{n_cats}分野。キーワード検索と分野で絞り込めます。</p>
+      </div>
+      <span id="terms-idx-hit" class="terms-index-hit" aria-live="polite">{n_terms} / {n_terms} 語</span>
     </div>
-  </div>
-
-  <div class="terms-idx-chips" aria-label="分野フィルタ">
+    <div class="terms-index-tools">
+      <label class="terms-index-search" for="terms-idx-q">
+        <span>用語検索</span>
+        <input id="terms-idx-q" type="search" inputmode="search" autocomplete="off" placeholder="例：過去問、合格基準、復習…">
+      </label>
+      <div class="terms-idx-chips" aria-label="分野フィルタ">
 {chips_html}
-  </div>
-
-  <section class="terms-idx-panel" aria-label="用語一覧">
-{body_html}
-    <div class="terms-idx-panel-footer">
-      <span id="terms-idx-hit"></span>
-      <div class="terms-idx-panel-footer-app">学習アプリ本体は <a href="../index.html">トップ</a> から利用できます。</div>
+      </div>
+      <button type="button" class="terms-idx-reset hide" id="terms-idx-reset">条件をクリア</button>
+      <div class="terms-idx-active-filters hide" id="terms-idx-active-filters" aria-live="polite"></div>
+    </div>
+    <div class="terms-idx-empty-panel hide" id="terms-idx-empty" role="status" hidden>
+      <p class="terms-idx-empty-title">条件に一致する用語がありません</p>
+      <p class="terms-idx-empty-hint">検索語を短くするか、分野を「すべて」に戻してお試しください。</p>
+      <button type="button" class="terms-idx-reset" id="terms-idx-empty-reset">条件をクリア</button>
+    </div>
+    <div class="terms-idx-layout" aria-label="用語一覧">
+      <div class="terms-idx-table-wrap">
+        <table class="terms-idx-table">
+          <thead><tr>
+            <th scope="col" class="terms-idx-th-term">用語（よみ）</th>
+            <th scope="col" class="terms-idx-th-cat">分野</th>
+            <th scope="col" class="terms-idx-th-def">定義（抜粋）</th>
+          </tr></thead>
+          <tbody id="terms-idx-flat-body">
+{tbody_html}
+          </tbody>
+        </table>
+      </div>
+      <div class="terms-idx-seo-fallback" aria-hidden="true" hidden>
+{seo_html}
+      </div>
     </div>
   </section>
 </main>
 {terms_footer}
 {site_page_wrap_close()}
-{terms_idx_script}
+<button type="button" class="terms-idx-top" id="terms-idx-top" aria-label="ページ上部へ">↑</button>
+<script type="application/json" id="terms-index-data">{json_data}</script>
+<script defer src="../site-terms-index.js?v={TERMS_INDEX_JS_VER}"></script>
 </body>
 </html>
 """
-
 
 def load_glossary_rows() -> list[dict]:
     if not GLOSSARY_CSV.is_file():
@@ -960,34 +1157,59 @@ def main() -> int:
                 "legal_basis": norm(row.get("legal_basis")),
                 "importance": norm(row.get("importance")),
                 "explanation": norm(row.get("explanation")),
+                "article_title": norm(row.get("article_title")),
+                "article_lead": norm(row.get("article_lead")),
+                "term_detail_body": norm(row.get("term_detail_body")),
+                "exam_points": norm(row.get("exam_points")),
+                "common_mistakes": norm(row.get("common_mistakes")),
+                "memory_tip": norm(row.get("memory_tip")),
+                "example_question": norm(row.get("example_question")),
+                "example_answer": norm(row.get("example_answer")),
+                "faq_1_question": norm(row.get("faq_1_question")),
+                "faq_1_answer": norm(row.get("faq_1_answer")),
+                "faq_2_question": norm(row.get("faq_2_question")),
+                "faq_2_answer": norm(row.get("faq_2_answer")),
+                "faq_3_question": norm(row.get("faq_3_question")),
+                "faq_3_answer": norm(row.get("faq_3_answer")),
                 "slug_file": slug_file,
+                "field_hub": field_hub_slug(norm(row.get("category"))),
             }
         )
 
     term_lookup = make_term_lookup(entries)
-    past_index = build_term_past_index(entries)
+    guides = load_guide_slugs()
 
     TERMS_DIR.mkdir(parents=True, exist_ok=True)
     for stale in TERMS_DIR.glob("g-*.html"):
         stale.unlink()
+    for stale in TERMS_DIR.glob("field-*"):
+        if stale.is_dir():
+            shutil.rmtree(stale)
 
     for e in entries:
         out_file = TERMS_DIR / e["slug_file"]
         rel_path = out_file.relative_to(ROOT)
-        hits = past_index.get(e["term"], [])
-        out_file.write_text(
-            build_term_html(e, rel_path, base, term_lookup, past_hits=hits),
+        out_file.write_text(build_term_html(e, rel_path, base, term_lookup, entries, guides), encoding="utf-8")
+
+    by_cat: dict[str, list[dict]] = {}
+    for e in entries:
+        by_cat.setdefault(e["category"] or "その他", []).append(e)
+    hub_count = 0
+    for cat in ordered_term_categories(by_cat):
+        hub = field_hub_slug(cat)
+        hub_dir = TERMS_DIR / hub
+        hub_dir.mkdir(parents=True, exist_ok=True)
+        (hub_dir / "index.html").write_text(
+            build_field_hub_html(cat, hub, by_cat[cat], base),
             encoding="utf-8",
         )
+        hub_count += 1
 
     (TERMS_DIR / "index.html").write_text(build_terms_index(entries, base), encoding="utf-8")
 
-    urls = collect_sitemap_urls(base)
-    write_sitemap(urls, ROOT / "sitemap.xml")
-
     print(f"Wrote {len(entries)} term pages under {TERMS_DIR}")
+    print(f"Wrote {hub_count} field hub pages under {TERMS_DIR}/field-*/")
     print(f"Wrote {TERMS_DIR / 'index.html'}")
-    print(f"Updated {ROOT / 'sitemap.xml'} ({len(set(urls))} URLs)")
     return 0
 
 
