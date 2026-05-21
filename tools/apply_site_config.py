@@ -70,7 +70,7 @@ def replace_all(text: str) -> str:
     if orig_nav_label == "実践演習":
         replacements.extend(
             [
-                (">オリジナル問題<", ">実践演習<"),
+                ("オリジナル問題", "実践演習"),
                 ("オリジナル演習", "実践演習"),
                 ("単元別問題データ", "実践演習データ"),
             ]
