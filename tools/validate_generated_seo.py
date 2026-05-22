@@ -92,8 +92,16 @@ class GeneratedSeoValidator:
             self.warn(path, "本番サイトでは example.com の公式リンクを実URLに差し替えてください")
 
     def pages(self) -> list[Path]:
-        article_pages = sorted((ROOT / "articles").glob("*/index.html"))
-        term_pages = sorted((ROOT / "terms").glob("g-*.html"))
+        article_pages = sorted(
+            p
+            for p in (ROOT / "articles").glob("*/index.html")
+            if p.parent.name != "chapters"
+        )
+        term_pages = sorted(
+            p
+            for p in (ROOT / "terms").glob("*.html")
+            if p.name != "index.html"
+        )
         return article_pages + term_pages
 
     def run(self) -> int:

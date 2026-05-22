@@ -175,8 +175,8 @@ def main() -> int:
         objs.append(o)
         y = o["year"]
         wl = norm(row.get("exam_wareki"))
-        if y not in year_labels and wl:
-            year_labels[y] = wl if y > 9999 else f"{wl}（{y}年）"
+        if y not in year_labels:
+            year_labels[y] = f"{y}年"
 
     practice_objs = load_practice_questions()
     write_practice_js(practice_objs)

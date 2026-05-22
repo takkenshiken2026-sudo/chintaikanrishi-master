@@ -59,6 +59,7 @@ class InternalLinkValidator:
             ROOT / "index.html",
             ROOT / "about.html",
             ROOT / "privacy.html",
+            ROOT / "privacy-terms.html",
             ROOT / "related-sites.html",
         ]
         for base in roots:
@@ -86,7 +87,9 @@ class InternalLinkValidator:
         path_part, fragment = urldefrag(href)
         if self.is_external(path_part or href):
             return None, fragment
-        if path_part.startswith("/"):
+        if path_part in ("/", ""):
+            target = (ROOT / "index.html").resolve()
+        elif path_part.startswith("/"):
             target = (ROOT / path_part.lstrip("/")).resolve()
         elif path_part:
             target = (page.parent / path_part).resolve()

@@ -23,6 +23,7 @@
   const toolbar = document.querySelector('.terms-index-tools');
   const topBtn = document.getElementById('terms-idx-top');
   const flatBody = document.getElementById('terms-idx-flat-body');
+  const TERMS_INDEX_BASE = '/terms/';
 
   let activeCat = 'all';
   let urlSyncTimer = null;
@@ -109,10 +110,17 @@
     });
   }
 
+  function resolveEntryHref(href) {
+    if (!href) return href;
+    if (/^https?:\/\//i.test(href) || href.startsWith('/')) return href;
+    return `${TERMS_INDEX_BASE}${String(href).replace(/^\.\//, '')}`;
+  }
+
   function rowHtml(item, query) {
-    const hrefAttr = ` data-entry-href="${escapeHtml(item.href)}"`;
+    const href = resolveEntryHref(item.href);
+    const hrefAttr = ` data-entry-href="${escapeHtml(href)}"`;
     return `<tr class="terms-idx-table-row">
-<td class="terms-idx-td-term" data-label="用語"${hrefAttr} tabindex="0"><div class="terms-idx-term-cell"><a href="${escapeHtml(item.href)}">${highlightText(item.term, query)}</a></div></td>
+<td class="terms-idx-td-term" data-label="用語"${hrefAttr} tabindex="0"><div class="terms-idx-term-cell"><a href="${escapeHtml(href)}">${highlightText(item.term, query)}</a></div></td>
 <td class="terms-idx-td-cat" data-label="分野"${hrefAttr}>${escapeHtml(item.category)}</td>
 <td class="terms-idx-td-snippet" data-label="定義（抜粋）"${hrefAttr}>${item.shortDef ? highlightText(item.shortDef, query) : ''}</td>
 </tr>`;
@@ -121,7 +129,8 @@
   function bindRows() {
     if (!flatBody) return;
     const go = (href) => {
-      if (href) window.location.href = href;
+      const target = resolveEntryHref(href);
+      if (target) window.location.href = target;
     };
     flatBody.querySelectorAll('[data-entry-href]').forEach((cell) => {
       if (cell.dataset.bound) return;
@@ -193,7 +202,7 @@
       if (query) params.set('q', query);
       if (activeCat !== 'all') params.set('cat', activeCat);
       const qs = params.toString();
-      const next = qs ? `${location.pathname}?${qs}` : location.pathname;
+      const next = qs ? `${TERMS_INDEX_BASE}?${qs}` : TERMS_INDEX_BASE;
       history.replaceState(null, '', next);
     }, 200);
   }

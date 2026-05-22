@@ -116,9 +116,6 @@ def page_heading(page: dict) -> str:
 
 
 def page_context_line(page: dict) -> str:
-    wareki = norm(page.get("wareki"))
-    if wareki:
-        return f"{wareki} · {page['category']}"
     return f"{page['year']}年 · {page['category']}"
 
 
@@ -129,15 +126,14 @@ def page_title_seo(page: dict) -> str:
 def page_meta_description(page: dict) -> str:
     stem = norm(page.get("stem_plain"))
     lead = (
-        f"{exam_name()}の{page['year']}年"
-        f"（{page['wareki']}）過去問 第{page['qno']}問・{page['category']}。"
+        f"{exam_name()}の{page['year']}年過去問 第{page['qno']}問・{page['category']}。"
     )
     if stem:
         return meta_description(lead + stem, 155)
     return meta_description(lead + "選択肢と解説を掲載しています。", 155)
 
 
-Q_INDEX_CSS_VER = "20260521-index-layout"
+Q_INDEX_CSS_VER = "20260521-index-slim"
 
 GLOSSARY_CSV = ROOT / "data" / "glossary_terms.csv"
 
@@ -164,7 +160,22 @@ def q_index_filter_chip_btn(
 
 
 def parse_tags(raw: str) -> list[str]:
-    return [t.strip() for t in re.split(r"[,、/|]", raw) if t.strip()]
+    """CSV tags（; 区切りが多い）。一覧表示用の内部タグは除外。"""
+    skip_prefixes = ("otsu4-sample-", "kikenbutsu_", "p")
+    skip_exact = {"過去問", "乙4", "要確認"}
+    out: list[str] = []
+    for t in re.split(r"[,、/|;]+", raw or ""):
+        t = t.strip()
+        if not t or t in skip_exact:
+            continue
+        if any(t.startswith(p) for p in skip_prefixes if p != "p"):
+            continue
+        if re.fullmatch(r"p\d+", t):
+            continue
+        if t.endswith(".pdf"):
+            continue
+        out.append(t)
+    return out
 
 
 def load_glossary_lookup() -> dict[str, str]:
@@ -179,9 +190,15 @@ def load_glossary_lookup() -> dict[str, str]:
         term = norm(row.get("term"))
         if not term:
             continue
-        reading = norm(row.get("reading"))
-        slug = term_slug(term, reading, used)
-        entries.append({"term": term, "reading": reading, "slug_file": f"{slug}.html"})
+        legacy_slug = norm(row.get("slug"))
+        if legacy_slug:
+            slug_file = f"{legacy_slug}.html"
+            if slug_file in used:
+                raise ValueError(f"glossary_terms.csv: slug が重複しています: {legacy_slug}")
+            used[slug_file] = term
+        else:
+            slug_file = f"{term_slug(term, used)}.html"
+        entries.append({"term": term, "slug_file": slug_file})
     lookup = make_term_lookup(entries)
     return {k: f"../terms/{v}" for k, v in lookup.items()}
 
@@ -250,6 +267,8 @@ def build_index_table_row(page: dict) -> str:
         f'<td class="q-year-table-desc" data-label="問題文">{preview_cell}</td>'
         "</tr>"
     )
+
+
 
 
 def rel_to_root(rel_file: Path) -> str:
@@ -369,6 +388,31 @@ CHINTAIKAN_STUDY_HINTS: dict[str, str] = {
 
 CATEGORY_STUDY_HINTS: dict[str, str] = {
     **CHINTAIKAN_STUDY_HINTS,
+    "基礎・役割": (
+        "管理監督者の役割・法令の趣旨・ストレスの基礎知識は、用語の定義と"
+        "「誰が・何を・どこまで」がセットで出題されます。間違えた肢は正答との"
+        "違い（根拠法令・対象範囲・責任の所在）をメモし、関連用語から解き直すと定着します。"
+    ),
+    "職場環境・配慮": (
+        "職場の配慮・リスク要因の問題は、具体策と「誰が担うか」を対にして覚えると得点しやすくなります。"
+        "数値基準や手順は表に整理し、同年の過去問で実務イメージを補強してください。"
+    ),
+    "相談・連携・復職": (
+        "面談・医療連携・復職支援は手順と禁止事項（やってはいけないこと）の区別が重要です。"
+        "正答肢のキーワードを用語解説で確認してから、同分野の過去問に戻ると理解が深まります。"
+    ),
+    "関係法令": (
+        "法令・制度は条文の趣旨と数字・期限をセットで覚えると得点しやすくなります。"
+        "関連用語は用語解説で押さえてから同年の過去問に戻ると定着しやすくなります。"
+    ),
+    "労働衛生": (
+        "衛生・安全の問題は用語の定義と数値基準の組み合わせが多いです。"
+        "間違えた問題は復習リストに残し、用語解説で意味を確認しながら解き直してください。"
+    ),
+    "労働生理": (
+        "生理・人体の問題は図解と用語の対応づけが有効です。"
+        "分野別の用語一覧から関連語をたどると理解が深まります。"
+    ),
     "法令・制度": (
         "試験制度は年度で見直されることがあります。受験要項や公式発表を定期的に確認し、"
         "関連用語は用語解説で意味を押さえてから過去問に戻ると定着しやすくなります。"
@@ -624,9 +668,10 @@ def build_related_links_html(
             continue
         pg = pages_by_key.get((y, other_q))
         if pg:
+            ylabel = pg.get("year_label") or pg.get("wareki") or f"{y}年"
             add_auto(
                 rel_href(rel_path, pg["rel_path"]),
-                f"{y}年 第{other_q}問",
+                f"{ylabel} 第{other_q}問",
             )
 
     for gl in glossary_links_for_tags(page.get("tags") or [], glossary_lookup):
@@ -812,7 +857,7 @@ def build_question_html(
 {json.dumps(json_ld, ensure_ascii=False, indent=2)}
 </script>
 </head>
-<body>
+<body class="q-static-page">
 {site_page_wrap_open()}
 {site_header}
 <main class="q-static-main">
@@ -873,16 +918,19 @@ def build_q_index(pages: list[dict], base_url: str) -> str:
     year_jump_links = []
     for y in sorted_years:
         rows_html = "".join(build_index_table_row(pg) for pg in by_year[y])
-        heading = (
-            by_year[y][0]["wareki"]
+        sample = by_year[y][0]
+        year_label = norm(sample.get("year_label") or "")
+        heading = year_label or (
+            sample["wareki"]
             if y > 9999
-            else f"{y}年（{by_year[y][0]['wareki']}）"
+            else f"{y}年（{sample['wareki']}）"
         )
+        jump_label = year_label or (f"{y}年" if y <= 9999 else sample["wareki"])
         expanded = "true" if y in open_years else "false"
         collapsed = "" if y in open_years else " is-collapsed"
         year_jump_links.append(
             f'<a class="q-index-filter-opt q-index-year-link" href="#year-{y}" data-year="{y}">'
-            f'{html.escape(f"{y}年")}<span class="q-index-filter-count">（{len(by_year[y])}）</span></a>'
+            f'{html.escape(jump_label)}<span class="q-index-filter-count">（{len(by_year[y])}）</span></a>'
         )
         year_blocks.append(
             f'<section class="q-index-year-block{collapsed}" id="year-{y}">'

@@ -72,9 +72,9 @@ def collect_entries(base: str) -> list[SitemapEntry]:
     terms_root = ROOT / "terms"
     if terms_root.is_dir():
         add_file(entries, base, "terms/index.html")
-        for path in sorted(terms_root.glob("g-*.html")):
+        for path in sorted(terms_root.glob("*/index.html")):
             add_file(entries, base, path.relative_to(ROOT).as_posix())
-        for path in sorted(terms_root.glob("field-*/index.html")):
+        for path in sorted(terms_root.glob("g-*.html")):
             add_file(entries, base, path.relative_to(ROOT).as_posix())
 
     return entries

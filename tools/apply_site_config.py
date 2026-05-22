@@ -174,16 +174,20 @@ def update_index_shell_footer(text: str) -> str:
 
 def update_index_brand_mark(text: str) -> str:
     mark = html.escape(brand_mark())
+
+    def _inject_mark(m: re.Match[str]) -> str:
+        return f"{m.group(1)}{mark}{m.group(3)}"
+
     text = re.sub(
         r'(<div class="topnav-logo-mark"[^>]*>)(.*?)(</div>)',
-        rf"\1{mark}\3",
+        _inject_mark,
         text,
         count=1,
         flags=re.S,
     )
     text = re.sub(
         r'(<span class="site-footer-logo-mark"[^>]*>)(.*?)(</span>)',
-        rf"\1{mark}\3",
+        _inject_mark,
         text,
         count=1,
         flags=re.S,
