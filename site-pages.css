@@ -2830,11 +2830,6 @@ html:not(.js) .terms-idx-seo-fallback .terms-idx-seo-list a {
   .terms-idx-table-duo .terms-idx-slot-b.terms-idx-td-term:not(.terms-idx-cell-empty) {
     border-top: 10px solid color-mix(in srgb, var(--bg2) 70%, var(--bg));
   }
-  .terms-idx-table-duo .terms-idx-reading::before {
-    content: "よみ：";
-    color: var(--text3);
-    margin-right: 2px;
-  }
   .terms-idx-table-duo .terms-idx-td-cat::before {
     content: "分野：";
     color: var(--text3);
@@ -4283,10 +4278,6 @@ html:not(.js) .terms-idx-seo-fallback .terms-idx-seo-list a {
   }
   .terms-idx-table:not(.terms-idx-table-duo) .terms-idx-td-term a {
     color: var(--accent-emphasis);
-  }
-  .terms-idx-table:not(.terms-idx-table-duo) .terms-idx-reading::before {
-    content: "よみ：";
-    color: var(--text3);
   }
   .terms-idx-table:not(.terms-idx-table-duo) .terms-idx-td-cat::before {
     content: "分野：";

@@ -544,7 +544,10 @@ def build_term_html(
     article_title = norm(entry.get("article_title"))
     article_lead = norm(entry.get("article_lead"))
     term_detail_body = norm(entry.get("term_detail_body"))
+    summary_body = norm(entry.get("summary_body"))
     exam_points = norm(entry.get("exam_points"))
+    exam_focus = norm(entry.get("exam_focus"))
+    comparison_table = norm(entry.get("comparison_table"))
     common_mistakes = norm(entry.get("common_mistakes"))
     memory_tip = norm(entry.get("memory_tip"))
     example_question = norm(entry.get("example_question"))
@@ -617,10 +620,13 @@ def build_term_html(
             f'<div class="related-links term-related-links">{rel_html}</div></div>'
         )
 
-    lead = (
-        f"{term}は、{short_def.rstrip('。')}。"
-        f"{exam_name()}では、{category}分野の用語として、意味・根拠・似た用語との違いをセットで押さえると理解しやすくなります。"
-    )
+    if article_lead:
+        lead = article_lead
+    else:
+        lead = (
+            f"{term}は、{short_def.rstrip('。')}。"
+            f"{exam_name()}では、{category}分野の用語として、意味・根拠・似た用語との違いをセットで押さえると理解しやすくなります。"
+        )
     points = study_points(explanation)
     points_html = ""
     if exam_points:
@@ -628,6 +634,11 @@ def build_term_html(
     elif points:
         points_html = '<ol class="term-point-list">' + "".join(f"<li>{html.escape(p)}</li>" for p in points) + "</ol>"
     detail_html = text_paragraphs(term_detail_body or definition)
+    if comparison_table:
+        detail_html = (detail_html + comparison_table) if detail_html else comparison_table
+    summary_html = text_paragraphs(summary_body or short_def)
+    exam_body = exam_focus or explanation
+    exam_section_html = text_paragraphs(exam_body)
     mistakes_html = text_paragraphs(common_mistakes)
     memory_html = f"<blockquote><p>{html.escape(memory_tip)}</p></blockquote>" if memory_tip else ""
     example_html = ""
@@ -708,11 +719,11 @@ def build_term_html(
     content_sections: list[str] = []
     body_toc_items: list[tuple[str, str]] = []
     for sec_id, label, body_html in [
-        ("summary", "まず押さえる要点", text_paragraphs(short_def)),
+        ("summary", "まず押さえる要点", summary_html),
         ("points", "試験で押さえるポイント", points_html),
         ("definition", "定義と基本理解", detail_html),
         ("legal", "法令・根拠", legal_basis_html(legal)),
-        ("exam", "選択肢で問われやすい点", text_paragraphs(explanation)),
+        ("exam", "選択肢で問われやすい点", exam_section_html),
         ("mistakes", "よくある誤解・注意点", mistakes_html),
         ("memory", "覚え方・整理のコツ", memory_html),
         ("example", "例題で確認", example_html),
@@ -839,7 +850,7 @@ def build_term_html(
       <span class="meta-updated">{meta_line}</span>
     </div>
     <h1 class="article-title">{html.escape(article_title or term + 'とは？意味・根拠・試験ポイントを整理')}</h1>
-    <p class="article-lead"><strong>{html.escape(term)}</strong>について、定義・根拠・試験での押さえ方をまとめます。{html.escape(article_lead or lead)}</p>
+    <p class="article-lead"><strong>{html.escape(term)}</strong>—{html.escape(lead)}</p>
     {toc_html}
     {quality_html}
     {can_do_html}
@@ -1146,7 +1157,10 @@ def main() -> int:
                 "article_title": norm(row.get("article_title")),
                 "article_lead": norm(row.get("article_lead")),
                 "term_detail_body": norm(row.get("term_detail_body")),
+                "summary_body": norm(row.get("summary_body")),
                 "exam_points": norm(row.get("exam_points")),
+                "exam_focus": norm(row.get("exam_focus")),
+                "comparison_table": norm(row.get("comparison_table")),
                 "common_mistakes": norm(row.get("common_mistakes")),
                 "memory_tip": norm(row.get("memory_tip")),
                 "example_question": norm(row.get("example_question")),
