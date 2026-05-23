@@ -713,11 +713,15 @@ def main() -> int:
     for row in rows:
         choices_field, correct_body, summary, point = build_row_fields(row)
         if choices_field:
-            avg = sum(len(p.split(":", 1)[1]) for p in choices_field.split(";")) / max(
-                choices_field.count(";") + 1, 1
-            )
-            if avg < MIN_WRONG_NOTE_LEN:
-                short += 1
+            note_lens = [
+                len(p.split(":", 1)[1])
+                for p in choices_field.split(";")
+                if ":" in p
+            ]
+            if note_lens:
+                avg = sum(note_lens) / len(note_lens)
+                if avg < MIN_WRONG_NOTE_LEN:
+                    short += 1
         if not args.dry_run:
             row["explanation_choices"] = choices_field
             row["explanation_correct"] = correct_body

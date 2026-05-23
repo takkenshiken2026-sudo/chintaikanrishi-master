@@ -28,6 +28,7 @@ if str(ROOT) not in sys.path:
 from tools.html_footer import (
     ROBOTS_INDEX_FOLLOW,
     breadcrumb_html,
+    shell_body_class,
     site_page_footer,
     site_page_header,
     site_page_wrap_close,
@@ -197,7 +198,7 @@ def split_semicolon(s: str) -> list[str]:
     return [x.strip() for x in (s or "").split(";") if x.strip()]
 
 
-TERMS_INDEX_CSS_VER = "20260522-terms-chips-overflow"
+TERMS_INDEX_CSS_VER = "20260525-responsive-h1"
 TERMS_INDEX_JS_VER = "20260521-terms-snippet"
 TERMS_INDEX_SEARCH_PLACEHOLDER = "例：ストレスチェック、ラインケア、うつ病…"
 
@@ -884,7 +885,7 @@ def build_term_html(
 <link rel="stylesheet" href="{html.escape(css_href)}">
 <link rel="stylesheet" href="{html.escape(theme_href)}">
 </head>
-<body class="term-article-page">
+<body class="{shell_body_class('term-article-page')}">
 {site_page_wrap_open()}
 {page_header}
 <main class="seo-article-main">
@@ -984,7 +985,7 @@ def build_field_hub_html(
 <link rel="stylesheet" href="{html.escape(rel_css(rel_path))}">
 <link rel="stylesheet" href="{html.escape(rel_theme_css(rel_path))}">
 </head>
-<body class="terms-field-hub-page">
+<body class="{shell_body_class('terms-field-hub-page')}">
 {site_page_wrap_open()}
 {page_header}
 <main class="site-page-main terms-idx-main">
@@ -1106,7 +1107,7 @@ def build_terms_index(entries: list[dict], base_url: str) -> str:
 <link rel="stylesheet" href="../site-theme.css">
 <script>document.documentElement.classList.add("js");</script>
 </head>
-<body class="terms-index-page" data-terms-total="{n_terms}">
+<body class="{shell_body_class('terms-index-page')}" data-terms-total="{n_terms}">
 {site_page_wrap_open()}
 {terms_header}
 <main class="site-page-main">
@@ -1119,13 +1120,15 @@ def build_terms_index(entries: list[dict], base_url: str) -> str:
         <h2 id="terms-index-heading">用語一覧</h2>
         <p>全{n_terms}語・{n_cats}分野。キーワード検索と分野で絞り込めます。</p>
       </div>
-      <span id="terms-idx-hit" class="terms-index-hit" aria-live="polite">{n_terms} / {n_terms} 語</span>
     </div>
     <div class="terms-index-tools">
+      <div class="terms-index-tools-primary">
       <label class="terms-index-search" for="terms-idx-q">
-        <span>用語検索</span>
+        <span class="u-visually-hidden">用語検索</span>
         <input id="terms-idx-q" type="search" inputmode="search" autocomplete="off" placeholder="{html.escape(TERMS_INDEX_SEARCH_PLACEHOLDER, quote=True)}">
       </label>
+      <span id="terms-idx-hit" class="terms-index-hit" aria-live="polite">{n_terms} / {n_terms} 語</span>
+      </div>
       <div class="terms-idx-chips" aria-label="分野フィルタ">
 {chips_html}
       </div>

@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 """data/ichimon_questions.csv → exam-site-data-ichimondou.js（window.ICHIMONDOU_ROWS）。
 
-CSV 列: id, question, answer, explanation, category, tags, source, note
+CSV 列: id, question, answer, explanation, explanation_summary, explanation_correct,
+explanation_opposite, explanation_point, category, tags, source, note
+（静的 HTML の詳細解説用。SPA 用 JS は従来どおり explanation を要約表示）
 - answer: ○＝記述が正しい / ×＝記述が誤り（index.html の correctAnswer と一致）
 - category: tools/csv_to_exam_site_past_js.py の CATEGORY_TO_FIELD と揃える
 """
@@ -56,8 +58,8 @@ def public_path_from_id(row_id: str) -> str:
     m = _ID_PATH.match(norm(row_id))
     if not m:
         return ""
-    y, qn, _ = m.groups()
-    return f"q/past/y{int(y)}/q{int(qn):02d}/index.html"
+    y, mo, seq = m.groups()
+    return f"q/ichimon/y{int(y)}/i{int(mo):02d}-{int(seq)}/index.html"
 
 
 def normalize_statement(text: str) -> str:
