@@ -82,11 +82,12 @@
 </script>
 
 <meta name="format-detection" content="telephone=no">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
 <style>
 :root {
   --bg:    #ffffff;
@@ -1965,13 +1966,33 @@ function applyCsvImportedQuestions() {
   YEARS = Array.from(yset).sort(function (a, b) { return b - a; });
 }
 </script>
-<script src="eisei1-data-glossary.js"></script>
 <script src="eisei1-data-original.js"></script>
 <script src="eisei1-master-data.js"></script>
-<script src="eisei1-data-ichimon.js"></script>
 <script>
 
-(function enrichGlossaryPlaceholderDesc(){
+const _lazyScriptPromises = Object.create(null);
+function loadLazyScript(src){
+  if(_lazyScriptPromises[src]) return _lazyScriptPromises[src];
+  _lazyScriptPromises[src] = new Promise(function(resolve, reject){
+    const el = document.createElement('script');
+    el.src = src;
+    el.async = true;
+    el.onload = function(){ resolve(); };
+    el.onerror = function(){ reject(new Error('script load failed: '+src)); };
+    document.head.appendChild(el);
+  });
+  return _lazyScriptPromises[src];
+}
+function ensureGlossaryBundle(){
+  return loadLazyScript('eisei1-data-glossary.js').then(function(){
+    enrichGlossaryPlaceholderDesc();
+  });
+}
+function ensureIchimonBundle(){
+  return loadLazyScript('eisei1-data-ichimon.js');
+}
+
+function enrichGlossaryPlaceholderDesc(){
   const PLACEHOLDER_SNIPPET='試験の頻出論点です。定義・比較表・具体例を公開サイトの解説記事で詳しく確認できます。';
   const CAT_HINT={
     lawH:'賃貸住宅管理業法・登録・遵守事項・監督処分など、管理業者の義務と手続を整理します。',
@@ -2001,7 +2022,7 @@ function applyCsvImportedQuestions() {
       '※カードを開くと、データがある項目は表・比較・フローなどの図解が表示されます。'
     ].join('\n');
   });
-})();
+}
 
 // ===== GLOSSARY UI（既定: eisei1-data-glossary.js。成功時は docs/glossary-terms-checklist.csv で上書き）=====
 let glosActiveCat = 'all';
@@ -3194,14 +3215,15 @@ async function syncUserLearningToSupabaseNow(){
   if(!currentUser?.id || currentUser.email==='__guest__') return;
   const email=currentUser.email;
   try{
+    const sb = await ensureSupabaseClient();
     let u=normalizeUserData(_cloneUserSnapshot(db[email]||{}));
-    const {data,error}=await _sb.from(USER_LEARNING_SYNC_TABLE).select('payload').eq('user_id',currentUser.id).maybeSingle();
+    const {data,error}=await sb.from(USER_LEARNING_SYNC_TABLE).select('payload').eq('user_id',currentUser.id).maybeSingle();
     if(error&&error.code!=='PGRST116') console.warn('[learning-sync]',error.message);
     if(data?.payload) u=mergeLearningPayload(u,data.payload);
     db[email]=u;
     saveDB();
     const payload=extractLearningSyncPayload(u);
-    const {error:upErr}=await _sb.from(USER_LEARNING_SYNC_TABLE).upsert({
+    const {error:upErr}=await sb.from(USER_LEARNING_SYNC_TABLE).upsert({
       user_id:currentUser.id,
       payload,
       updated_at:new Date().toISOString()
@@ -3213,7 +3235,8 @@ async function loadMergeUserLearningSyncFromSupabase(){
   if(!currentUser?.id || currentUser.email==='__guest__') return;
   const email=currentUser.email;
   try{
-    const {data,error}=await _sb.from(USER_LEARNING_SYNC_TABLE).select('payload').eq('user_id',currentUser.id).maybeSingle();
+    const sb = await ensureSupabaseClient();
+    const {data,error}=await sb.from(USER_LEARNING_SYNC_TABLE).select('payload').eq('user_id',currentUser.id).maybeSingle();
     if(error&&error.code!=='PGRST116'){ console.warn('[learning-sync load]',error.message); return; }
     if(!data?.payload) return;
     let u=normalizeUserData(db[email]||{});
@@ -3241,7 +3264,31 @@ function closeSidebar(){ closeMobileDrawer(); }
 // 本番のみ GitHub Actions の secrets（SUPABASE_URL / SUPABASE_KEY）で上書きする場合は .github/workflows/deploy-pages.yml を参照。
 const SUPABASE_URL = 'https://ujysjdaboqqslkljjjtn.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_I6hAL709aNvw29iHMLsAOQ_EmfkZoSQ';
-const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let _sb = null;
+let _sbLoadPromise = null;
+function ensureSupabaseClient(){
+  if(_sb) return Promise.resolve(_sb);
+  if(!_sbLoadPromise){
+    _sbLoadPromise = new Promise(function(resolve, reject){
+      if(window.supabase){
+        _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        resolve(_sb);
+        return;
+      }
+      const el = document.createElement('script');
+      el.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+      el.async = true;
+      el.onload = function(){
+        if(!window.supabase){ reject(new Error('supabase unavailable')); return; }
+        _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        resolve(_sb);
+      };
+      el.onerror = function(){ reject(new Error('supabase load failed')); };
+      document.head.appendChild(el);
+    });
+  }
+  return _sbLoadPromise;
+}
 
 function isValidPassword(p){
   return typeof p === 'string' && p.length >= 6 && /[A-Za-z]/.test(p) && /\d/.test(p);
@@ -3255,7 +3302,8 @@ async function loadAnswersFromSupabase(){
   if(!currentUser?.id) return;
   const u=getUserData();
   if(!u) return;
-  const {data,error}=await _sb
+  const sb = await ensureSupabaseClient();
+  const {data,error}=await sb
     .from('user_answers')
     .select('*')
     .eq('user_id',currentUser.id);
@@ -3277,7 +3325,8 @@ async function loadAnswersFromSupabase(){
 
 async function saveAnswerToSupabase(q,picked,correct,elapsed){
   if(!currentUser?.id) return;
-  const {error}=await _sb.from('user_answers').insert({
+  const sb = await ensureSupabaseClient();
+  const {error}=await sb.from('user_answers').insert({
     user_id:currentUser.id,
     question_id:q.id,
     answer:picked,
@@ -3301,7 +3350,8 @@ async function doLogin(){
   document.getElementById('login-err').textContent='ログイン中...';
   let data, error;
   try{
-    ({data,error}=await _sb.auth.signInWithPassword({email:e,password:p}));
+    const sb = await ensureSupabaseClient();
+    ({data,error}=await sb.auth.signInWithPassword({email:e,password:p}));
   }catch(net){
     const m=net&&net.message?String(net.message):String(net);
     document.getElementById('login-err').textContent=m.includes('fetch')||m.includes('Failed')
@@ -3335,7 +3385,8 @@ async function doRegister(){
   document.getElementById('reg-err').textContent='登録中...';
   let data, error;
   try{
-    ({data,error}=await _sb.auth.signUp({email:e,password:p,options:{data:{name:n}}}));
+    const sb = await ensureSupabaseClient();
+    ({data,error}=await sb.auth.signUp({email:e,password:p,options:{data:{name:n}}}));
   }catch(net){
     const m=net&&net.message?String(net.message):String(net);
     document.getElementById('reg-err').textContent=m.includes('fetch')||m.includes('Failed')
@@ -3383,7 +3434,10 @@ function demoLogin(){
 }
 async function doLogout(){
   await flushLearningSyncToSupabase();
-  await _sb.auth.signOut();
+  try{
+    const sb = await ensureSupabaseClient();
+    await sb.auth.signOut();
+  }catch(e){ console.warn('[logout]', e); }
   currentUser=null;
   // ゲストとして再入場
   loadDB();
@@ -3401,8 +3455,14 @@ async function sendPasswordReset(){
   const redirectTo=location.origin && location.origin !== 'null'
     ? location.origin + location.pathname
     : undefined;
-  const {error}=await _sb.auth.resetPasswordForEmail(e, redirectTo?{redirectTo}:undefined);
-  if(error){errEl.textContent='再設定メールを送れませんでした: '+error.message;return}
+  try{
+    const sb = await ensureSupabaseClient();
+    const {error}=await sb.auth.resetPasswordForEmail(e, redirectTo?{redirectTo}:undefined);
+    if(error){errEl.textContent='再設定メールを送れませんでした: '+error.message;return}
+  }catch(net){
+    errEl.textContent='再設定メールを送れませんでした: 接続できませんでした';
+    return;
+  }
   errEl.textContent='パスワード再設定メールを送信しました。メールを確認してください。';
 }
 
@@ -3420,8 +3480,14 @@ async function updatePassword(){
   const errEl=document.getElementById('reset-err');
   if(!isValidPassword(p)){errEl.textContent=passwordRuleMessage();return}
   errEl.textContent='更新中...';
-  const {error}=await _sb.auth.updateUser({password:p});
-  if(error){errEl.textContent='更新できませんでした: '+error.message;return}
+  try{
+    const sb = await ensureSupabaseClient();
+    const {error}=await sb.auth.updateUser({password:p});
+    if(error){errEl.textContent='更新できませんでした: '+error.message;return}
+  }catch(net){
+    errEl.textContent='更新できませんでした: 接続できませんでした';
+    return;
+  }
   errEl.textContent='パスワードを更新しました。次回から新しいパスワードでログインできます。';
   setTimeout(()=>closeLoginModal(),1200);
 }
@@ -4124,7 +4190,23 @@ function shareIchiResultToX(){
   openTwitterShareIntent(`賃管マスター（賃貸不動産経営管理士試験）で一問一答を解きました。\n正答率 ${pct}%（${s}/${att}問）\n合格を目指して学習を続けています。`);
 }
 
-function gotoPage(id){
+function gotoPage(id, _lazyReady){
+  if(!_lazyReady){
+    if(id==='glossary' && (typeof GLOSSARY_DATA==='undefined' || !Array.isArray(GLOSSARY_DATA))){
+      ensureGlossaryBundle().then(function(){ gotoPage(id, true); }).catch(function(e){
+        console.warn('[glossary bundle]', e);
+        gotoPage(id, true);
+      });
+      return;
+    }
+    if((id==='ichimondou' || id==='ichimondou-score') && (typeof ICHI_MON_ROWS==='undefined' || !Array.isArray(ICHI_MON_ROWS))){
+      ensureIchimonBundle().then(function(){ gotoPage(id, true); }).catch(function(e){
+        console.warn('[ichimon bundle]', e);
+        gotoPage(id, true);
+      });
+      return;
+    }
+  }
   if(id==='ichimondou') syncIchiPageVisibility();
   if(id!=='quiz') showNextBtn(false, null);
   document.body.classList.toggle('is-solving', id==='quiz' || (id==='ichimondou' && ichiState.active));
@@ -5492,8 +5574,23 @@ function forceShowDailyFirstVisitLetter(u, letterId){
   if(state.count >= SUPPORT_LETTER_DAILY_AUTO_LIMIT) return false;
   markSupportLetterAutoShown(u);
   saveUser(u);
-  setTimeout(()=>showSupportLetter(letterId, true), 520);
+  scheduleDeferredSupportLetter(letterId);
   return true;
+}
+function scheduleDeferredSupportLetter(letterId){
+  const open = function(){
+    if(document.hidden) return;
+    showSupportLetter(letterId, true);
+  };
+  const afterLoad = function(){
+    if(typeof requestIdleCallback === 'function'){
+      requestIdleCallback(open, {timeout: 10000});
+    }else{
+      setTimeout(open, 4000);
+    }
+  };
+  if(document.readyState === 'complete') afterLoad();
+  else window.addEventListener('load', afterLoad, {once: true});
 }
 function markSupportLetterAutoShown(u){
   const state = getSupportLetterAutoState(u);
@@ -6869,27 +6966,30 @@ window.addEventListener('load', function(){
   if (!gp || !gp.classList.contains('active')) return;
   var listEl = document.getElementById('glossary-list');
   if (!listEl || typeof renderGlossary !== 'function') return;
-  if (listEl.querySelector('.glos-static-section') && typeof GLOSSARY_DATA !== 'undefined' && Array.isArray(GLOSSARY_DATA)) {
-    renderGlossary();
+  if (listEl.querySelector('.glos-static-section')) {
+    ensureGlossaryBundle().then(function(){ renderGlossary(); }).catch(function(){ renderGlossary(); });
   }
 });
-// Supabaseセッションがあればログイン済みユーザーに切り替え
+// Supabaseセッションがあればログイン済みユーザーに切り替え（ゲスト起動後に非同期）
 (async function(){
-  const {data:{session}}=await _sb.auth.getSession();
-  const hash = location.hash || '';
-  if(hash.includes('type=recovery') || hash.includes('access_token=')){
-    showPasswordResetForm();
-  }
-  if(session){
-    const e=session.user.email;
-    const u=normalizeUserData(db[e]||{name:e,plan:'free',answers:{},sessions:[],bookmarks:{},streak:0});
-    if(!db[e]){db[e]=u;saveDB();}
-    currentUser={id:session.user.id,email:e,name:u.name};
-    await loadAnswersFromSupabase();
-    await loadMergeUserLearningSyncFromSupabase();
-    await syncUserLearningToSupabaseNow();
-    enterApp();
-  }
+  try{
+    const sb = await ensureSupabaseClient();
+    const {data:{session}}=await sb.auth.getSession();
+    const hash = location.hash || '';
+    if(hash.includes('type=recovery') || hash.includes('access_token=')){
+      showPasswordResetForm();
+    }
+    if(session){
+      const e=session.user.email;
+      const u=normalizeUserData(db[e]||{name:e,plan:'free',answers:{},sessions:[],bookmarks:{},streak:0});
+      if(!db[e]){db[e]=u;saveDB();}
+      currentUser={id:session.user.id,email:e,name:u.name};
+      await loadAnswersFromSupabase();
+      await loadMergeUserLearningSyncFromSupabase();
+      await syncUserLearningToSupabaseNow();
+      enterApp();
+    }
+  }catch(e){ console.warn('[supabase session]', e); }
 })();
 // ===== EXAM COUNTDOWN =====
 (function(){
