@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """Enrich glossary rows that have article_title with detail-article quality content.
 
+一括品質向上は tools/upgrade_glossary_quality.py を正本とする（全件の用語別本文・FAQ・比較表）。
+
 Optional: --bootstrap-a N creates detail shells for importance-A terms without article_title.
 """
 

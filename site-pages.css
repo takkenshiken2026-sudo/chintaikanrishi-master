@@ -3809,6 +3809,53 @@ html:not(.js) .terms-idx-seo-fallback .terms-idx-seo-list a {
   font-size: var(--fs-body);
   line-height: 1.9;
 }
+.term-memory-box {
+  background: var(--bg2);
+  border-left: 4px solid var(--accent-border, #c5d9e8);
+  border-radius: var(--r2);
+  padding: 16px 18px 4px;
+  margin: 0;
+}
+.term-memory-box p {
+  font-size: var(--fs-body);
+  line-height: 1.85;
+  color: var(--ink);
+}
+.term-memory-box p strong {
+  color: var(--text);
+  font-weight: 700;
+}
+.term-memory-block + .term-memory-block {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.term-memory-heading {
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 8px;
+}
+.term-memory-list {
+  margin: 0 0 12px 1.2em;
+  padding: 0;
+  line-height: 1.85;
+}
+.term-memory-list li + li {
+  margin-top: 6px;
+}
+.term-example-box {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 14px 16px 6px;
+  margin: 16px 0 8px;
+}
+.term-example-label {
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 10px;
+  font-size: var(--fs-sub);
+}
 .article-body h3 {
   font-size: var(--fs-body);
   font-weight: 700;

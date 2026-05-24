@@ -565,7 +565,7 @@ def faq_section_html(items: list[dict[str, str]]) -> str:
 
 def custom_faq_items(entry: dict, fallback: list[dict[str, str]]) -> list[dict[str, str]]:
     items: list[dict[str, str]] = []
-    for idx in range(1, 4):
+    for idx in range(1, 5):
         q = norm(entry.get(f"faq_{idx}_question"))
         a = norm(entry.get(f"faq_{idx}_answer"))
         if q and a:
@@ -607,6 +607,9 @@ def build_term_html(
     memory_tip = norm(entry.get("memory_tip"))
     example_question = norm(entry.get("example_question"))
     example_answer = norm(entry.get("example_answer"))
+    summary_body = norm(entry.get("summary_body"))
+    comparison_table = norm(entry.get("comparison_table"))
+    exam_focus = norm(entry.get("exam_focus"))
 
     title = f"{article_title or term + 'とは？意味・根拠・試験ポイント'}｜{brand_name()}"
     desc = meta_description(
@@ -631,6 +634,33 @@ def build_term_html(
         if not paras:
             paras = [body.strip()]
         return "\n".join(f"<p>{html.escape(p).replace(chr(10), '<br>')}</p>" for p in paras)
+
+    def memory_block_html(part: str) -> str:
+        part = part.strip()
+        if not part:
+            return ""
+        heading = ""
+        body = part
+        if part.startswith("【"):
+            end = part.find("】")
+            if end != -1:
+                heading = part[: end + 1]
+                body = part[end + 1 :].lstrip("\n")
+        lines = [ln.strip() for ln in body.splitlines() if ln.strip()]
+        if lines and all(re.match(r"^\d+\.\s", ln) for ln in lines):
+            num_pat = re.compile(r"^\d+\.\s*")
+            items = "".join(
+                f"<li>{html.escape(num_pat.sub('', ln))}</li>" for ln in lines
+            )
+            body_html = f'<ol class="term-memory-list">{items}</ol>'
+        elif lines and all(ln.startswith("・") for ln in lines):
+            items = "".join(f"<li>{html.escape(ln.lstrip('・').strip())}</li>" for ln in lines)
+            body_html = f'<ul class="term-memory-list">{items}</ul>'
+        else:
+            body_html = text_paragraphs(body) if body else ""
+        if heading:
+            return f'<p class="term-memory-heading">{html.escape(heading)}</p>{body_html}'
+        return body_html
 
     def article_section(sec_id: str, label: str, body_html: str, number: int | None = None) -> str:
         if not body_html.strip():
@@ -685,9 +715,39 @@ def build_term_html(
         points_html = semicolon_list_html(exam_points)
     elif points:
         points_html = '<ol class="term-point-list">' + "".join(f"<li>{html.escape(p)}</li>" for p in points) + "</ol>"
+    if exam_focus:
+        focus_para = f"<p>{html.escape(exam_focus)}</p>"
+        points_html = (points_html + focus_para) if points_html else focus_para
+    if summary_body and "【具体例】" in summary_body:
+        intro_part, example_rest = summary_body.split("【具体例】", 1)
+        exam_tip_part = ""
+        if "【試験のポイント】" in example_rest:
+            example_rest, exam_tip_part = example_rest.split("【試験のポイント】", 1)
+        example_part = example_rest.strip()
+        summary_html = text_paragraphs(intro_part.strip())
+        if example_part:
+            summary_html += (
+                '<div class="term-example-box" aria-label="具体例">'
+                '<p class="term-example-label">具体例</p>'
+                f"{text_paragraphs(example_part)}</div>"
+            )
+        if exam_tip_part.strip():
+            summary_html += text_paragraphs(exam_tip_part.strip())
+    else:
+        summary_html = text_paragraphs(summary_body) if summary_body else text_paragraphs(short_def)
     detail_html = text_paragraphs(term_detail_body or definition)
+    if comparison_table:
+        detail_html = (detail_html + "\n" + comparison_table) if detail_html else comparison_table
     mistakes_html = text_paragraphs(common_mistakes)
-    memory_html = f"<blockquote><p>{html.escape(memory_tip)}</p></blockquote>" if memory_tip else ""
+    memory_html = ""
+    if memory_tip:
+        mem_parts = [p.strip() for p in re.split(r"\n{2,}", memory_tip.strip()) if p.strip()]
+        if len(mem_parts) <= 1:
+            mem_parts = [p.strip() for p in re.split(r"(?=【)", memory_tip.strip()) if p.strip()]
+        memory_inner = "".join(
+            f'<div class="term-memory-block">{memory_block_html(part)}</div>' for part in mem_parts
+        )
+        memory_html = f'<div class="term-memory-box">{memory_inner}</div>'
     example_html = ""
     if example_question or example_answer:
         example_html = (
@@ -766,7 +826,7 @@ def build_term_html(
     content_sections: list[str] = []
     body_toc_items: list[tuple[str, str]] = []
     for sec_id, label, body_html in [
-        ("summary", "まず押さえる要点", text_paragraphs(short_def)),
+        ("summary", "まず押さえる要点", summary_html),
         ("points", "試験で押さえるポイント", points_html),
         ("definition", "定義と基本理解", detail_html),
         ("legal", "法令・根拠", legal_basis_html(legal)),
@@ -1212,8 +1272,8 @@ def sync_index_glossary_slug_map(entries: list[dict]) -> None:
 def load_glossary_rows() -> list[dict]:
     if not GLOSSARY_CSV.is_file():
         raise FileNotFoundError(str(GLOSSARY_CSV))
-    text = GLOSSARY_CSV.read_text(encoding="utf-8-sig")
-    return list(csv.DictReader(text.splitlines()))
+    with GLOSSARY_CSV.open(encoding="utf-8-sig", newline="") as f:
+        return list(csv.DictReader(f))
 
 
 def main() -> int:
@@ -1267,6 +1327,11 @@ def main() -> int:
                 "faq_2_answer": norm(row.get("faq_2_answer")),
                 "faq_3_question": norm(row.get("faq_3_question")),
                 "faq_3_answer": norm(row.get("faq_3_answer")),
+                "faq_4_question": norm(row.get("faq_4_question")),
+                "faq_4_answer": norm(row.get("faq_4_answer")),
+                "summary_body": norm(row.get("summary_body")),
+                "comparison_table": norm(row.get("comparison_table")),
+                "exam_focus": norm(row.get("exam_focus")),
                 "slug_file": slug_file,
                 "field_hub": field_hub_slug(norm(row.get("category"))),
             }

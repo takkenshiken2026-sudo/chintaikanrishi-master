@@ -84,7 +84,9 @@ class Validator:
         for h in dupes:
             self.error(path, 1, f"列名が重複しています: {h}")
 
-        rows = list(csv.DictReader(text.splitlines()))
+        import io
+
+        rows = list(csv.DictReader(io.StringIO(text)))
         fieldnames = list(rows[0].keys()) if rows else (headers or [])
         missing = sorted(required - set(fieldnames))
         for col in missing:
