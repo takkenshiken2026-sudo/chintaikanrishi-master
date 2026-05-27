@@ -79,22 +79,6 @@ def replace_all(text: str) -> str:
         replacements.append(("◯◯試験", exam_name()))
     for src, dst in replacements:
         text = text.replace(src, dst)
-
-    marker = '<script src="./site-config.js"></script>'
-    if "site-config.js" not in text and "site-analytics.js" in text:
-        for old, new_block in (
-            (
-                '<script defer src="./site-analytics.js"></script>',
-                marker + '\n<script defer src="./site-analytics.js"></script>',
-            ),
-            (
-                '<script defer src="site-analytics.js"></script>',
-                '<script src="site-config.js"></script>\n<script defer src="site-analytics.js"></script>',
-            ),
-        ):
-            if old in text:
-                text = text.replace(old, new_block, 1)
-                break
     return text
 
 
@@ -133,7 +117,14 @@ def replace_static_chrome(text: str, path: Path) -> str:
         flags=re.S,
     )
     text = re.sub(
-        r'\s*<footer class="(?:site-page-footer(?: site-page-footer--wide)?|site-footer)[^"]*".*?</footer>\s*(?:<!-- GA4:.*?-->\s*)?(?:<script>window\.__GA4_MEASUREMENT_ID__="[^"]*";</script>\s*)?(?:<script defer src="[^"]*site-analytics\.js"></script>\s*)?',
+        r'\s*<footer class="(?:site-page-footer(?: site-page-footer--wide)?|site-footer)[^"]*".*?</footer>'
+        # フッター直後の GA4 / site-config 関連スクリプトを任意個吸収して再生成（重複ロード対策）
+        r'(?:\s*(?:'
+        r'<!-- GA4:[^>]*?-->|'
+        r'<script>window\.__GA4_MEASUREMENT_ID__="[^"]*";</script>|'
+        r'<script(?:\s+defer)?\s+src="[^"]*?site-analytics\.js"></script>|'
+        r'<script(?:\s+defer)?\s+src="[^"]*?site-config\.js"></script>'
+        r'))*',
         "\n" + site_page_footer(rel_path, current=current),
         text,
         count=1,
