@@ -55,6 +55,10 @@ GLOSSARY_CSV = ROOT / "data" / "glossary_terms.csv"
 TERMS_DIR = ROOT / "terms"
 BASE_DEFAULT = clean_origin()
 
+# ナレッジハブ（compare / numbers / mistakes）は別ビルド。用語再生成時に削除しない。
+PRESERVED_TERM_SUBDIRS = frozenset({"compare", "numbers", "mistakes", "priority", "samples", "diagram-samples"})
+PRESERVED_TERM_HTML = frozenset({"index.html", "g-writing-sample.html", "g-diagram-sample.html"})
+
 # site-config.json の fields[].aliases / name と揃える
 FIELD_LABELS = field_labels()
 GLOSSARY_CAT_TO_FIELD: dict[str, str] = category_to_field_map()
@@ -1397,10 +1401,10 @@ def main() -> int:
 
     TERMS_DIR.mkdir(parents=True, exist_ok=True)
     for stale in TERMS_DIR.glob("*.html"):
-        if stale.name != "index.html":
+        if stale.name not in PRESERVED_TERM_HTML:
             stale.unlink()
     for stale in TERMS_DIR.iterdir():
-        if stale.is_dir():
+        if stale.is_dir() and stale.name not in PRESERVED_TERM_SUBDIRS:
             shutil.rmtree(stale)
 
     for e in entries:
