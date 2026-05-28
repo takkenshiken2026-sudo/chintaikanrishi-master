@@ -43,7 +43,7 @@ def _rows(*items: dict) -> str:
 
 
 _OFFICIAL = (
-    "数値・日程・合格基準は公益財団法人 一般社団法人賃貸不動産経営管理士協議会（www.chintaikanrishi.jp）"
+    "数値・日程・合格基準は一般社団法人賃貸不動産経営管理士協議会（www.chintaikanrishi.jp）"
     "の試験要項で必ずご確認ください。"
 )
 
