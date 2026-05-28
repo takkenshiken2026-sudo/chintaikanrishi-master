@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TOOLS = Path(__file__).resolve().parent
 
 from _hub_content_emit import emit_cmp, emit_mis, emit_num, fix_entry  # noqa: E402
+from hub_s35_s44_numbers_patches import SLUG_BASE_PATCHES  # noqa: E402
 from write_chintai_hub_s30 import _OFFICIAL  # noqa: E402
 
 with (ROOT / "data/glossary_terms.csv").open(encoding="utf-8-sig") as _f:
@@ -42,14 +43,14 @@ def _faq(qa: list[tuple[str, str]]) -> list[tuple[str, str]]:
 
 
 THEMES = [
-    ("nyukyo-trouble", "入居トラブル", "P", ("苦情処理", "入居審査"), "入居トラブル;苦情処理", "24時間以内初動（実務目安）", ("苦情処理", "管理事務報告書")),
+    ("nyukyo-trouble", "入居トラブル", "P", ("苦情処理", "入居審査"), "入居トラブル;苦情処理", "法定24時間初動なし（実務目安）", ("苦情処理", "管理事務報告書")),
     ("genjou-kaifuku", "原状回復協議", "S", ("原状回復", "原状回復ガイドライン"), "原状回復;原状回復義務", "協議・書面化（実務目安）", ("原状回復", "原状回復費用の精算")),
     ("yachin-taino", "家賃滞納", "S", ("滞納督促", "滞納時の対応"), "家賃滞納;滞納督促", "催告・契約解除（条文確認）", ("滞納督促", "更新拒絶通知")),
-    ("kanri-houkoku-sho", "管理報告書", "L", ("管理事務報告書", "管理受託契約"), "管理報告書;管理事務報告書", "年1回以上（契約・目安）", ("管理事務報告書", "管理受託契約")),
+    ("kanri-houkoku-sho", "管理報告書", "L", ("管理事務報告書", "管理受託契約"), "管理報告書;管理事務報告書", "報告頻度は受託契約で定める", ("管理事務報告書", "管理受託契約")),
     ("it-jusetsu-unyou", "IT重説運用", "L", ("IT重説", "管理受託契約重要事項説明"), "IT重説;重要事項説明（宅建業法）", "事前書面交付（目安）", ("IT重説", "管理受託契約重要事項説明")),
     ("sublease-koushin", "サブリース更新", "E", ("サブリース契約", "特定賃貸借契約"), "サブリース更新;特定賃貸借契約", "更新協議・書面（目安）", ("サブリース契約", "合意更新")),
     ("kasai-taiou", "火災対応", "P", ("火災保険", "住宅用火災警報器"), "火災対応;火災保険", "初動・連絡体制（実務目安）", ("火災保険", "地震保険")),
-    ("keiyaku-koushin", "契約更新", "S", ("合意更新", "法定更新"), "契約更新;更新料", "1ヶ月分以内（更新料・目安）", ("合意更新", "法定更新")),
+    ("keiyaku-koushin", "契約更新", "S", ("合意更新", "法定更新"), "契約更新;更新料", "更新料1ヶ月上限（合意更新）", ("合意更新", "法定更新")),
     ("azukari-seisan", "預り金精算", "L", ("敷金返還請求権", "原状回復費用の精算"), "預り金精算;敷金", "明細書交付（実務目安）", ("敷金", "分別管理義務")),
     ("hanrei-seiri", "判例整理", "E", ("サブリース判例（最高裁平成15.10.21判決等）", "サブリースガイドライン"), "判例整理;特定賃貸借契約", "判例・ガイドライン併読", ("サブリース判例（最高裁平成15.10.21判決等）", "原状回復ガイドライン")),
 ]
@@ -81,17 +82,28 @@ def _cmp(slug, title, cat, t1, t2, summary, lead, points, mistakes, tip, rel, qa
     }
 
 
-def _num(slug, title, cat, tag, summary, highlight, lead, points, mistakes, tip, rel, qa):
-    return {
-        "slug": slug, "title": title, "cat": cat, "tags": tag, "summary": summary,
-        "highlight": highlight,
-        "items": [
+def _num(slug, title, cat, tag, summary, highlight, lead, points, mistakes, tip, rel, qa, slug_base: str):
+    patch = SLUG_BASE_PATCHES.get(slug_base)
+    if patch:
+        items = [(r["item"], r["value"], r["note"]) for r in patch["item_rows"]]
+        highlight = patch["highlight"]
+        lead = patch["article_lead"]
+        points = patch["exam_points"]
+        mistakes = patch["common_mistakes"]
+        tip = patch["memory_tip"]
+        tag = patch.get("tags", tag)
+    else:
+        items = [
             ("数値", highlight.split("（")[0], "試験頻出"),
             ("根拠", "法令・要項", "条文確認"),
             ("対象", tag.split(";")[0], "適用範囲"),
             ("試験", "混同肢", "正誤確認"),
             ("確認", "用語集", "最新要項"),
-        ],
+        ]
+    return {
+        "slug": slug, "title": title, "cat": cat, "tags": tag, "summary": summary,
+        "highlight": highlight,
+        "items": items,
         "article_title": f"{title}｜数値早見",
         "lead": lead, "points": points, "mistakes": mistakes, "tip": tip, "related": rel,
         "qa": _faq(qa),
@@ -146,6 +158,7 @@ def _batch(batch: str) -> tuple[list, list, list]:
                 ("試験対策の進め方は？", f"{theme}の数値一覧表を作成し、過去問の正誤を反復してください。"),
                 ("確認先はどこですか？", "借地借家法・賃管法・協議会要項を参照してください。"),
             ],
+            slug_base,
         ))
         mis_rows.append(_mis(
             f"{slug_base}-mis{sfx}", _t(f"{theme}：{m1}と{m2}の混同誤り", batch), cat, m1, m2,

@@ -84,6 +84,7 @@ from tools.write_chintai_hub_s44_content import (  # noqa: E402
     MISTAKES_ADD as MISTAKES_S44,
     NUMBERS_ADD as NUMBERS_S44,
 )
+from tools.hub_numbers_corrections import apply_numbers_corrections  # noqa: E402
 from tools.write_chintai_hub_premium_faqs import apply_all as apply_premium_faqs  # noqa: E402
 
 
@@ -148,6 +149,7 @@ def main() -> None:
         ),
         apply_premium=apply_premium_faqs,
     )
+    apply_numbers_corrections(numbers)
     mistakes = finalize_hub_rows(
         _merge(
             M30,

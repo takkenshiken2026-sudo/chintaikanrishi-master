@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TOOLS = Path(__file__).resolve().parent
 
 from _hub_content_emit import emit_cmp, emit_mis, emit_num, fix_entry  # noqa: E402
+from hub_s35_s44_numbers_patches import SLUG_BASE_PATCHES  # noqa: E402
 
 with (ROOT / "data/glossary_terms.csv").open(encoding="utf-8-sig") as _f:
     GLOSS = {r["term"] for r in csv.DictReader(_f)}
@@ -42,14 +43,14 @@ def _faq(qa: list[tuple[str, str]]) -> list[tuple[str, str]]:
 
 # (slug_base, theme, cat, compare pair, num tag, num highlight, mistake pair)
 THEMES = [
-    ("nyukyosha-taiou", "入居者対応", "P", ("入居者苦情対応", "修繕手配"), "入居者対応;管理受託契約", "24時間以内連絡（実務目安）", ("入居者対応", "管理業務報告")),
+    ("nyukyosha-taiou", "入居者対応", "P", ("入居者苦情対応", "修繕手配"), "入居者対応;管理受託契約", "法定24時間義務なし（実務目安）", ("入居者対応", "管理業務報告")),
     ("shuuzen-hiyou", "修繕費用負担", "S", ("借主負担特約", "原状回復"), "原状回復;修繕費用", "通常損耗は貸主負担（目安）", ("原状回復", "修繕費用")),
-    ("chintai-kaitei", "賃料改定", "S", ("賃料改定の協議", "更新料"), "賃料改定;合意更新", "1ヶ月分以内（更新料・目安）", ("賃料改定の協議", "更新料")),
-    ("kanri-houkoku", "管理業務報告", "L", ("管理業務報告", "管理受託契約"), "管理業務報告;管理受託契約", "年1回以上（契約・目安）", ("管理業務報告", "管理受託契約")),
+    ("chintai-kaitei", "賃料改定", "S", ("賃料改定の協議", "更新料"), "賃料改定;合意更新", "更新料1ヶ月上限（賃料改定とは別）", ("賃料改定の協議", "更新料")),
+    ("kanri-houkoku", "管理業務報告", "L", ("管理業務報告", "管理受託契約"), "管理業務報告;管理受託契約", "報告頻度は受託契約で定める", ("管理業務報告", "管理受託契約")),
     ("juyo-jusetsu", "重要事項説明", "L", ("管理受託契約重要事項説明", "IT重説"), "IT重説;重要事項説明（宅建業法）", "説明前に書面交付（目安）", ("管理受託契約重要事項説明", "IT重説")),
     ("sublease-unyou", "サブリース運用", "E", ("サブリーススキーム", "管理受託契約"), "サブリース契約;成約家賃", "空室リスク配分（スキーム次第）", ("サブリーススキーム", "管理受託契約")),
     ("kasai-jishin", "火災・地震", "P", ("火災保険", "地震保険"), "火災保険;地震保険", "契約者・受益者は契約次第", ("火災保険", "地震保険")),
-    ("keiyaku-shomen", "契約書面", "L", ("35条書面", "37条書面"), "35条書面;37条書面", "媒介・代理で書面交付", ("35条書面", "37条書面")),
+    ("keiyaku-shomen", "契約書面", "L", ("管理受託契約書面", "管理受託契約重要事項説明"), "管理受託契約;重要事項説明", "書面締結・重説前交付", ("管理受託契約書面", "管理受託契約重要事項説明")),
     ("azukari-kanri", "預り金管理", "L", ("分別管理義務", "敷金"), "分別管理義務;敷金", "預かった額の全額を分別", ("分別管理義務", "敷金")),
     ("shiken-hanrei", "試験頻出判例", "E", ("サブリース判例（最高裁平成15.10.21判決等）", "サブリースガイドライン"), "サブリース判例;特定賃貸借", "判例・ガイドライン併読", ("サブリース判例（最高裁平成15.10.21判決等）", "サブリースガイドライン")),
 ]
@@ -81,17 +82,28 @@ def _cmp(slug, title, cat, t1, t2, summary, lead, points, mistakes, tip, rel, qa
     }
 
 
-def _num(slug, title, cat, tag, summary, highlight, lead, points, mistakes, tip, rel, qa):
-    return {
-        "slug": slug, "title": title, "cat": cat, "tags": tag, "summary": summary,
-        "highlight": highlight,
-        "items": [
+def _num(slug, title, cat, tag, summary, highlight, lead, points, mistakes, tip, rel, qa, slug_base: str):
+    patch = SLUG_BASE_PATCHES.get(slug_base)
+    if patch:
+        items = [(r["item"], r["value"], r["note"]) for r in patch["item_rows"]]
+        highlight = patch["highlight"]
+        lead = patch["article_lead"]
+        points = patch["exam_points"]
+        mistakes = patch["common_mistakes"]
+        tip = patch["memory_tip"]
+        tag = patch.get("tags", tag)
+    else:
+        items = [
             ("数値", highlight.split("（")[0], "試験頻出"),
             ("根拠", "法令・要項", "条文確認"),
             ("対象", tag.split(";")[0], "適用範囲"),
             ("試験", "混同肢", "正誤確認"),
             ("確認", "用語集", "最新要項"),
-        ],
+        ]
+    return {
+        "slug": slug, "title": title, "cat": cat, "tags": tag, "summary": summary,
+        "highlight": highlight,
+        "items": items,
         "article_title": f"{title}｜数値早見",
         "lead": lead, "points": points, "mistakes": mistakes, "tip": tip, "related": rel,
         "qa": _faq(qa),
@@ -146,6 +158,7 @@ def _batch(batch: str) -> tuple[list, list, list]:
                 ("試験対策の進め方は？", f"{theme}の数値一覧表を作成し、過去問の正誤を反復してください。"),
                 ("確認先はどこですか？", "借地借家法・賃管法・協議会要項を参照してください。"),
             ],
+            slug_base,
         ))
         mis_rows.append(_mis(
             f"{slug_base}-mis{sfx}", _t(f"{theme}：{m1}と{m2}の混同誤り", batch), cat, m1, m2,
