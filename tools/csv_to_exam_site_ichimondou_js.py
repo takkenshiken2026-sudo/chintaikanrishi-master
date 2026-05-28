@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from tools.ichimon_paths import ichimon_rel_path
 from tools.site_config import category_to_field_map
 
 DATA_CSV = ROOT / "data" / "ichimon_questions.csv"
@@ -28,8 +29,6 @@ OUT_JS = ROOT / "exam-site-data-ichimondou.js"
 
 # site-config.json の fields[].aliases / name に対応
 CATEGORY_TO_FIELD: dict[str, str] = category_to_field_map()
-
-_ID_PATH = re.compile(r"^(\d{4})-(\d+)-(\d+)$")
 
 
 def norm(s: str | None) -> str:
@@ -55,11 +54,7 @@ def parse_marubatsu_answer(raw: str) -> bool:
 
 
 def public_path_from_id(row_id: str) -> str:
-    m = _ID_PATH.match(norm(row_id))
-    if not m:
-        return ""
-    y, mo, seq = m.groups()
-    return f"q/ichimon/y{int(y)}/i{int(mo):02d}-{int(seq)}/index.html"
+    return ichimon_rel_path(row_id)
 
 
 def normalize_statement(text: str) -> str:

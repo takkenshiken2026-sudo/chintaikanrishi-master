@@ -79,7 +79,8 @@ ICHIMON_CSV = ROOT / "data" / "ichimon_questions.csv"
 Q_ROOT = ROOT / "q"
 BASE_DEFAULT = clean_origin()
 
-_ID_PATH = re.compile(r"^(\d{4})-(\d+)-(\d+|[アイウエ])$")
+from tools.ichimon_paths import ichimon_path_info, ichimon_rel_path  # noqa: E402
+
 PRACTICE_ID_BASE = 900_000
 
 INDEX_CONFIG: dict[str, dict] = {
@@ -135,18 +136,6 @@ def category_rank(cat: str) -> int:
         return order.index(cat)
     except ValueError:
         return len(order)
-
-
-def parse_ichimon_id(row_id: str) -> tuple[int, int, str]:
-    m = _ID_PATH.match(norm(row_id))
-    if not m:
-        raise ValueError(f"一問一答 id の形式が不正です: {row_id!r}（例: 2026-01-1 または 2017-01-ア）")
-    return int(m.group(1)), int(m.group(2)), m.group(3)
-
-
-def ichimon_rel_path(row_id: str) -> str:
-    y, mo, seq = parse_ichimon_id(row_id)
-    return f"q/ichimon/y{y}/i{mo:02d}-{seq}/index.html"
 
 
 def practice_rel_path(qno: int) -> str:
@@ -212,11 +201,10 @@ def ichimon_page_dict(row: dict, line_no: int) -> dict:
     cat = norm(row.get("category"))
     statement = norm(row.get("question"))
     correct = parse_marubatsu_answer(norm(row.get("answer")))
-    rel = ichimon_rel_path(rid)
-    y, mo, seq = parse_ichimon_id(rid)
+    paths = ichimon_path_info(rid)
     return {
         "id": rid,
-        "year": y,
+        "year": int(paths["year"]),
         "category": cat,
         "statement": statement,
         "statement_html": f"<p>{text_to_html(statement)}</p>" if statement else "<p>（問題文なし）</p>",
@@ -224,8 +212,8 @@ def ichimon_page_dict(row: dict, line_no: int) -> dict:
         "exp": norm(row.get("explanation")) or "（解説は未入力です。）",
         "source": norm(row.get("source")),
         "tags": parse_tags(norm(row.get("tags"))),
-        "rel_path": rel,
-        "href_rel": f"y{y}/i{mo:02d}-{seq}/index.html",
+        "rel_path": str(paths["rel_path"]),
+        "href_rel": str(paths["href_rel"]),
     }
 
 
@@ -237,6 +225,7 @@ def build_practice_related_html(
     guides: list[dict[str, str]],
 ) -> str:
     from tools.build_glossary_pages import field_hub_slug
+    from tools.knowledge_hub_seo import field_hub_page_exists
 
     links: list[tuple[str, str]] = []
     seen: set[str] = set()
@@ -258,8 +247,10 @@ def build_practice_related_html(
     for gl in glossary_links_for_tags(page.get("tags") or [], glossary_lookup):
         add(rel_href(rel_path, normalize_glossary_href(gl["href"])), gl["label"])
 
-    hub = field_hub_slug(page.get("category") or "")
-    add(rel_href(rel_path, f"terms/{hub}/index.html"), f"{page.get('category', '')}の用語一覧")
+    cat = page.get("category") or ""
+    if field_hub_page_exists(cat):
+        hub = field_hub_slug(cat)
+        add(rel_href(rel_path, f"terms/{hub}/index.html"), f"{cat}の用語一覧")
 
     for href_rel, title in guide_links_for_page(page.get("category") or "", guides):
         add(rel_href(rel_path, href_rel), title)
@@ -288,6 +279,7 @@ def build_ichimon_related_html(
     guides: list[dict[str, str]],
 ) -> str:
     from tools.build_glossary_pages import field_hub_slug
+    from tools.knowledge_hub_seo import field_hub_page_exists
 
     links: list[tuple[str, str]] = []
     seen: set[str] = set()
@@ -310,8 +302,10 @@ def build_ichimon_related_html(
     for gl in glossary_links_for_tags(page.get("tags") or [], glossary_lookup):
         add(rel_href(rel_path, normalize_glossary_href(gl["href"])), gl["label"])
 
-    hub = field_hub_slug(page.get("category") or "")
-    add(rel_href(rel_path, f"terms/{hub}/index.html"), f"{page.get('category', '')}の用語一覧")
+    cat = page.get("category") or ""
+    if field_hub_page_exists(cat):
+        hub = field_hub_slug(cat)
+        add(rel_href(rel_path, f"terms/{hub}/index.html"), f"{cat}の用語一覧")
 
     for href_rel, title in guide_links_for_page(page.get("category") or "", guides):
         add(rel_href(rel_path, href_rel), title)
@@ -945,7 +939,11 @@ def ichimon_index_item_dict(page: dict) -> dict:
     preview = stem_preview(page.get("statement") or "")
     tags = page.get("tags") or []
     rid = page["id"]
-    year = page.get("year") or int(rid.split("-")[0])
+    year = int(page.get("year") or 0)
+    if not year and "-" in rid:
+        head = rid.split("-", 1)[0]
+        if head.isdigit():
+            year = int(head)
     search_bits = [rid, page["category"], str(year), preview, *tags]
     return {
         "appId": rid,

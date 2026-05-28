@@ -8,6 +8,8 @@ import html
 import re
 from pathlib import Path
 
+from tools.ichimon_paths import ichimon_rel_path
+
 MODE_LABEL: dict[str, str] = {
     "past": "過去問",
     "practice": "実践演習",
@@ -138,11 +140,10 @@ def load_question_catalog(root: Path) -> list[dict]:
 
 
 def _ichimon_rel_path(rid: str) -> str:
-    m = re.match(r"^(\d{4})-(\d+)-(\d+|[アイウエ])$", rid.replace(" ", ""))
-    if not m:
+    try:
+        return ichimon_rel_path(rid)
+    except ValueError:
         return "q/ichimon/index.html"
-    y, mo, seq = int(m.group(1)), int(m.group(2)), m.group(3)
-    return f"q/ichimon/y{y}/i{mo:02d}-{seq}/index.html"
 
 
 def current_ref_from_page(page: dict, *, mode: str) -> dict:
