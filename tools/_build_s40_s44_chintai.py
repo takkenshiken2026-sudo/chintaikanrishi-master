@@ -35,7 +35,7 @@ def _rel(*terms: str) -> str:
 
 
 def _t(title: str, batch: str) -> str:
-    return f"{title}（{batch}）"
+    return title
 
 
 def _faq(qa: list[tuple[str, str]]) -> list[tuple[str, str]]:

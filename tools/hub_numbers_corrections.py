@@ -24,7 +24,7 @@ def _title_for(base: str, batch: str) -> str | None:
         "keiyaku-koushin": "契約更新：更新料と法定更新",
     }
     t = titles.get(base)
-    return f"{t}（{batch}）" if t else None
+    return t
 
 
 def apply_numbers_corrections(rows: list[dict[str, str]]) -> None:
