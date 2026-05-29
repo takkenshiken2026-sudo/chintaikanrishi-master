@@ -44,7 +44,15 @@ def apply_numbers_corrections(rows: list[dict[str, str]]) -> None:
                 row[key] = val
         new_title = _title_for(base, batch)
         if new_title:
-            row["title"] = new_title
-            row["article_title"] = f"{new_title}｜数値早見"
+            batch_num = int(re.search(r"-s(\d+)$", slug).group(1)) if re.search(r"-s(\d+)$", slug) else None
+            from tools.hub_diversify_content import ANGLE_BY_BATCH
+
+            angle_suffix = ""
+            if batch_num and batch_num in ANGLE_BY_BATCH:
+                angle_suffix = f"（{ANGLE_BY_BATCH[batch_num]}）"
+            row["title"] = (
+                f"{new_title}{angle_suffix}" if angle_suffix and angle_suffix not in new_title else new_title
+            )
+            row["article_title"] = f"{row['title']}｜数値早見"
         summary_theme = SLUG_BASE_PATCHES[base]["highlight"].split("。")[0]
         row["summary"] = f"{summary_theme}。借地借家法・賃管法・受託契約の関係を整理します。"
