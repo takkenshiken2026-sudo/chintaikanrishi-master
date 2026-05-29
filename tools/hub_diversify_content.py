@@ -477,28 +477,21 @@ def _confusion_for_row(row: dict[str, str], topic: str, angle: str) -> str:
 
 
 def _summary_mistake(row: dict[str, str], topic: str, angle: str) -> str:
-    label = _clean_public_title(_strip_angle_suffix(row.get("title", "")))
-    return (
-        f"「{label}」（{angle}）で出やすい誤答を、"
-        "主体の取り違え・手順の前後逆・数値の単独暗記・記録省略の4型に分けて整理します。"
-    )
+    from tools.index_summary import mistakes_index_overview
+
+    return mistakes_index_overview(row)
 
 
-def _summary_compare(t1: str, t2: str, topic: str, angle: str) -> str:
-    return (
-        f"「{t1}」と「{t2}」（{angle}）について、"
-        "目的・主体・手続・数値・試験論点の5軸で違いを比較します。"
-    )
+def _summary_compare(row: dict[str, str], topic: str, angle: str) -> str:
+    from tools.index_summary import compare_index_overview
+
+    return compare_index_overview(row)
 
 
 def _summary_numbers(row: dict[str, str], topic: str, angle: str) -> str:
-    label = _clean_public_title(_strip_angle_suffix(row.get("title", "")))
-    nuance = _title_nuance(row)
-    focus = f"{nuance}の" if nuance else ""
-    return (
-        f"「{label}」で押さえる{focus}代表数値・条件・記録要件を、"
-        f"{angle}の観点で表に整理します。"
-    )
+    from tools.index_summary import numbers_index_overview
+
+    return numbers_index_overview(row)
 
 
 def _personalize_confusion_point(row: dict[str, str]) -> None:
@@ -708,7 +701,7 @@ def _ensure_compare_content(row: dict[str, str]) -> None:
 
     row["col_labels"] = f"{t1};{t2}"
     row["compare_rows"] = json.dumps(_compare_rows(row, topic, terms, angle), ensure_ascii=False)
-    row["summary"] = _summary_compare(t1, t2, topic, angle)
+    row["summary"] = _summary_compare(row, topic, angle)
     if not row.get("article_lead") or len((row.get("article_lead") or "")) < 40:
         row["article_lead"] = LEAD_BY_ANGLE[angle].format(topic=topic or t1)
     row["exam_points"] = _mistake_exam_points(topic or t1, angle, row.get("slug", ""))
@@ -784,7 +777,7 @@ def _diversify_compare(row: dict[str, str]) -> None:
         row["title"] = f"{base_title or topic}（{angle}）"
         row["col_labels"] = f"{t1};{t2}"
         row["compare_rows"] = json.dumps(_compare_rows(row, topic, terms, angle), ensure_ascii=False)
-        row["summary"] = _summary_compare(t1, t2, topic, angle)
+        row["summary"] = _summary_compare(row, topic, angle)
         row["article_lead"] = LEAD_BY_ANGLE[angle].format(topic=topic)
         row["exam_points"] = _mistake_exam_points(topic, angle, row.get("slug", ""))
         row["common_mistakes"] = _mistake_common(topic, terms, row.get("slug", ""))
@@ -1092,7 +1085,7 @@ def _dedupe_compare_col_labels(rows: list[dict[str, str]]) -> None:
                 row["compare_rows"] = json.dumps(
                     _compare_rows(row, topic, terms, angle), ensure_ascii=False
                 )
-                row["summary"] = _summary_compare(t1, t2, topic, angle)
+                row["summary"] = _summary_compare(row, topic, angle)
                 _apply_compare_batch_angle(row)
 
 

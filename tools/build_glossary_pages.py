@@ -34,6 +34,7 @@ from tools.html_footer import (
     site_page_wrap_close,
     site_page_wrap_open,
 )
+from tools.index_summary import glossary_index_definition
 from tools.knowledge_hub_tabs import knowledge_hub_tab_hrefs, knowledge_hub_tabs_html
 from tools.site_config import (
     brand_name,
@@ -217,7 +218,7 @@ def split_semicolon(s: str) -> list[str]:
 
 
 TERMS_INDEX_CSS_VER = "20260525-responsive-h1"
-TERMS_INDEX_JS_VER = "20260529-terms-index-cols"
+TERMS_INDEX_JS_VER = "20260529-terms-index-summary"
 TERMS_INDEX_SEARCH_PLACEHOLDER = "例：ストレスチェック、ラインケア、うつ病…"
 
 # CSV enrich 時の分野テンプレ（一覧の定義抜粋には出さない）
@@ -262,30 +263,8 @@ def _is_generic_index_snippet(text: str, term: str) -> bool:
 
 
 def terms_index_snippet(entry: dict) -> str:
-    """一覧・検索用の定義抜粋。enrich テンプレ文は definition から実義を拾う。"""
-    term = (entry.get("term") or "").strip()
-    short = (entry.get("short_def") or "").strip()
-    definition = (entry.get("definition") or "").strip()
-
-    if definition:
-        m = re.search(r"まず「([^」]+)」", definition)
-        if m:
-            clause = m.group(1).strip()
-            if clause and not _is_generic_index_snippet(clause, term):
-                if clause.startswith(term):
-                    return clause if clause.endswith("。") else f"{clause}。"
-                body = clause.rstrip("。")
-                return f"{term}は、{body}。" if body else short
-
-    if short and not _is_generic_index_snippet(short, term):
-        return short
-
-    if definition:
-        for part in re.split(r"(?<=[。！？])", definition):
-            part = part.strip()
-            if part and part != short and not _is_generic_index_snippet(part, term):
-                return part[:200]
-    return short
+    """一覧・検索用の定義（詳細記事要約）。"""
+    return glossary_index_definition(entry)
 
 
 def render_terms_index_tbody(entries: list[dict]) -> str:

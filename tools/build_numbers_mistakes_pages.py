@@ -73,12 +73,13 @@ from tools.html_footer import (  # noqa: E402
     site_page_wrap_close,
     site_page_wrap_open,
 )
+from tools.index_summary import hub_index_overview as build_hub_overview
 from tools.knowledge_hub_tabs import knowledge_hub_tab_hrefs, knowledge_hub_tabs_html  # noqa: E402
 from tools.seo_utils import content_date_from_row, meta_updated_html  # noqa: E402
 from tools.site_config import brand_name, clean_origin, exam_name  # noqa: E402
 
 BASE_DEFAULT = clean_origin()
-HUB_INDEX_JS_VER = "20260529-knowledge-hub-index-cols"
+HUB_INDEX_JS_VER = "20260529-knowledge-hub-index-summary"
 
 
 @dataclass(frozen=True)
@@ -223,9 +224,9 @@ def load_hub_rows(spec: HubSpec, *, row_parser: Callable[[str, int], list[dict]]
     return entries
 
 
-def hub_index_overview(entry: dict) -> str:
-    """一覧3列目：記事サマリ（summary → article_lead）。"""
-    return (entry.get("summary") or entry.get("article_lead") or "").strip()
+def hub_index_overview(entry: dict, *, hub: str) -> str:
+    """一覧3列目：詳細記事から要約。"""
+    return build_hub_overview(entry, hub)
 
 
 def hub_index_href(spec: HubSpec, slug_file: str) -> str:
@@ -235,7 +236,7 @@ def hub_index_href(spec: HubSpec, slug_file: str) -> str:
 
 def hub_index_item_dict(spec: HubSpec, entry: dict) -> dict:
     tags = parse_term_tags(entry.get("tags") or "")
-    overview = hub_index_overview(entry)
+    overview = hub_index_overview(entry, hub=spec.hub_id)
     detail = entry.get(spec.index_detail_field) or ""
     search_bits = [entry["title"], entry.get("category") or "", overview, detail, *tags]
     return {
@@ -308,7 +309,7 @@ def render_index_tbody(spec: HubSpec, entries: list[dict]) -> str:
     for item in items:
         href = html.escape(hub_index_href(spec, item["slug_file"]))
         href_attr = f' data-entry-href="{href}"'
-        overview = html.escape(hub_index_overview(item))
+        overview = html.escape(hub_index_overview(item, hub=spec.hub_id))
         rows.append(
             f'<tr class="terms-idx-table-row {spec.index_table_class}-row">'
             f'<td class="terms-idx-td-term {spec.index_table_class}-td-title" data-label="{html.escape(spec.index_col1)}"{href_attr} tabindex="0">'

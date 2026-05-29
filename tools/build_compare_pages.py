@@ -73,6 +73,7 @@ from tools.html_footer import (  # noqa: E402
     site_page_wrap_close,
     site_page_wrap_open,
 )
+from tools.index_summary import compare_index_overview as build_compare_overview
 from tools.knowledge_hub_tabs import knowledge_hub_tab_hrefs, knowledge_hub_tabs_html  # noqa: E402
 from tools.seo_utils import content_date_from_row, meta_updated_html  # noqa: E402
 from tools.site_config import brand_name, exam_name, clean_origin  # noqa: E402
@@ -81,7 +82,7 @@ COMPARE_CSV = ROOT / "data" / "comparisons.csv"
 COMPARE_DIR = ROOT / "terms" / "compare"
 BASE_DEFAULT = clean_origin()
 
-COMPARE_INDEX_JS_VER = "20260529-compare-index-cols"
+COMPARE_INDEX_JS_VER = "20260529-compare-index-summary"
 COMPARE_INDEX_SEARCH_PLACEHOLDER = "例：過去問、模擬試験、公式情報…"
 PRESERVED_COMPARE_GLOB = "c-*.html"
 
@@ -192,8 +193,8 @@ def load_compare_rows() -> list[dict]:
 
 
 def compare_index_overview(entry: dict) -> str:
-    """一覧3列目：記事サマリ（summary → article_lead）。"""
-    return (entry.get("summary") or entry.get("article_lead") or "").strip()
+    """一覧3列目：詳細記事から要約。"""
+    return build_compare_overview(entry)
 
 
 def compare_index_item_dict(entry: dict) -> dict:
