@@ -162,7 +162,9 @@
     "hanrei-seiri-num-s42": "hanrei-seiri-num-s40",
     "hanrei-seiri-num-s43": "hanrei-seiri-num-s40",
     "hanrei-seiri-num-s44": "hanrei-seiri-num-s40",
-    "genjo-jiko-5nen-s34": "genjo-kaifuku-jiko-s32"
+    "genjo-jiko-5nen-s34": "genjo-kaifuku-jiko-s32",
+    "juken-12000": "/articles/exam-fees.html",
+    "shiken-moshikomi-kikan": "/articles/schedule-application.html"
   },
   "mistakes": {
     "nyukyosha-taiou-mis-s36": "nyukyosha-taiou-mis-s35",
