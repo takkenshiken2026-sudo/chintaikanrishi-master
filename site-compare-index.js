@@ -120,11 +120,11 @@
   function rowHtml(item, query) {
     const href = resolveEntryHref(item.href);
     const hrefAttr = ` data-entry-href="${escapeHtml(href)}"`;
-    const overview = item.summary || '';
+    const summary = item.summary || '';
     return `<tr class="terms-idx-table-row compare-idx-table-row">
 <td class="terms-idx-td-term compare-idx-td-title" data-label="項目"${hrefAttr} tabindex="0"><div class="terms-idx-term-cell"><a href="${escapeHtml(href)}">${highlightText(item.title, query)}</a></div></td>
 <td class="terms-idx-td-cat" data-label="分野"${hrefAttr}>${escapeHtml(item.category)}</td>
-<td class="terms-idx-td-snippet compare-idx-td-overview" data-label="概要"${hrefAttr}>${overview ? highlightText(overview, query) : ''}</td>
+<td class="terms-idx-td-snippet compare-idx-td-summary" data-label="概要"${hrefAttr}>${highlightText(summary, query)}</td>
 </tr>`;
   }
 

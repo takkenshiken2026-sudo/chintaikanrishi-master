@@ -210,9 +210,9 @@ def extract_choice_verdict_clauses(
         if verdict.startswith(("適切", "正しい", "妥当")):
             if inappropriate:
                 out[n] = (
-                    f"（{n}）は単体では適切な記述です。"
-                    f"本問は「最も適切でないもの」を選ぶ形式のため、この肢は正答にはなりません。"
-                    f"正答は（{correct}）です。"
+                    f"解説では選択肢{n}は「{verdict}」と整理されています。"
+                    f"本問は最も不適切・誤っている記述を選ぶ形式のため、"
+                    f"単独では妥当に見える記述でも正答にはなりません。"
                 )
         else:
             out[n] = (
@@ -338,62 +338,7 @@ def is_true_only_marker(note: str) -> bool:
     return bool(re.search(r"[①②③④⑤]?正[）)]?", compact)) and len(compact) < 90
 
 
-def is_kana_combo(opt: str) -> bool:
-    return bool(re.fullmatch(r"[ア-オ](?:・[ア-オ])*", norm(opt)))
-
-
-def parse_statement_verdicts(exp: str) -> dict[str, str]:
-    """記述アは不適切 / 記述イは適切 などを抽出 → wrong / right。"""
-    out: dict[str, str] = {}
-    for m in re.finditer(
-        r"記述([ア-オ])\s*は\s*(不適切|適切|誤り|誤|正しい|正)",
-        exp,
-    ):
-        verdict = m.group(2)
-        out[m.group(1)] = (
-            "wrong" if verdict.startswith(("不適", "誤")) else "right"
-        )
-    return out
-
-
-def kana_combo_wrong_note(
-    n: int,
-    opt: str,
-    correct: int,
-    correct_opt: str,
-    exp: str,
-) -> str:
-    verdicts = parse_statement_verdicts(exp)
-    if not verdicts:
-        return ""
-    wrong_labels = {k for k, v in verdicts.items() if v == "wrong"}
-    right_labels = {k for k, v in verdicts.items() if v == "right"}
-    combo = set(norm(opt).split("・"))
-    parts = [f"（{n}）「{opt}」は正答にはなりません。"]
-    extra_right = combo & right_labels
-    missing_wrong = wrong_labels - combo
-    if extra_right:
-        parts.append(
-            f"記述{'・'.join(sorted(extra_right))}は正しい記述のため、"
-            f"「誤っているものの組合せ」には当たりません。"
-        )
-    if missing_wrong:
-        parts.append(
-            f"誤っている記述{'・'.join(sorted(missing_wrong))}が含まれていません。"
-        )
-    if not extra_right and not missing_wrong:
-        parts.append(
-            f"正答は（{correct}）「{correct_opt}」で、"
-            f"誤っている記述をすべて含む組合せです。"
-        )
-    return " ".join(parts)
-
-
 def combo_choice_note(n: int, opt: str, exp: str, correct: int, correct_opt: str) -> str:
-    if is_kana_combo(opt):
-        note = kana_combo_wrong_note(n, opt, correct, correct_opt, exp)
-        if note:
-            return note
     letters = re.findall(r"[A-E]", opt)
     if not letters:
         return ""
@@ -423,9 +368,6 @@ def finalize_wrong_note(
     note = norm(note)
     opt_short = opt[:80] + ("…" if len(opt) > 80 else "")
     correct_short = correct_opt[:80] + ("…" if len(correct_opt) > 80 else "")
-
-    if is_kana_combo(opt):
-        return kana_combo_wrong_note(n, opt, correct, correct_opt, exp)
 
     if len(re.findall(r"[①②③④⑤]", note)) >= 2:
         return (
@@ -493,68 +435,12 @@ def polish_note(note: str, n: int, opt: str, correct: int, category: str) -> str
     )
 
 
-def inappropriate_phrase(stem: str) -> str:
-    s = norm(stem)
-    if "最も" in s and "適切でない" in s:
-        return "「最も適切でないもの」"
-    if re.search(r"適切でない", s):
-        return "「適切でないもの」"
-    if re.search(r"誤っている", s):
-        return "「誤っているもの」"
-    return "「不適切なもの」"
-
-
 def stem_asks_inappropriate(stem: str) -> bool:
-    """設問が「最も適切でない／誤っているもの」を選ぶ形式か（q_explanation と同型）。"""
-    s = norm(stem)
-    return bool(
-        re.search(r"適切でない|誤っている|誤りである|正しくない|不適切なもの", s)
-    )
-
-
-def stem_asks_most_correct(stem: str) -> bool:
-    s = norm(stem)
-    if stem_asks_inappropriate(s):
-        return False
-    return bool(re.search(r"正しい|妥当|適切である|適切なもの", s))
+    return "不適切" in stem and "適切" in stem
 
 
 def law_terms(text: str) -> list[str]:
     return list(dict.fromkeys(LAW_RE.findall(norm(text))))
-
-
-def format_correct_rationale(
-    correct: int,
-    correct_opt: str,
-    stem: str,
-    *,
-    inappropriate: bool,
-) -> tuple[str, str]:
-    """正答の要約（summary）と詳述（correct_body）を設問形式に合わせて生成。"""
-    opt_short = correct_opt[:72] + ("…" if len(correct_opt) > 72 else "")
-    if inappropriate:
-        phrase = inappropriate_phrase(stem)
-        summary = (
-            f"本問は{phrase}を選ぶ問題です。"
-            f"（{correct}）の記述が不適切なため、正答は（{correct}）です。"
-        )
-        body = (
-            f"（{correct}）「{opt_short}」は、設問の条件に照らして問題のある記述です。"
-            f"他の選択肢は単独では適切な内容が多いため、四肢を比較して不適切なものを選びます。"
-        )
-    elif stem_asks_most_correct(stem):
-        summary = (
-            f"本問は「正しいもの」を選ぶ問題です。"
-            f"（{correct}）の記述が最も正確なため、正答は（{correct}）です。"
-        )
-        body = (
-            f"（{correct}）「{opt_short}」は、制度・実務の整理に沿った正しい記述です。"
-            f"他の選択肢は要件・主体・数字・期限などの点でずれている部分があります。"
-        )
-    else:
-        summary = f"正答は（{correct}）です。"
-        body = f"（{correct}）「{opt_short}」が、設問の条件に最も合う選択肢です。"
-    return summary, body
 
 
 def infer_contrast_note(
@@ -571,11 +457,10 @@ def infer_contrast_note(
     reasons: list[str] = []
 
     if stem_asks_inappropriate(stem):
-        phrase = inappropriate_phrase(stem)
         return (
-            f"（{n}）「{opt_short}」は、単体では適切な記述です。"
-            f"本問は{phrase}を選ぶ形式のため、この肢は正答にはなりません。"
-            f"正答は（{correct}）「{correct_short}」です。"
+            f"（{n}）「{opt_short}」は、設問の趣旨では適切な記述・対応に当たることが多いです。"
+            f"本問は「最も不適切なもの」を選ぶ形式のため、正答は（{correct}）「{correct_short}」です。"
+            f"解説のポイント：{exp[:120]}{'…' if len(exp) > 120 else ''}"
         )
 
     exp_laws = law_terms(exp)
@@ -612,18 +497,30 @@ def infer_contrast_note(
     if re.search(r"精神科", opt) and "心療内科" in exp and "心身症" in exp and "すべて" in opt:
         reasons.append("診療科の対象範囲の言い過ぎ・取り違えがある可能性があります。")
 
-    if stem_asks_most_correct(stem):
+    for sent in split_sentences(exp):
+        if len(sent) < 12:
+            continue
+        key = sent[:24]
+        if key in opt:
+            continue
+        if any(
+            tok in opt
+            for tok in ("ない", "しない", "のみ", "誤", "対象外", "不要", "含まれない")
+        ) and any(tok in sent for tok in ("及ぶ", "ある", "必要", "実施", "有効", "適切")):
+            if len(sent) <= 100:
+                reasons.append(f"解説では「{sent}」とある一方、（{n}）の記述はそれと矛盾します。")
+                break
+
+    if not reasons:
         reasons.append(
-            f"（{n}）「{opt_short}」は、制度・実務の整理と照らすと正しい記述ではありません。"
-            f"正答は（{correct}）「{correct_short}」です。"
-        )
-    else:
-        reasons.append(
-            f"（{n}）の内容は、正答（{correct}）「{correct_short}」が示す論点と異なります。"
-            f"設問の条件に合う肢かどうかを確認してください。"
+            f"（{n}）の内容は、正答（{correct}）「{correct_short}」が示す論点とずれています。"
         )
 
-    return " ".join(reasons[:2])
+    lead = " ".join(reasons[:2])
+    return (
+        f"{lead} 解説の要点：{exp[:140]}{'…' if len(exp) > 140 else ''} "
+        f"正答（{correct}）との違いを確認し直してください。"
+    )
 
 
 def synthesize_wrong_note(
@@ -712,7 +609,7 @@ def build_row_fields(row: dict) -> tuple[str, str, str]:
     correct_opt = texts.get(correct, "")
     for n in wrong_nums:
         parts: list[str] = []
-        if re.match(r"^[A-E]", texts[n].strip()) or is_kana_combo(texts[n]):
+        if re.match(r"^[A-E]", texts[n].strip()):
             combo = combo_choice_note(n, texts[n], exp, correct, correct_opt)
             if combo:
                 parts.append(combo)
@@ -766,21 +663,21 @@ def build_row_fields(row: dict) -> tuple[str, str, str]:
         wrong_map[n] = polish_note(
             wrong_map[n], n, texts[n], correct, category
         )
-        if inappropriate and not is_kana_combo(texts[n]) and not re.match(
-            r"^[A-E]", texts[n].strip()
-        ):
-            if "法令上妥当" in wrong_map[n] or "選び直してください" in wrong_map[n]:
-                wrong_map[n] = infer_contrast_note(
-                    n, texts[n], correct, correct_opt, exp, stem
-                )
 
     correct_body = norm(row.get("explanation_correct"))
+    if not correct_body:
+        parts = []
+        if markers.get(correct):
+            parts.append(markers[correct])
+        parts.extend(buckets.get(correct, []))
+        correct_body = " ".join(dict.fromkeys(parts)) or extract_correct_body(exp, correct)
+        if not correct_body:
+            correct_body = exp[:500]
+
     summary = norm(row.get("explanation_summary"))
-    summary_new, body_new = format_correct_rationale(
-        correct, correct_opt, stem, inappropriate=inappropriate
-    )
-    correct_body = body_new
-    summary = summary_new
+    if not summary or summary == exp[:200]:
+        lead = extract_correct_body(exp, correct) or exp[:180]
+        summary = lead[:220]
 
     choices_field = ";".join(f"{n}:{wrong_map[n]}" for n in sorted(wrong_map))
     point = norm(row.get("explanation_point")) or CATEGORY_STUDY_HINTS.get(category, "")
