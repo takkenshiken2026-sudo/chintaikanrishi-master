@@ -145,11 +145,16 @@ def split_long_sentences(text: str, *, max_chars: int = 72) -> str:
             if not sent:
                 continue
             while len(sent) > max_chars and "、" in sent:
-                idx = sent.rfind("、", 0, max_chars)
-                if idx <= 0:
-                    break
-                head, sent = sent[: idx + 1].rstrip("、") + "。", sent[idx + 1 :].lstrip()
-                sentences.append(head)
+        idx = sent.rfind("、", 0, max_chars)
+        if idx <= 0:
+            break
+        # 「…について、」の直後で切ると述語欠落になるため避ける
+        if idx >= 3 and sent[idx - 3 : idx + 1] == "について、":
+            idx = sent.rfind("、", 0, idx)
+            if idx <= 0:
+                break
+        head, sent = sent[: idx + 1].rstrip("、") + "。", sent[idx + 1 :].lstrip()
+        sentences.append(head)
             while len(sent) > max_chars:
                 cut = _safe_cut(sent, max_chars)
                 if cut <= 20:
