@@ -82,7 +82,17 @@ def apply_readability(text: str) -> str:
             out = out.replace("することが可能", "できます")
         elif frag == "において":
             out = out.replace("において", "では")
+        elif frag == "ものとする":
+            out = out.replace("ものとする", "と定められています")
     return out
+
+
+def fix_faq_questions(row: dict[str, str], *, prefix: str = "faq_", count: int = 4) -> None:
+    for i in range(1, count + 1):
+        col = f"{prefix}{i}_question"
+        q = norm(row.get(col))
+        if q and not q.endswith(("？", "?")):
+            row[col] = q.rstrip("?") + "？"
 
 
 def split_long_sentences(text: str, *, max_chars: int = 72) -> str:
@@ -484,6 +494,7 @@ def fix_glossary_rows(rows: list[dict[str, str]], *, header: list[str]) -> int:
                 text = ensure_concreteness(text, term=term)
             row[col] = normalize_prose(text)
         row["explanation"] = ensure_explanation_exam(norm(row.get("explanation")), term)
+        fix_faq_questions(row, count=4)
         fix_faq_answers(row, glossary=True)
         imp = norm(row.get("importance"))
         pts = split_semicolon(norm(row.get("exam_points")))
@@ -542,6 +553,7 @@ def fix_guide_rows(rows: list[dict[str, str]], *, header: list[str], official_ur
             text = norm(row.get(col))
             if text:
                 row[col] = apply_readability(text)
+        fix_faq_questions(row, count=3)
         fix_faq_answers(row, glossary=False)
         title = norm(row.get("title"))
         if title:
