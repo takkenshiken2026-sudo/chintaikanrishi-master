@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tools.hub_strip_batch_suffix import BATCH_SUFFIX_RE  # noqa: E402
+from tools.hub_strip_batch_suffix import strip_batch_suffix  # noqa: E402
 
 HUB_FILES = ("comparisons.csv", "numbers.csv", "mistakes.csv")
 HUB_TAG = {
@@ -25,7 +25,18 @@ HUB_TAG = {
 
 
 def _title_key(title: str) -> str:
-    return BATCH_SUFFIX_RE.sub("", title.strip()).strip()
+    return strip_batch_suffix(title.strip())
+
+
+def _similar(t1: str, t2: str) -> bool:
+    if not t1 or not t2:
+        return False
+    if t1 == t2:
+        return True
+    k1, k2 = _title_key(t1), _title_key(t2)
+    if k1 == k2:
+        return True
+    return SequenceMatcher(None, k1, k2).ratio() >= 0.88
 
 
 def _read(path: Path) -> tuple[list[str], list[dict[str, str]]]:
@@ -41,15 +52,51 @@ def _write(path: Path, header: list[str], rows: list[dict[str, str]]) -> None:
         w.writerows(rows)
 
 
-def _disambiguator(row: dict[str, str], hub_file: str) -> str:
+def _clean_title(title: str) -> str:
+    """連続した同一【…】プレフィックスを1つに戻す。"""
+    while True:
+        idx = title.find("【")
+        if idx < 0:
+            break
+        end = title.find("】", idx)
+        if end < 0:
+            break
+        chunk = title[idx : end + 1]
+        rest = title[end + 1 :]
+        if rest.startswith(chunk):
+            title = title[:idx] + rest
+            continue
+        break
+    return title.strip()
+
+
+def _tweak_title(row: dict[str, str], hub_file: str, *, level: int) -> str | None:
+    title = _clean_title((row.get("title") or "").strip())
+    if not title:
+        return None
     highlight = (row.get("highlight") or "").strip()
-    if highlight and len(highlight) <= 18:
-        return highlight
+    category = (row.get("category") or "").strip()
     slug = (row.get("slug") or "").strip()
-    tail = slug.split("-")[-1] if slug else ""
-    if tail:
-        return tail
-    return HUB_TAG.get(hub_file, "論点")
+    if level == 0:
+        tag = highlight[:16] if highlight else slug.split("-")[-1] if slug else HUB_TAG.get(hub_file, "論点")
+        if tag and tag not in title:
+            return f"{title}｜{tag}"
+    if level == 1 and highlight and "【" not in title[:24]:
+        label = highlight[:8]
+        if label:
+            return f"【{label}】{title}"
+    if level == 2 and slug:
+        tail = "-".join(slug.split("-")[-2:]) if "-" in slug else slug[-14:]
+        if tail and tail not in title:
+            return f"{title}｜{tail}"
+    if level == 3 and category and "【" not in title[:24]:
+        return f"【{category[:8]}】{title}"
+    if level >= 4 and slug:
+        batch = slug.split("-")[-1]
+        core = _title_key(title).split("｜")[0]
+        if batch and batch not in core:
+            return f"{core}（{batch}）｜{slug.split('-')[-2]}-{batch}" if "-" in slug else f"{core}（{batch}）"
+    return None
 
 
 def fix_file(path: Path) -> int:
@@ -57,23 +104,27 @@ def fix_file(path: Path) -> int:
     if not rows:
         return 0
     changed = 0
-    titles = [(i, (row.get("title") or "").strip()) for i, row in enumerate(rows)]
-    for i, t1 in titles:
-        if not t1:
-            continue
-        for j, t2 in titles[i + 1 :]:
-            if not t2:
-                continue
-            if t1 == t2 or SequenceMatcher(None, _title_key(t1), _title_key(t2)).ratio() >= 0.88:
+    for _ in range(16):
+        round_changed = 0
+        active = [i for i, row in enumerate(rows) if (row.get("title") or "").strip()]
+        for ai, i in enumerate(active):
+            t1 = (rows[i].get("title") or "").strip()
+            for j in active[ai + 1 :]:
+                t2 = (rows[j].get("title") or "").strip()
+                if not _similar(t1, t2):
+                    continue
                 for idx in (i, j):
                     row = rows[idx]
                     title = (row.get("title") or "").strip()
-                    tag = _disambiguator(row, path.name)
-                    if tag and tag not in title:
-                        new_title = f"{title}｜{tag}"
-                        if new_title != title:
+                    for level in range(6):
+                        new_title = _tweak_title(row, path.name, level=level)
+                        if new_title and new_title != title:
                             row["title"] = new_title
-                            changed += 1
+                            round_changed += 1
+                            break
+        if round_changed == 0:
+            break
+        changed += round_changed
     if changed:
         _write(path, header, rows)
     return changed
@@ -81,52 +132,15 @@ def fix_file(path: Path) -> int:
 
 def fix_site(root: Path) -> int:
     data = root / "data"
-    rows_by: dict[str, tuple[list[str], list[dict[str, str]]]] = {}
+    total = 0
     for name in HUB_FILES:
         path = data / name
-        if path.is_file():
-            rows_by[name] = _read(path)
-    total = 0
-    for name, (header, rows) in rows_by.items():
-        path = data / name
+        if not path.is_file():
+            continue
         n = fix_file(path)
         if n:
             print(f"  {name}: {n} title tweaks")
         total += n
-        rows_by[name] = _read(path)
-
-    entries: list[tuple[str, int, dict[str, str]]] = []
-    for name in HUB_FILES:
-        if name not in rows_by:
-            continue
-        _, rows = rows_by[name]
-        for i, row in enumerate(rows):
-            if (row.get("title") or "").strip():
-                entries.append((name, i, row))
-    cross = 0
-    for a in range(len(entries)):
-        f1, _, r1 = entries[a]
-        t1 = (r1.get("title") or "").strip()
-        for b in range(a + 1, len(entries)):
-            f2, _, r2 = entries[b]
-            t2 = (r2.get("title") or "").strip()
-            if SequenceMatcher(None, _title_key(t1), _title_key(t2)).ratio() < 0.88:
-                continue
-            for fname, row in ((f1, r1), (f2, r2)):
-                title = (row.get("title") or "").strip()
-                tag = _disambiguator(row, fname)
-                if tag and tag not in title:
-                    new_title = f"{title}｜{tag}"
-                    if new_title != title:
-                        row["title"] = new_title
-                        cross += 1
-    if cross:
-        for name in HUB_FILES:
-            if name in rows_by:
-                header, rows = rows_by[name]
-                _write(data / name, header, rows)
-        print(f"  cross-hub: {cross} title tweaks")
-    total += cross
     return total
 
 
