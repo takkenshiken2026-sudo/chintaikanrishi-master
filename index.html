@@ -358,6 +358,7 @@ h2.section-label .tip-icon{width:13px;height:13px;font-size:9px}
 .mode-num-v2--paid{color:var(--text3);font-weight:400}
 .mode-purpose-v2--paid{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .mode-paid-tag{font-size:10px;font-weight:700;background:var(--paid-mock-accent);color:var(--paid-mock-accent-text);padding:1px 7px;border-radius:999px;letter-spacing:.04em;line-height:1.5;flex-shrink:0}
+.mode-paid-footnote{font-size:12px;color:var(--text2);margin:6px 0 0 2px;line-height:1.5}
 .mode-arrow-v2--ext{color:var(--text3);font-weight:400}
 .mode-card{background:#fff;border:1.5px solid var(--border2);border-radius:var(--r2);padding:18px;cursor:pointer;transition:all .18s;box-shadow:var(--sh);position:relative;display:flex;flex-direction:column}
 .mode-card:hover{box-shadow:var(--sh2);border-color:var(--text2);transform:translateY(-1px)}
@@ -602,6 +603,7 @@ details.rich-detail summary{display:none}
 .score-paid-mock-strip-title{display:block;font-size:var(--fs-body);font-weight:700;color:var(--text);margin-bottom:2px;line-height:1.35}
 .score-paid-mock-strip-meta{font-size:var(--fs-caption);color:var(--text2)}
 .score-paid-mock-strip-cta{font-size:var(--fs-sub);font-weight:700;color:var(--paid-mock-accent);flex-shrink:0;white-space:nowrap}
+.score-paid-mock-footnote{font-size:var(--fs-caption);color:var(--text2);margin-top:10px;line-height:1.5}
 
 /* ===== DASHBOARD ===== */
 .stat-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:18px}
@@ -7153,6 +7155,7 @@ function getPaidMockExamConfig(){
     priceLabel: String(cfg.priceLabel||'¥590').trim(),
     scoreMeta: String(cfg.scoreMeta||'PDF').trim(),
     scoreLead: String(cfg.scoreLead||'本番形式の予想模試').trim(),
+    footnote: String(cfg.footnote||'※ note で販売する有料コンテンツです。サイト内の無料演習とは別商品です。').trim(),
   };
 }
 
@@ -7170,7 +7173,8 @@ function injectPaidMockExamCard(modeList){
         <div class="mode-title-v2">${escapeAttr(m.modeTitle)}</div>
       </div>
       <div class="mode-arrow-v2 mode-arrow-v2--ext" aria-hidden="true">↗</div>
-    </a>`;
+    </a>
+    <p class="mode-paid-footnote">${escapeAttr(m.footnote)}</p>`;
   modeList.appendChild(wrapper);
 }
 
@@ -7204,7 +7208,8 @@ function renderScorePaidMockPromo(opts){
         <span class="score-paid-mock-strip-meta">${escapeAttr(m.scoreMeta)} · ${escapeAttr(m.priceLabel)} · note</span>
       </span>
       <span class="score-paid-mock-strip-cta">詳細 ↗</span>
-    </a>`;
+    </a>
+    <p class="score-paid-mock-footnote">${escapeAttr(m.footnote)}</p>`;
 }
 window.renderScorePaidMockPromo=renderScorePaidMockPromo;
 

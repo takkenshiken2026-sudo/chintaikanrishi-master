@@ -150,5 +150,14 @@ window.SITE_CONFIG = {
       ],
       "legacyGlossaryCat": "limit"
     }
-  ]
+  ],
+  "paidMockExam": {
+    "url": "https://note.com/shikaku_master/n/n11609ea28445",
+    "modeTitle": "予想模試（PDF・3回分）",
+    "modePurpose": "50問通しで本番形式の実力確認をしたい",
+    "priceLabel": "¥590",
+    "footnote": "※ note で販売する有料コンテンツ（¥590）です。サイト内の無料演習とは別商品です。",
+    "scoreMeta": "50問×3回",
+    "scoreLead": "本番同形式の50問"
+  }
 };
