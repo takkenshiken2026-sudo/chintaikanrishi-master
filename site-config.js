@@ -6,7 +6,7 @@ window.SITE_CONFIG = {
   "contactUrl": "https://forms.gle/duTebNY1vKqV6A816",
   "ga4MeasurementId": "G-NYSHQLECDS",
   "theme": {
-    "accent": "#333333",
+    "accent": "#5c4d7a",
     "accentText": "#ffffff",
     "background": "#f4f4f5",
     "surface": "#ffffff",
