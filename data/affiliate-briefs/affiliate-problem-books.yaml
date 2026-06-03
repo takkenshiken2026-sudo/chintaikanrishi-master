@@ -1,0 +1,69 @@
+slug: affiliate-problem-books
+theme_key: problem-books
+search_intent: 賃貸不動産経営管理士の問題集・過去問を比較して選びたい
+title: 賃貸不動産経営管理士のおすすめ問題集3選【一問一答・過去問2026】
+layout: product-comparison
+asp_primary: amazon
+comparison_kind: books
+comparison_title: おすすめ問題集3選（比較）
+price_disclaimer: 価格・在庫は執筆時点（2026-06-04）のAmazon税込参考です。購入前に販売ページで最新版を確認してください。
+products:
+- rank: 1
+  offer_type: book
+  name: 2026年度版 みんなが欲しかった! 賃貸不動産経営管理士の一問一答問題集
+  publisher: TAC出版
+  edition: 2026年度版
+  price_yen: 2090
+  price_note: Amazon税込参考・送料別
+  pages: 524
+  format: B5判
+  asin: '4300120080'
+  image_file: chintai-book-4300120080.webp
+  amazon_url: https://www.amazon.co.jp/dp/4300120080/ref=nosim?tag=ue083093-22
+  for_who: テキスト読了後に一問一答で演習量を確保したい人
+  highlights:
+  - TAC教科書と章立てが揃いやすい
+  - 3分野を短問形式で総復習しやすい
+  - 直前期の穴埋め演習にも使える
+- rank: 2
+  offer_type: book
+  name: 2026年版 賃貸不動産経営管理士 合格のトリセツ 過去問題集
+  publisher: LEC
+  edition: 2026年度版
+  price_yen: 2530
+  price_note: Amazon税込参考・送料別
+  pages: 789
+  format: B5判
+  asin: 484497436X
+  image_file: chintai-book-484497436x.webp
+  amazon_url: https://www.amazon.co.jp/dp/484497436X/ref=nosim?tag=ue083093-22
+  for_who: LECテキストとセットで過去問演習をしたい人
+  highlights:
+  - 合格のトリセツシリーズで解説付き過去問
+  - 本試験形式の演習量確保に向く
+  - TAC一問一答との使い分けがしやすい
+- rank: 3
+  offer_type: book
+  name: どこでも! 学ぶ 賃貸不動産経営管理士 過去問題集 2026年度版
+  publisher: 建築資料研究社
+  edition: 2026年度版
+  price_yen: 2640
+  price_note: Amazon税込参考・送料別
+  pages: 536
+  format: B5判
+  asin: '4868340581'
+  image_file: chintai-book-4868340581.webp
+  amazon_url: https://www.amazon.co.jp/dp/4868340581/ref=nosim?tag=ue083093-22
+  for_who: 過去問を解説付きで通し演習したい人
+  highlights:
+  - 建築資料研究社の過去問シリーズで定番
+  - スキマ時間学習と相性がよい構成
+  - 他社問題集との併用で演習量を増やしやすい
+related_links:
+- past-questions-how-to-use:過去問活用法
+- past-questions-by-year:年度別過去問
+- self-study-start:独学の始め方
+- affiliate-textbooks-recommend:おすすめテキスト
+- affiliate-mock-exam-materials:直前・予想模試
+- pass-score:合格点と合格基準
+operator_note: Amazon tag=ue083093-22。4300120080 / 484497436X / 4868340581。
