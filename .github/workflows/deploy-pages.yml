@@ -1,7 +1,5 @@
 # GitHub Pages
-# ① Settings → Pages → Build and deployment → Source を「GitHub Actions」に必ず設定
-# ② 未設定だと deploy ジョブが失敗します
-# リポジトリ: https://github.com/takkenshiken2026-sudo/chintaikanrishi-master
+# ① Settings → Pages → Build and deployment → Source を「GitHub Actions」に必須設定
 # 本番: https://chintaikanrishi-master.jp/（CNAME）
 name: Deploy GitHub Pages
 
@@ -35,16 +33,14 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Generate data and static question pages
+      - name: Site-specific SPA data
         run: |
           python3 tools/csv_to_chintaikan_eisei_master.py
           python3 tools/glossary_csv_to_eisei_embed_js.py
           python3 tools/csv_to_eisei_ichimon_js.py
-          python3 tools/build_past_question_pages.py
-          python3 tools/build_glossary_pages.py
 
-      - name: Bundle public files
-        run: bash tools/prepare_public_site.sh
+      - name: Build, validate, and bundle public_site
+        run: python3 tools/build_all.py
 
       - uses: actions/upload-pages-artifact@v5
         with:
