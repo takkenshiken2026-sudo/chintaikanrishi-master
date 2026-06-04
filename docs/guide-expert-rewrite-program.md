@@ -9,7 +9,7 @@
 
 **5本 batch の手順:** `docs/guide-hand-rewrite-batch-workflow.md`（`exam-site-shell` から sync）
 
-**運用:** 宅建 49/49 完走後に着手。現状 expert_pass **30/149**（exemplar + batch1–6 適用済み）。
+**運用:** 宅建 49/49 完走後に着手。現状 expert_pass **40/149**（exemplar + batch1–8 適用済み）。
 
 | batch | 内容 |
 |-------|------|
@@ -18,6 +18,7 @@
 | 2 | 合格点・受験料・申込フロー・法令/契約ハブ |
 | 3–4 | 設備ハブ・業法・原状回復・借地借家・設備税務・直前 |
 | 5–6 | 合格後・重説・敷金・滞納・ADR・PM/保険・5問免除・一問一答 |
+| 7–8 | 再受験・公式情報・初受験・資格比較・両立・締切・合格率 |
 
 ```bash
 cd ~/Projects/chintaikanrishi-master
