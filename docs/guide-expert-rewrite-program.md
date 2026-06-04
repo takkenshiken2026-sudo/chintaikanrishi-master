@@ -9,7 +9,7 @@
 
 **5本 batch の手順:** `docs/guide-hand-rewrite-batch-workflow.md`（`exam-site-shell` から sync）
 
-**運用:** 宅建 49/49 完走後に着手。現状 expert_pass **50/149**（exemplar + batch1–12 適用済み）。
+**運用:** 宅建 49/49 完走後に着手。現状 expert_pass **70/149**（exemplar + batch1–14 適用済み）。
 
 | batch | 内容 |
 |-------|------|
@@ -21,6 +21,7 @@
 | 7–8 | 再受験・公式情報・初受験・資格比較・両立・締切・合格率 |
 | 9–10 | 受験資格・5問免除・会場・試験形式・学習日程 |
 | 11–12 | 時間配分・出題範囲・改定・難易度・合格率の読み方 |
+| 13–14 | 学習計画（3/6/12ヶ月・社会人）・独学開始・失敗パターン |
 
 ```bash
 cd ~/Projects/chintaikanrishi-master
