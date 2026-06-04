@@ -548,19 +548,20 @@ def _viewport_and_static_css(root: Path) -> list[Issue]:
                         " — tools/apply_site_config.py を実行してください"
                     )
                 )
-            if "takken-master.jp" in head:
-                if "takken-master.jp" not in str(load_config().get("siteOrigin") or ""):
-                    issues.append(
-                        Issue("index.html: head 内に takken-master.jp が残っています（apply_site_config を再実行）")
-                    )
+            site_host = origin.replace("https://", "").replace("http://", "").strip("/")
             for leak in (
                 "mentalhealth-master.jp",
                 "chintaikanrishi-master.jp",
                 "mankan-master.jp",
                 "kikenbutsu-master.jp",
                 "takken-master.jp",
+                "eisei1shu-master.jp",
+                "eisei2shu-master.jp",
+                "kangyou-master.jp",
+                "unkan-master.jp",
+                "boiler-master.jp",
             ):
-                if leak in origin:
+                if leak == site_host:
                     continue
                 if leak in head:
                     issues.append(
