@@ -9,12 +9,13 @@
 
 **5本 batch の手順:** `docs/guide-hand-rewrite-batch-workflow.md`（`exam-site-shell` から sync）
 
-**運用:** 宅建 49/49 完走後に着手。現状 expert_pass **5/149**（exemplar + batch1 適用済み）。
+**運用:** 宅建 49/49 完走後に着手。現状 expert_pass **10/149**（exemplar + batch1–2 適用済み）。
 
 | batch | 内容 |
 |-------|------|
 | exemplar | 日程・申込 `schedule-application` |
 | 1 | 試験概要・学習計画・過去問・受験資格 |
+| 2 | 合格点・受験料・申込フロー・法令/契約ハブ |
 
 ```bash
 cd ~/Projects/chintaikanrishi-master
