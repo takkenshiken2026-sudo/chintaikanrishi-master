@@ -9,19 +9,21 @@
 
 **5本 batch の手順:** `docs/guide-hand-rewrite-batch-workflow.md`（`exam-site-shell` から sync）
 
-**運用:** 宅建 49/49 完走後に着手。現状 expert_pass **100/149**（exemplar + batch1–20 適用済み）。
+**運用:** 宅建 49/49 完走後に着手。**149/149 完走**（buildable ガイド全件・exemplar + batch1–30）。
 
-| batch | 内容 |
-|-------|------|
+| 区分 | 内容 |
+|------|------|
 | exemplar | 日程・申込 `schedule-application` |
-| 1–8 | 概要・ハブ・業法・合格後・再受験・資格比較 |
-| 9–14 | 受験資格・試験形式・学習計画・独学 |
-| 15–18 | 教材・過去問・模試・演習量 |
-| 19–20 | 時間演習・用語ハブ・数字・公式 |
+| batch1–20 | 概要・ハブ・学習・教材・過去問・用語 |
+| batch21–25 | 復習・直前・当日・合格後・再受験 |
+| batch26–30 | 制度更新・誤解・分野別 field-* シリーズ |
+
+**未対象（別枠）:** アフィリエイト10本（ASP URL 未設定3本は HTML 未生成。リンク準備後に expert batch で対応）
 
 ```bash
 cd ~/Projects/chintaikanrishi-master
 python3 tools/validate_guide_hand_batch.py --batch tools/chintai_rewrite_batchN_expert.py
 python3 tools/run_guide_hand_batch.py --batch tools/chintai_rewrite_batchN_expert.py
 python3 tools/build_article_pages.py
+python3 tools/audit_guide_prose_quality.py --strict
 ```
