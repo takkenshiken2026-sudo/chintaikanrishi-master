@@ -592,7 +592,7 @@ def write_briefs() -> None:
 
 
 def patch_csv() -> None:
-    with CSV_PATH.open(encoding="utf-8", newline="") as f:
+    with CSV_PATH.open(encoding="utf-8-sig", newline="") as f:
         reader = csv.DictReader(f)
         fieldnames = reader.fieldnames
         rows = list(reader)
@@ -635,7 +635,7 @@ def patch_csv() -> None:
             row[f"faq_{i}_answer"] = ""
         print(f"patched CSV row: {slug}")
 
-    with CSV_PATH.open("w", encoding="utf-8", newline="") as f:
+    with CSV_PATH.open("w", encoding="utf-8-sig", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
