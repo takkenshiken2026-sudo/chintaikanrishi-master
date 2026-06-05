@@ -63,6 +63,49 @@ SENTENCE_SPLIT_RE = re.compile(r"[。！？\n]+")
 
 PIPE_TABLE_ROW_RE = re.compile(r"^\|", re.M)
 
+# 分野別記事に載せない学習運用ジャargon（テンプレ混入防止）
+FIELD_GUIDE_FORBIDDEN_RE = re.compile(
+    r"5行表|7行表|5列表|/terms/|terms/|Day3解き直し|Day0→3→7|"
+    r"11/22新規0|9月通し\d+/50|9/\d+通し\d+/\d+"
+)
+
+# 分野別記事に最低1つは試験論点語が必要
+FIELD_GUIDE_SUBSTANCE_RE = re.compile(
+    r"条文|論点|制度|法第|借地|借家|契約|権利|義務|規定|敷金|更新|正当事由|保証|賃貸|"
+    r"明渡|預り金|返還|重説|原状回復|管理受託|サブリース|分別管理|"
+    r"修繕|点検|設備|税務|保険|管理費|"
+    r"判例|横断|分野またぎ|"
+    r"委託|受託|報酬|媒介|重要事項"
+)
+
+
+def validate_field_guide_genre(slug: str, patch: dict[str, str]) -> list[str]:
+    """分野別 field-* 記事のジャンル適合（学習計画テンプレ混入を ERROR）。"""
+    if not slug.startswith("field-"):
+        return []
+    errors: list[str] = []
+    prefix = f"{slug}:"
+    prose_cols = (
+        ["lead", "user_intent"]
+        + [f"section_{n}_body" for n in range(1, 6)]
+        + [f"faq_{n}_answer" for n in range(1, 4)]
+    )
+    combined = ""
+    for col in prose_cols:
+        combined += norm(patch.get(col)) + "\n"
+    if FIELD_GUIDE_FORBIDDEN_RE.search(combined):
+        errors.append(
+            f"{prefix} field guide must not use study-schedule jargon "
+            f"(5列表, 7行表, /terms/, 9/6通し 等). Link to study-plan instead."
+        )
+    section_bodies = "".join(norm(patch.get(f"section_{n}_body")) for n in range(1, 6))
+    if section_bodies and not FIELD_GUIDE_SUBSTANCE_RE.search(section_bodies):
+        errors.append(
+            f"{prefix} field guide section bodies need exam substance "
+            f"(条文/論点/更新/敷金/重説 等)"
+        )
+    return errors
+
 
 def skip_concrete_rules(patch: dict[str, str]) -> bool:
     """編集合格お手本（exam-schedule 等・具体例なし）のみ具体性チェック対象外。"""
@@ -223,5 +266,7 @@ def validate_concrete_rewrite(slug: str, patch: dict[str, str]) -> list[str]:
         errors.append(
             f"{prefix} need at least 1 FAQ answer with substantive 例えば/たとえば"
         )
+
+    errors.extend(validate_field_guide_genre(slug, patch))
 
     return errors
