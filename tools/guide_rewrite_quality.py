@@ -14,6 +14,7 @@ AUTO_PROSE_SIGNATURES: tuple[str, ...] = (
     "演習10問→誤答分析→用語10語→1週間後解き直し",
     "比較表・よくある誤答で混同語を整理する",
     "主体・期限・手順は",
+    "主体・期限・数値をメモしながら演習問題で定着を確認",
     "と公式テキストで必ず照合してください。",
     "に向けた学習計画の立て方を説明します",
 )
@@ -54,16 +55,16 @@ def revision_is_hand(row: dict[str, str]) -> bool:
 
 
 def prose_quality_status(row: dict[str, str], combined_text: str) -> str:
-    """hand_done | auto_pending | affiliate_pending | needs_rewrite | ok"""
+    """hand_done | auto_pending | affiliate_* | needs_rewrite | ok"""
+    from tools.affiliate_article_rules import affiliate_quality_status
     from tools.guide_rewrite_rules import (
         is_affiliate_row,
         is_hand_rewritten,
         rewrite_forbidden_hits,
     )
 
-    tags = norm(row.get("tags"))
-    if "アフィリエイト" in tags and not revision_is_hand(row):
-        return "affiliate_pending"
+    if is_affiliate_row(row):
+        return affiliate_quality_status(row, combined_text)
     if rewrite_forbidden_hits(combined_text):
         return "needs_rewrite"
     if revision_is_hand(row) and not is_auto_prose_text(combined_text):
