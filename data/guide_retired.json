@@ -78,6 +78,27 @@
     "education-requirement": "exam-eligibility",
     "eligibility-registration": "exam-eligibility",
     "exemption-system": "exam-eligibility",
-    "glossary-how-to-use": "study-plan"
+    "glossary-how-to-use": "study-plan",
+    "retake-schedule-adjustment": "study-plan",
+    "review-cycle-spaced": "study-plan",
+    "scope-revision-history": "syllabus-how-to-read",
+    "scope-vs-past-questions": "syllabus-how-to-read",
+    "score-gap-analysis": "study-plan",
+    "self-study-environment": "study-plan",
+    "self-study-mistakes": "study-plan",
+    "self-study-motivation": "study-plan",
+    "self-study-schedule": "study-plan",
+    "self-study-start": "study-plan",
+    "self-study-without-school": "study-plan",
+    "simulation-exam-schedule": "study-plan",
+    "study-hours-myth": "exam-overview",
+    "study-plan-1year": "study-plan",
+    "study-plan-3months": "study-plan",
+    "study-plan-6months": "study-plan",
+    "study-plan-beginner": "study-plan",
+    "study-plan-working": "study-plan",
+    "syllabus-update-tracker": "syllabus-how-to-read",
+    "textbook-vs-past-questions": "exam-overview",
+    "time-management": "study-plan"
   }
 }
