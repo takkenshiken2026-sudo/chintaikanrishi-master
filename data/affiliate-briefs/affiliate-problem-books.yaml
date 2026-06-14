@@ -6,7 +6,7 @@ layout: product-comparison
 asp_primary: amazon
 comparison_kind: books
 comparison_title: おすすめ問題集3選（比較）
-price_disclaimer: 価格・在庫は執筆時点（2026-06-04）のAmazon税込参考です。購入前に販売ページで最新版を確認してください。
+price_disclaimer: 価格・在庫は執筆時点（2026-06-12）のAmazon税込参考です。購入前に販売ページで最新版を確認してください。
 products:
 - rank: 1
   offer_type: book
@@ -61,8 +61,8 @@ products:
   - 他社問題集との併用で演習量を増やしやすい
 related_links:
 - past-questions-how-to-use:過去問活用法
-- past-questions-by-year:年度別過去問
-- self-study-start:独学の始め方
+- past-questions-by-field:分野別過去問
+- study-plan:学習計画の立て方
 - affiliate-textbooks-recommend:おすすめテキスト
 - affiliate-mock-exam-materials:直前・予想模試
 - pass-score:合格点と合格基準

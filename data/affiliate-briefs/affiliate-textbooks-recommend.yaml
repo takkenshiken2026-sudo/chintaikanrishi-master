@@ -6,7 +6,7 @@ layout: product-comparison
 asp_primary: amazon
 comparison_kind: books
 comparison_title: おすすめテキスト3選（比較）
-price_disclaimer: 価格・在庫・版情報は執筆時点（2026-06-04）のAmazon税込参考です。購入前に必ず販売ページでご確認ください。
+price_disclaimer: 価格・在庫・版情報は執筆時点（2026-06-12）のAmazon税込参考です。購入前に必ず販売ページでご確認ください。
 products:
 - rank: 1
   offer_type: book
@@ -60,7 +60,7 @@ products:
   - 過去問題集（別冊）へのステップアップがしやすい
   - TAC教科書と比較して選びやすい定番
 related_links:
-- self-study-start:独学の始め方
+- study-plan:学習計画の立て方
 - past-questions-how-to-use:過去問活用法
 - exam-overview:試験概要
 - affiliate-problem-books:おすすめ問題集
