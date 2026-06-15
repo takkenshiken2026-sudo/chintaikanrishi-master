@@ -1,0 +1,40 @@
+# 賃管アフィリエイト講座の A8 URL 正本。
+# A8管理画面で発行したリンクを products[].a8_url に貼り付けてから:
+#   python3 tools/apply_chintai_a8_publish.py
+# を実行すると brief・CSV・published を一括更新します。
+
+affiliate-online-course-compare:
+  products:
+    - rank: 1
+      label: スタディング 賃管合格コース
+      a8_url: ""
+    - rank: 2
+      label: アガルート 賃管講座
+      a8_url: ""
+
+affiliate-correspondence-course:
+  products:
+    - rank: 1
+      label: TAC 賃管総合本科生（Web通信）
+      a8_url: ""
+    - rank: 2
+      label: LEC 賃管合格フルコース（通信Web）
+      a8_url: ""
+
+affiliate-cram-school:
+  products:
+    - rank: 1
+      label: TAC 賃管総合本科生（教室）
+      a8_url: ""
+    - rank: 2
+      label: LEC 賃管合格フルコース（通学）
+      a8_url: ""
+
+affiliate-retake-short-course:
+  products:
+    - rank: 1
+      label: TAC 賃管速修本科生
+      a8_url: ""
+    - rank: 2
+      label: LEC 賃管合格プライム
+      a8_url: ""

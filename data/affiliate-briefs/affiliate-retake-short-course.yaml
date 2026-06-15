@@ -1,0 +1,62 @@
+slug: affiliate-retake-short-course
+theme_key: retake-short-course
+search_intent: 賃貸不動産経営管理士の再受験で短期講座を比較して弱点補強したい
+title: 賃貸不動産経営管理士試験の再受験者向け短期講座比較【TAC速修 vs LECプライム】【2026年度版】
+genre: 学習計画
+layout: product-comparison
+asp_primary: a8
+comparison_kind: courses
+comparison_title: 再受験者向け短期講座2選（比較）
+price_disclaimer: 料金·割引·受講期間は執筆時点（2026-06-12）の各公式ページ参考です。申込前に必ず最新条件を確認してください。ASP URL確定後に公開してください。
+products:
+  - rank: 1
+    offer_type: course
+    name: 資格の学校TAC 賃貸管理士速修本科生（Web通信）
+    provider: 資格の学校TAC
+    plan_name: Web通信講座（2026合格目標·短期集中）
+    price_yen: 52800
+    billing_type: lump
+    price_note: 税込·賃管受験経験者価格·通常66,000円·入会金10,000円別·再受講46,200円
+    duration: 短期集中·直前30論点集中講義（公式参考）
+    lecture_hours: 15分単位Web講義·Web答練
+    support: 質問メール·Web答練·受験経験者割引
+    official_url: https://www.tac-school.co.jp/kouza_chintai/chintai_crs_sokuhon.html
+    lp_url: https://www.tac-school.co.jp/kouza_chintai/chintai_crs_sokuhon.html
+    affiliate_url: https://www.tac-school.co.jp/kouza_chintai/chintai_crs_sokuhon.html
+    image_file: chintai-tac-sokuhon2026.webp
+    for_who: 前回受験データがあり、論点を絞って短期で演習量を上げたい再受験者
+    highlights:
+      - 賃管受験経験者52,800円（税込）
+      - 直前30論点集中講義
+      - TAC再受講割引46,200円
+  - rank: 2
+    offer_type: course
+    name: LEC東京リーガルマインド 賃貸管理士合格プライムコース（通信Web）
+    provider: LEC東京リーガルマインド
+    plan_name: 通信Web（2026合格目標·全16回）
+    price_yen: 42240
+    billing_type: lump
+    price_note: 税込·受験者20％割引·通常52,800円·再受講30％36,960円
+    duration: 全16回·プライム講座中心（公式参考）
+    lecture_hours: Web動画＋模試会場/自宅
+    support: チャレンジ答練·全国公開模擬試験·再受講割引
+    official_url: https://online.lec-jp.com/disp/CSfLastPackGoodsPage_003.jsp?GOODS_NO=100266461
+    lp_url: https://online.lec-jp.com/disp/CSfLastPackGoodsPage_003.jsp?GOODS_NO=100266461
+    affiliate_url: https://online.lec-jp.com/disp/CSfLastPackGoodsPage_003.jsp?GOODS_NO=100266461
+    image_file: chintai-lec-prime2026.webp
+    for_who: 通信Webでコストを抑えつつ、再受験割引で短期カリキュラムを進めたい人
+    highlights:
+      - 受験者割引42,240円（税込）
+      - 再受講30％割引36,960円
+      - 合格プライム講座·模試セット
+related_links:
+  - retake-strategy:再受験戦略
+  - study-plan:学習計画の立て方
+  - affiliate-problem-books:おすすめ問題集3選
+  - affiliate-mock-exam-materials:直前対策3選
+  - affiliate-correspondence-course:通信講座比較
+operator_note: |
+  2026-06-12 v2本文完了。TAC速修52,800円（受験経験者）は chintai_crs_sokuhon.html で確認。
+  LECプライム42,240円（受験者20％）は GOODS_NO=100266461 で確認。
+  A8 URL未確定のため a8_url 未設定·published 不可。
+  提携後: products[].a8_url を追記し related_links にASPリンクを追加。

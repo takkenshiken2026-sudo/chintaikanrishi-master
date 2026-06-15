@@ -5,7 +5,7 @@
 
 ## 読む順番
 
-1. **[affiliate-article-rules.md](./affiliate-article-rules.md)** — いつ作るか・書籍/講座・UI・チェックリスト
+1. **[affiliate-article-rules.md](./affiliate-article-rules.md)** — いつ作るか・書籍/講座・UI・バナー・チェックリスト
 2. **[auto-create-workflow.md](./auto-create-workflow.md)** — CLI / AI フロー
 3. [seo-article-guidelines.md](../seo-article-guidelines.md) — 識別・法務・本数
 4. [guide-article-catalog.md](../guide-article-catalog.md) — 標準10 slug

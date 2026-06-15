@@ -1,0 +1,63 @@
+slug: affiliate-cram-school
+theme_key: cram-school
+search_intent: 賃貸不動産経営管理士向け通学講座を比較して週次ペースを固定したい
+title: 賃貸不動産経営管理士試験の通学講座比較【TAC vs LEC】独学との併用【2026年度版】
+genre: 独学対策
+layout: product-comparison
+asp_primary: a8
+comparison_kind: courses
+comparison_title: おすすめ通学講座2選（比較）
+price_disclaimer: 料金·割引·開講校舎は執筆時点（2026-06-12）の各公式ページ参考です。申込前に必ず最新条件を確認してください。ASP URL確定後に公開してください。
+products:
+  - rank: 1
+    offer_type: course
+    name: 資格の学校TAC 賃貸管理士総合本科生（教室講座）
+    provider: 資格の学校TAC
+    plan_name: 教室講座（2026合格目標·全32回）
+    price_yen: 110000
+    billing_type: lump
+    price_note: 税込·入会金10,000円別·キャンペーン前125,000円表記あり·割引多数
+    duration: 全32回·週1ペース目安（公式参考）
+    lecture_hours: 池袋校等·欠席時Web講義フォロー
+    support: 質問メール·Web答練·ミニテスト·無料体験入学
+    official_url: https://www.tac-school.co.jp/kouza_chintai/chintai_crs_idx.html
+    lp_url: https://www.tac-school.co.jp/kouza_chintai/chintai_crs_idx.html
+    affiliate_url: https://www.tac-school.co.jp/kouza_chintai/chintai_crs_idx.html
+    image_file: chintai-tac-classroom2026.webp
+    for_who: 週1の通学で学習リズムを固定し、欠席時もWebフォローで穴を埋めたい社会人
+    highlights:
+      - 全国校舎·無料体験入学あり
+      - 教室＋Web講義フォローで欠席カバー
+      - U35·宅建経験者·再受講割引あり
+  - rank: 2
+    offer_type: course
+    name: LEC東京リーガルマインド 賃貸管理士合格フルコース（通学）
+    provider: LEC東京リーガルマインド
+    plan_name: 通学Webフォロー＋模試会場（2026合格目標）
+    price_yen: 88000
+    billing_type: lump
+    price_note: 税込·6月末早期割引79,200円·受験者20％割引あり
+    duration: 通学全回·模試会場受験（公式参考）
+    lecture_hours: 通学講義＋Webフォロー
+    support: 添削·全国公開模擬試験·質問（コースによる）
+    official_url: https://online.lec-jp.com/disp/CSfLastPackGoodsPage_003.jsp?GOODS_NO=100266455
+    lp_url: https://online.lec-jp.com/disp/CSfLastPackGoodsPage_003.jsp?GOODS_NO=100266455
+    affiliate_url: https://online.lec-jp.com/disp/CSfLastPackGoodsPage_003.jsp?GOODS_NO=100266455
+    image_file: chintai-lec-classroom2026.webp
+    for_who: LEC校舎へ通学しつつ、トリセツ系列と模試会場をセットにしたい人
+    highlights:
+      - 通学一般88,000円（税込）
+      - 合格のトリセツ系列·全国公開模擬試験
+      - 早期申込·受験者割引あり
+related_links:
+  - exam-overview:試験概要
+  - study-plan:学習計画の立て方
+  - affiliate-correspondence-course:通信講座比較
+  - affiliate-online-course-compare:オンライン講座比較
+  - affiliate-textbooks-recommend:おすすめテキスト3選
+  - affiliate-free-vs-paid-study:無料と有料教材の使い分け
+operator_note: |
+  2026-06-12 v2本文完了。TAC教室110,000円+入会金は tac-school.co.jp/kouza_chintai/chintai_crs_idx.html で確認。
+  LEC通学88,000円は online.lec-jp.com GOODS_NO=100266455 で確認。
+  A8 URL未確定のため a8_url 未設定·published 不可。
+  提携後: products[].a8_url を追記し related_links にASPリンクを追加。

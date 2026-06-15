@@ -384,6 +384,39 @@ CSV 本文には商品名を **括弧なし** で書いてよい。ビルド時�
 
 ---
 
+## 8.4 アフィリエイト用バナー（一覧・記事内）
+
+アフィリエイト導線の「バナー」は次の3か所に限定する。記事トップの大型ヒーローは使わない（§8）。
+
+| 種別 | ページ | 設定 |
+|------|--------|------|
+| **一覧カード（3ハブ共通）** | `articles/index.html`・`terms/index.html`・`q/index.html` | `site-config.json` → `guideIndexPicks`（3枚） |
+| **要点右端サムネ** | 各 `affiliate-*` 記事 | brief 1位商品 → `affiliate_key_points_box_html()` |
+| **比較 hub カード** | 各 `affiliate-*` 記事 | brief 全商品 → `affiliate_product_hub_html()` |
+
+### guideIndexPicks（一覧バナー）
+
+- 試験ガイド・用語解説・過去問一覧の **3ページで同一内容**（`tools/guide_index_picks_ui.py`）
+- 講座・テキスト・問題集の **3 item**。`href` は公開済みアフィリエイト slug（試験ガイド基準で `affiliate-…/`。用語・過去問一覧ではビルド時に `../articles/` を付与）
+- 各 item に `image`（`images/affiliate/…`）と `imageAlt` を必須。brief と同じ webp を再利用してよい
+- `kind` / `kindLabel` / `cta` はカード右下ラベル・左下ボタンに反映（`site-pages.css` の `.hub-promo-*` / `.article-index-pick-*`）
+- **`layout`**（任意・既定 `grid-3`）: `grid-3`（3列）| `grid-2`（2列・最大2件）| `strip`（横長帯）| `compact`（画像小）| `text`（画像なし・内部導線）
+- 画像取得は §7 と同じ `fetch_affiliate_product_images.py`。**webp はリポジトリにコミット**（CI が `build_all` で再生成するため）
+
+### 記事内サムネ
+
+- 比較 hub・要点右端は **brief の `image_file`** を `images/affiliate/` から解決（`affiliate_product_ui.image_href`）
+- ローカルに無い場合は brief の `image_url`（外部 URL）にフォールバック可。本番は自サイトホストを推奨
+
+### ビルド退行の防止
+
+`tools/build_article_pages.py` から `affiliate_product_*` / `load_affiliate_brief` / `build_guide_index_picks_html` を削除しない。  
+テンプレ同期後は `build_article_pages.py` を実行し、生成 HTML に `affiliate-product-hub` と `images/affiliate/` が含まれることを確認する。
+
+Cursor 要約: `.cursor/rules/affiliate-banner.mdc`
+
+---
+
 ## 9. 関連リンク（CSV 例）
 
 ```text
@@ -474,4 +507,4 @@ https://px.a8.net/...:SMART合格講座（公式）
 
 ---
 
-*最終更新: 2026-06-03（価格 URL 確認・オリジナル執筆の必須原則を追加）*
+*最終更新: 2026-06-13（§8.4 アフィリエイト用バナー・ビルド退行防止を追加）*

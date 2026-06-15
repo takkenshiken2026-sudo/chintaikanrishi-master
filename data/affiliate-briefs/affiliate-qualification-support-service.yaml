@@ -1,0 +1,72 @@
+slug: affiliate-qualification-support-service
+theme_key: qualification-support-service
+search_intent: 賃貸不動産経営管理士試験の申込支援サービスを公式手続きと比較したい
+title: 賃貸不動産経営管理士試験の受験支援サービス比較【公式申込 vs 書類チェック vs 講座付帯】【2026年度版】
+genre: 受験・申込
+layout: product-comparison
+asp_primary: internal
+comparison_kind: services
+comparison_title: 受験支援3スタイル（比較）
+price_disclaimer: 試験手数料12,000円は試験センター要項が正本です。支援料金は各社異なります。ASP URL確定後に公開してください。
+products:
+  - rank: 1
+    offer_type: service
+    name: 賃貸不動産経営管理士試験センター公式Web申込
+    provider: 賃貸不動産経営管理士試験センター
+    plan_name: インターネット申込（令和8年度）
+    price_yen: 12000
+    billing_type: lump
+    price_note: 受験手数料のみ·クレジットカード等（要項参照）
+    duration: 8/3（月）12:00〜9/30（火）23:59
+    lecture_hours: —
+    support: 要項PDF·受験票発送·公式問い合わせ
+    official_url: https://www.chintaikanrishi.jp/
+    lp_url: https://www.chintaikanrishi.jp/
+    affiliate_url: https://www.chintaikanrishi.jp/
+    image_file: chintai-official-application2026.webp
+    for_who: ネット申込に慣れており支援料を抑えたい人
+    highlights:
+      - 申込の正本·最も推奨される手続き
+      - 12,000円のみ（支援料なし）
+      - 顔写真データ·オンライン完結（WEB）
+  - rank: 2
+    offer_type: service
+    name: 書類チェック型サポート（第三者）
+    provider: 各社（要契約確認）
+    plan_name: 申込書·写真·区分のチェック
+    price_note: 12,000円+支援料·各社異なる
+    billing_type: lump
+    duration: 8〜9月申込期間中
+    lecture_hours: —
+    support: 書類記入確認·写真規格·5問免除要件アドバイス
+    image_file: chintai-support-check2026.webp
+    for_who: 区分選択·証明書·郵送手順が不安な初受験者
+    highlights:
+      - 要項準拠の書類チェック
+      - 本人が最終申込·決済する前提
+      - 振込先が公式と一致するか要確認
+  - rank: 3
+    offer_type: service
+    name: 講座付帯申込フォロー（予備校等）
+    provider: 予備校·通信講座（受講生向け）
+    plan_name: 申込スケジュール案内·書類フォロー
+    price_note: 講座料に含む場合あり·教材同梱に注意
+    billing_type: lump
+    duration: 講座受講期間中
+    lecture_hours: —
+    support: 8/3·9/30リマインド·書類確認
+    image_file: chintai-course-support2026.webp
+    for_who: 講座受講と同時期に試験申込を進めたい人
+    highlights:
+      - 申込締切の督促付き
+      - 学習と手続きを並行しやすい
+      - 教材セット重複購入に注意
+related_links:
+  - exam-application-flow:申込みの流れ
+  - application-deadline-checklist:申込締切前チェックリスト
+  - exam-eligibility:受験資格
+  - work-experience-requirement:実務経験要件
+  - schedule-application:日程·申込
+operator_note: |
+  2026-06-12 v2本文完了。試験センター要項が正本·申込代行制度なしを明記。
+  3スタイル比較（公式·書類チェック·講座付帯）。収益リンクなし internal 記事として公開。

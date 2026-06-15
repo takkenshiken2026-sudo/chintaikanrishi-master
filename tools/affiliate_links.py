@@ -106,8 +106,6 @@ def affiliate_urls_in_brief(config: dict[str, Any]) -> list[str]:
 
 
 def affiliate_brief_has_links(config: dict[str, Any]) -> bool:
-    if norm(str(config.get("asp") or "")).lower() == "internal":
-        return True
     return bool(affiliate_urls_in_brief(config))
 
 

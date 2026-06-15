@@ -1,0 +1,82 @@
+slug: affiliate-beginner-material-set
+theme_key: beginner-material-set
+search_intent: 賃貸不動産経営管理士を初学者が独学で始める教材セットを比較したい
+title: 賃貸不動産経営管理士試験の初学者向け教材セット3選【2026年度版·テキスト+問題集】
+genre: 学習計画
+layout: product-comparison
+asp_primary: amazon
+comparison_kind: books
+comparison_title: 初学者向け教材セット3選（比較）
+price_disclaimer: 価格·在庫は執筆時点（2026-06-12）のAmazon税込参考です。購入前に必ず販売ページで最新版·税込価格を確認してください。
+products:
+  - rank: 1
+    offer_type: book
+    name: TAC入門2冊セット（はじめの一歩+一問一答）
+    publisher: TAC出版
+    edition: 2026年度版
+    price_yen: 3520
+    price_label: 約3,520円（2冊合計·税込参考）
+    price_note: 入門1,430円+一問一答2,090円·送料別
+    pages: 728
+    format: B5判×2冊
+    asin: "4300120056"
+    image_file: chintai-book-4300120056.webp
+    amazon_url: https://www.amazon.co.jp/dp/4300120056/ref=nosim?tag=ue083093-22
+    workbook_name: 2026年度版 みんなが欲しかった! 賃貸不動産経営管理士の一問一答問題集
+    workbook_amazon_url: https://www.amazon.co.jp/dp/4300120080/ref=nosim?tag=ue083093-22
+    for_who: 初受験·予算を抑えて最小2冊から始めたい人
+    highlights:
+      - はじめの一歩で3分野の輪郭を短時間で把握
+      - TAC系列で入門と一問一答の章がつながる
+      - 3セットの中で合計予算が最も抑えやすい
+  - rank: 2
+    offer_type: book
+    name: TAC教科書2冊セット（教科書+一問一答）
+    publisher: TAC出版
+    edition: 2026年度版
+    price_yen: 4730
+    price_label: 約4,730円（2冊合計·税込参考）
+    price_note: 教科書2,640円+一問一答2,090円·送料別
+    pages: 1492
+    format: B5判×2冊
+    asin: "4300120072"
+    image_file: chintai-book-4300120072.webp
+    amazon_url: https://www.amazon.co.jp/dp/4300120072/ref=nosim?tag=ue083093-22
+    workbook_name: 2026年度版 みんなが欲しかった! 賃貸不動産経営管理士の一問一答問題集
+    workbook_amazon_url: https://www.amazon.co.jp/dp/4300120080/ref=nosim?tag=ue083093-22
+    for_who: 解説厚めの本格テキストから1セットで進めたい独学者
+    highlights:
+      - 3分野を1冊の教科書で体系的に学べる
+      - TAC一問一答と縦串で復習しやすい
+      - 社会人独学のメイン2冊候補
+  - rank: 3
+    offer_type: book
+    name: LECトリセツ2冊セット（テキスト&一問一答+過去問題集）
+    publisher: LEC
+    edition: 2026年度版
+    price_yen: 5280
+    price_label: 約5,280円（2冊合計·税込参考）
+    price_note: トリセツ2,750円+過去問2,530円·送料別
+    pages: 1245
+    format: B5判×2冊
+    asin: "4844974351"
+    image_file: chintai-book-4844974351.webp
+    amazon_url: https://www.amazon.co.jp/dp/4844974351/ref=nosim?tag=ue083093-22
+    workbook_name: 2026年版 賃貸不動産経営管理士 合格のトリセツ 過去問題集
+    workbook_amazon_url: https://www.amazon.co.jp/dp/484497436X/ref=nosim?tag=ue083093-22
+    for_who: LEC系列で論点整理から過去問演習へ進みたい人
+    highlights:
+      - トリセツでテキストと短問を1冊で回せる
+      - 過去問題集への縦串が明確
+      - TAC2セットとの比較選択肢
+related_links:
+  - exam-overview:試験概要
+  - study-plan:学習計画の立て方
+  - textbook-selection:テキストの選び方
+  - affiliate-textbooks-recommend:おすすめテキスト3選
+  - affiliate-problem-books:おすすめ問題集3選
+  - affiliate-free-vs-paid-study:無料と有料教材の使い分け
+operator_note: |
+  2026-06-12 v2本文完了·published。
+  Amazon tag=ue083093-22。5 ASIN URL確定（一問一答はセット1·2で共用）。
+  合計価格: 3,520 / 4,730 / 5,280円（税込参考）。

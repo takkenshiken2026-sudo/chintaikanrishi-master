@@ -8,6 +8,7 @@ import argparse
 import re
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -28,6 +29,7 @@ OG_IMAGE_RE = re.compile(
     re.I,
 )
 AMAZON_PLACEHOLDER_IDS = ("01MKUOLsA5L",)
+IMAGE_PLACEHOLDER_HINTS = ("no_image", "no-image", "placeholder", "01mkusols")
 USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
@@ -44,8 +46,20 @@ def extract_asin(value: str) -> str | None:
     return match.group(1).upper() if match else None
 
 
+def resolve_lp_url(url: str) -> str:
+    text = norm(url)
+    if not text:
+        return ""
+    if "a8.net" in text.lower() and "a8ejpredirect=" in text.lower():
+        parsed = urllib.parse.urlparse(text)
+        dest = urllib.parse.parse_qs(parsed.query).get("a8ejpredirect", [""])[0]
+        if dest:
+            return urllib.parse.unquote(dest)
+    return text
+
+
 def product_source_url(product: dict) -> str:
-    for key in ("amazon_url", "affiliate_url", "url", "asin"):
+    for key in ("lp_url", "amazon_url", "affiliate_url", "a8_url", "url", "asin"):
         raw = norm(str(product.get(key) or ""))
         if not raw:
             continue
@@ -53,8 +67,18 @@ def product_source_url(product: dict) -> str:
         if asin:
             return f"https://www.amazon.co.jp/dp/{asin}"
         if raw.lower().startswith(("http://", "https://")):
-            return raw
+            return resolve_lp_url(raw)
     return ""
+
+
+def _image_url_ok(url: str) -> bool:
+    text = norm(url)
+    if not text.lower().startswith(("http://", "https://")):
+        return False
+    if text.lower().endswith(".gif"):
+        return False
+    lower = text.lower()
+    return not any(hint in lower for hint in IMAGE_PLACEHOLDER_HINTS)
 
 
 def _amazon_image_ok(url: str) -> bool:
@@ -103,12 +127,13 @@ def fetch_amazon_cover_url(product_url: str) -> str | None:
 
 
 def fetch_og_image_url(product_url: str) -> str | None:
-    req = urllib.request.Request(product_url, headers={"User-Agent": USER_AGENT})
+    page_url = resolve_lp_url(product_url)
+    req = urllib.request.Request(page_url, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(req, timeout=30) as resp:
         html = resp.read().decode("utf-8", errors="replace")
     match = OG_IMAGE_RE.search(html)
     url = norm(match.group(1)) if match else None
-    if url and _amazon_image_ok(url):
+    if url and _image_url_ok(url):
         return url
     return None
 
@@ -172,8 +197,12 @@ def fetch_product_image(product: dict, *, root: Path, force: bool) -> bool:
     if not image_url:
         print(f"  skip: 表紙 URL 未取得 ({product.get('name')})")
         return False
-    if not _amazon_image_ok(image_url):
-        print(f"  skip: プレースホルダ画像 ({product.get('name')})")
+    if "media-amazon.com" in image_url:
+        if not _amazon_image_ok(image_url):
+            print(f"  skip: Amazon プレースホルダ画像 ({product.get('name')})")
+            return False
+    elif not _image_url_ok(image_url):
+        print(f"  skip: 無効な画像 URL ({product.get('name')})")
         return False
     try:
         data = download_bytes(image_url)

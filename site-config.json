@@ -275,6 +275,48 @@
       "legacyGlossaryCat": "limit"
     }
   ],
+  "guideIndexPicks": {
+    "title": "おすすめの教材セット・テキスト・問題集",
+    "lead": "2026年度版の比較記事から、初学者セット・テキスト・問題集の選び方へ。",
+    "leadsByHub": {
+      "articles": "2026年度版の比較記事から、初学者セット・テキスト・問題集の選び方へ。",
+      "terms": "用語暗記と併用するテキスト・問題集の比較記事へ。",
+      "q": "無料演習と併用する教材セット・問題集の比較記事へ。"
+    },
+    "layout": "grid-3",
+    "items": [
+      {
+        "kind": "textbook",
+        "kindLabel": "初学者セット",
+        "title": "初学者向け教材セット3選【2026年度版】",
+        "description": "TAC入門・TAC教科書・LECトリセツの2冊セットを比較。6/14要項確認→7月購入の順序と35/50ライン前提の併用例を解説します。",
+        "href": "affiliate-beginner-material-set/",
+        "cta": "3セットを比較する",
+        "image": "images/affiliate/chintai-book-4300120056.webp",
+        "imageAlt": "2026年度版 みんなが欲しかった! 賃貸不動産経営管理士 合格へのはじめの一歩 表紙"
+      },
+      {
+        "kind": "textbook",
+        "kindLabel": "テキスト",
+        "title": "おすすめテキスト3選【2026年度版】",
+        "description": "TAC入門・TAC教科書・LECトリセツの3冊を比較。3分野50問120分と22週逆算を前提に1冊選びを解説します。",
+        "href": "affiliate-textbooks-recommend/",
+        "cta": "3冊を比較する",
+        "image": "images/affiliate/chintai-book-4300120072.webp",
+        "imageAlt": "2026年度版 みんなが欲しかった! 賃貸不動産経営管理士の教科書 表紙"
+      },
+      {
+        "kind": "problem-book",
+        "kindLabel": "問題集",
+        "title": "おすすめ問題集3選【2026年度版】",
+        "description": "一問一答・過去問・分野別の違いと、テキスト読了後の演習1冊の選び方をまとめます。",
+        "href": "affiliate-problem-books/",
+        "cta": "3冊を比較する",
+        "image": "images/affiliate/chintai-book-4300120080.webp",
+        "imageAlt": "2026年度版 みんなが欲しかった! 賃貸不動産経営管理士の一問一答問題集 表紙"
+      }
+    ]
+  },
   "paidMockExam": {
     "url": "https://note.com/shikaku_master/n/n11609ea28445",
     "modeTitle": "予想模試（PDF・3回分）",

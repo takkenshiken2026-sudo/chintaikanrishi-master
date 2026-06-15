@@ -7,7 +7,6 @@ from __future__ import annotations
 from tools.affiliate_links import (
     affiliate_external_links_in_row,
     is_affiliate_article,
-    is_internal_affiliate_article,
 )
 from tools.editorial_quality import EditorialIssue, norm, split_semicolon
 from tools.related_links import parse_related_link_token
@@ -76,7 +75,7 @@ def affiliate_quality_status(row: dict[str, str], combined_text: str) -> str:
     if affiliate_template_hits(combined_text):
         return "affiliate_template"
     if norm(row.get("content_status")) == "published":
-        if not is_internal_affiliate_article(row) and not affiliate_external_links_in_row(row):
+        if not affiliate_external_links_in_row(row):
             return "affiliate_needs_links"
     if affiliate_is_hand_complete(row):
         return "affiliate_ok"
@@ -136,7 +135,7 @@ def check_affiliate_row(
                 err(col, msg)
 
     if published:
-        if not is_internal_affiliate_article(row) and not affiliate_external_links_in_row(row):
+        if not affiliate_external_links_in_row(row):
             err(
                 "related_links",
                 "published アフィリエイト記事に ASP / 商品 URL がありません。"

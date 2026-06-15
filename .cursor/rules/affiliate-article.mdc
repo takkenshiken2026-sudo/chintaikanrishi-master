@@ -67,6 +67,15 @@ alwaysApply: false
 
 `seo-editorial.css` を触ったら `tools/seo_editorial_chrome.py` の `SEO_EDITORIAL_CSS_VER` を更新。
 
+## ビルド退行（厳守）
+
+`build_article_pages.py` をテンプレ同期・マージするとき、次を **必ず残す**:
+
+- `affiliate_product_hub_html` / `affiliate_key_points_box_html` / `load_affiliate_brief`
+- `body_text_transform` / `is_affiliate_skip_section` / `affiliate_related_box_html`
+
+欠落すると CI 再生成で **記事内の商品画像・比較 hub が消える**。一覧バナーは `.cursor/rules/affiliate-banner.mdc` 参照。
+
 ## 完了時
 
 ```bash

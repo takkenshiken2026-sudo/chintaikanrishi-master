@@ -1,0 +1,60 @@
+slug: affiliate-online-course-compare
+theme_key: online-course-compare
+search_intent: 賃貸不動産経営管理士向けオンライン講座を比較して独学に組み込みたい
+title: 賃貸不動産経営管理士試験のオンライン講座比較【スタディング vs アガルート】独学との併用
+genre: 独学対策
+layout: product-comparison
+asp_primary: a8
+comparison_kind: courses
+comparison_title: おすすめオンライン講座2選（比較）
+price_disclaimer: 料金·受講期間は執筆時点（2026-06-12）の各公式ページ参考です。申込前に必ず最新条件を確認してください。ASP URL確定後に公開してください。
+products:
+  - rank: 1
+    offer_type: course
+    name: スタディング 賃貸不動産経営管理士合格コース［2026年度試験対応］
+    provider: 株式会社KIYOラーニング（スタディング）
+    plan_name: 賃管単科·買い切り
+    price_yen: 19800
+    billing_type: lump
+    price_note: 税込19,800円·合格お祝いギフト2,000円分（条件あり）
+    duration: 不合格時は翌年度試験まで受講継続可（公式参考）
+    lecture_hours: 基本講義合計約8時間（公式LP参考）
+    support: 学習Q&A（チケット制·有料オプション）·AI学習フロー
+    official_url: https://studying.jp/chintaikanrishi/
+    lp_url: https://studying.jp/chintaikanrishi/
+    affiliate_url: https://studying.jp/chintaikanrishi/
+    image_file: chintai-studying-course2026.webp
+    for_who: スマホ完結·買い切りで演習量も確保したい社会人
+    highlights:
+      - 動画·WEBテキスト·スマート問題集がコース内完結
+      - 税込19,800円の買い切り
+      - スキマ時間特化の約30分講義
+  - rank: 2
+    offer_type: course
+    name: アガルートアカデミー 賃貸不動産経営管理士試験講座
+    provider: アガルートアカデミー
+    plan_name: 入門総合·中上級総合·単科など
+    price_note: カリキュラム別·公式LPで要確認
+    billing_type: lump
+    duration: カリキュラムごとに異なる
+    lecture_hours: 公式テキスト相当を約22時間に凝縮（公式訴求）
+    support: 質問対応·受講相談·オリジナルテキスト
+    official_url: https://www.agaroot.jp/chintai_kk/
+    lp_url: https://www.agaroot.jp/chintai_kk/
+    affiliate_url: https://www.agaroot.jp/chintai_kk/
+    image_file: chintai-agaroot-course2026.webp
+    for_who: 質問サポート厚め·段階別カリキュラムで初学者を支えたい人
+    highlights:
+      - 入門から中上級まで学習段階別
+      - プロ講師講義とオリジナルテキスト
+      - 無料体験·資料請求あり
+related_links:
+  - exam-overview:試験概要
+  - study-plan:学習計画の立て方
+  - affiliate-textbooks-recommend:おすすめテキスト3選
+  - affiliate-problem-books:おすすめ問題集3選
+  - affiliate-free-vs-paid-study:無料と有料教材の使い分け
+operator_note: |
+  2026-06-12 v2本文完了。スタディング19,800円税込は studying.jp/chintaikanrishi で確認。
+  アガルート料金は公式LP要確認。A8 URL未確定のため a8_url 未設定·published 不可。
+  提携後: products[].a8_url を追記し related_links にASPリンクを追加。

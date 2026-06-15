@@ -1,0 +1,63 @@
+slug: affiliate-correspondence-course
+theme_key: correspondence-course
+search_intent: 賃貸不動産経営管理士向け通信講座を比較して独学に組み込みたい
+title: 賃貸不動産経営管理士試験の通信講座比較【TAC vs LEC】独学との併用【2026年度版】
+genre: 独学対策
+layout: product-comparison
+asp_primary: a8
+comparison_kind: courses
+comparison_title: おすすめ通信講座2選（比較）
+price_disclaimer: 料金·割引·受講期間は執筆時点（2026-06-12）の各公式ページ参考です。申込前に必ず最新条件を確認してください。ASP URL確定後に公開してください。
+products:
+  - rank: 1
+    offer_type: course
+    name: 資格の学校TAC 賃貸管理士総合本科生（Web通信）
+    provider: 資格の学校TAC
+    plan_name: Web通信講座（2026合格目標·全32回）
+    price_yen: 110000
+    billing_type: lump
+    price_note: 税込·入会金10,000円別·割引条件あり
+    duration: 全32回·15分単位Web講義（公式参考）
+    lecture_hours: Web講義フォロー·デジタル教材·Web答練
+    support: 質問メール·Web答練·ミニテスト（TAC WEB SCHOOL）
+    official_url: https://www.tac-school.co.jp/kouza_chintai/chintai_crs_idx.html
+    lp_url: https://www.tac-school.co.jp/kouza_chintai/chintai_crs_idx.html
+    affiliate_url: https://www.tac-school.co.jp/kouza_chintai/chintai_crs_idx.html
+    image_file: chintai-tac-course2026.webp
+    for_who: 初学から添削·Web答練で週次ペースを守りたい社会人
+    highlights:
+      - TACオリジナル教材·デジタル教材同梱
+      - 15分単位のWeb講義でスキマ学習
+      - 宅建受験経験者·再受講割引あり
+  - rank: 2
+    offer_type: course
+    name: LEC東京リーガルマインド 賃貸管理士合格フルコース（通信Web）
+    provider: LEC東京リーガルマインド
+    plan_name: 通信Web＋音声DL（2026合格目標）
+    price_yen: 82500
+    billing_type: lump
+    price_note: 税込·DVD版93,500円·早期割引あり
+    duration: 通信全回（公式参考·訓練期間7か月目安）
+    lecture_hours: Web動画＋スマホ＋音声DL
+    support: 添削·質問（コースによる）
+    official_url: https://www.lec-jp.com/campaign/toku2/chintai.html
+    lp_url: https://www.lec-jp.com/campaign/toku2/chintai.html
+    affiliate_url: https://www.lec-jp.com/campaign/toku2/chintai.html
+    image_file: chintai-lec-course2026.webp
+    for_who: 通信Webでコストを抑えつつLECトリセツ系列を揃えたい人
+    highlights:
+      - 通信Web82,500円（税込）から
+      - 合格のトリセツ系列教材を使用
+      - 早期申込·受験者割引あり
+related_links:
+  - exam-overview:試験概要
+  - study-plan:学習計画の立て方
+  - affiliate-textbooks-recommend:おすすめテキスト3選
+  - affiliate-problem-books:おすすめ問題集3選
+  - affiliate-online-course-compare:オンライン講座比較
+  - affiliate-free-vs-paid-study:無料と有料教材の使い分け
+operator_note: |
+  2026-06-12 v2本文完了。TAC110,000円+入会金10,000円は tac-school.co.jp/kouza_chintai で確認。
+  LEC82,500円は lec-jp.com/campaign/toku2/chintai.html で確認。
+  A8 URL未確定のため a8_url 未設定·published 不可。
+  提携後: products[].a8_url を追記し related_links にASPリンクを追加。
