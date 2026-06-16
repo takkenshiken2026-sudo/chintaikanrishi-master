@@ -4,10 +4,10 @@ search_intent: 賃貸不動産経営管理士向け通学講座を比較して�
 title: 賃貸不動産経営管理士試験の通学講座比較【TAC vs LEC】独学との併用【2026年度版】
 genre: 独学対策
 layout: product-comparison
-asp_primary: a8
+asp_primary: mixed
 comparison_kind: courses
 comparison_title: おすすめ通学講座2選（比較）
-price_disclaimer: 料金·割引·開講校舎は執筆時点（2026-06-12）の各公式ページ参考です。申込前に必ず最新条件を確認してください。ASP URL確定後に公開してください。
+price_disclaimer: 料金·割引·開講校舎は執筆時点（2026-06-16）の各公式ページ参考です。申込前に必ず最新条件を確認してください。
 products:
   - rank: 1
     offer_type: course
@@ -56,8 +56,8 @@ related_links:
   - affiliate-online-course-compare:オンライン講座比較
   - affiliate-textbooks-recommend:おすすめテキスト3選
   - affiliate-free-vs-paid-study:無料と有料教材の使い分け
+  - https://www.tac-school.co.jp/kouza_chintai/chintai_crs_idx.html:TAC賃管講座（公式）
+  - https://online.lec-jp.com/disp/CSfLastPackGoodsPage_003.jsp?GOODS_NO=100266455:LEC賃管通学講座（公式）
 operator_note: |
-  2026-06-12 v2本文完了。TAC教室110,000円+入会金は tac-school.co.jp/kouza_chintai/chintai_crs_idx.html で確認。
-  LEC通学88,000円は online.lec-jp.com GOODS_NO=100266455 で確認。
-  A8 URL未確定のため a8_url 未設定·published 不可。
-  提携後: products[].a8_url を追記し related_links にASPリンクを追加。
+  2026-06-16 手書きリライト·published。TAC教室11万円+入会金1万円·LEC通学88,000円は各公式LPで確認。
+  講座画像は通信講座表紙をproxy使用。A8確定後は a8_url へ差し替え可。

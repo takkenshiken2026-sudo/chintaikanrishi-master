@@ -6,8 +6,15 @@ alwaysApply: false
 
 # アフィリエイト用バナー
 
-正本: `docs/affiliate/affiliate-article-rules.md` §7・§8.1・§8.3・§8.4  
-記事本文・CSV・brief は `.cursor/rules/affiliate-article.mdc` を参照。
+正本: `docs/affiliate/placement-and-rollout.md` §5・`affiliate-article-rules.md` §7・§8.4  
+記事本文・CSV・brief・導線は `.cursor/rules/affiliate-article.mdc` を参照。
+
+## 設置ページ（厳守）
+
+| 設置する | 設置しない |
+|----------|------------|
+| `/articles/`・`/terms/`・`/q/` の **index のみ** | トップ・個別記事・個別用語・フッター |
+| 各 `affiliate-*` 記事内（要点・hub） | 通常ガイド・用語詳細への画像バナー |
 
 ## バナーの種類
 
@@ -22,6 +29,8 @@ alwaysApply: false
 ## guideIndexPicks（一覧バナー）
 
 - **3枚固定**（講座 / テキスト / 問題集）。`href` は公開済み `affiliate-*` slug へ
+- **`layout` 既定 `grid-3`**（運用標準）。`grid-2` は最大4件だが通常使わない
+- **`leadsByHub`**（任意）: `articles` / `terms` / `q` でリード文を出し分け
 - 各 item に **`image`** + **`imageAlt`** 必須。`images/affiliate/` の実ファイルを指す
 - `kind`: `course` | `textbook` | `problem-book`（`mock` 可）。`kindLabel` は短く（例: 講座）
 - 画像は brief と **同じファイルを再利用**可。講座=横長サムネ、書籍=表紙 webp
@@ -58,6 +67,6 @@ alwaysApply: false
 
 ## 反映手順
 
-1. `exam-site-shell` で `site-config.json` / CSS / 画像を編集
-2. `python3 tools/build_article_pages.py`（または `build_all.py`）
+1. `exam-site-shell` で `site-config.json` / CSS / 画像を編集（**各サイトは独自設定**）
+2. `python3 tools/build_article_pages.py` + `build_glossary_pages.py` + `build_past_question_pages.py`（または `build_all.py`）
 3. 本番: `sync_from_template.py --target …` → サイト側で `build_all.py` → デプロイ

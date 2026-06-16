@@ -8,7 +8,8 @@
 | 文書 | 内容 |
 |------|------|
 | **本書** | 作成手順・UI・画像・ASP・チェックリスト |
-| [seo-article-guidelines.md](../seo-article-guidelines.md) の「アフィリエイト記事」 | 識別・法務・本数・内部リンク方針 |
+| **[placement-and-rollout.md](./placement-and-rollout.md)** | **設置箇所マップ・通常ガイド導線・マルチサイト展開** |
+| [seo-article-guidelines.md](../seo-article-guidelines.md) の「アフィリエイト記事」 | 識別・法務・本数 |
 | [guide-article-catalog.md](../guide-article-catalog.md) | 標準 slug 一覧（10本目安） |
 | [auto-create-workflow.md](./auto-create-workflow.md) | CLI / AI による雛形生成フロー |
 
@@ -44,7 +45,7 @@ ASP URL 確定 → 各商品ページで価格確認 → brief 記入
 → content_status=published → build → デプロイ
 ```
 
-**例外:** `affiliate-free-vs-paid-study` など **asp=internal**（収益リンクなし・内部導線のみ）と明示したテーマ。
+**ASP URL が1本もないテーマは CSV 行・公開 HTML を作らない**（`content_status=draft` のまま待機）。
 
 ---
 
@@ -417,18 +418,56 @@ Cursor 要約: `.cursor/rules/affiliate-banner.mdc`
 
 ---
 
-## 9. 関連リンク（CSV 例）
+## 9. 関連リンク・収益導線
+
+**設置箇所の全体像:** [placement-and-rollout.md](./placement-and-rollout.md)
+
+### 収益の本丸
+
+```
+通常ガイド → affiliate-* 比較記事 → ASP（Amazon / A8 / afb）
+```
+
+- **比較記事だけ** が ASP 直リンクを載せる
+- **通常ガイド** は `related_links` と本文 slug で比較記事へ送る（ASP 直リンク禁止）
+- 1 通常ガイドあたり比較記事への内部リンクは **1〜2 本**
+
+### 比較記事の `related_links`（末尾ボックス）
 
 ```text
 self-study-roadmap:独学の進め方
 study-plan:学習計画の立て方
 ../../q/index.html:過去問を解く（無料）
+affiliate-problem-books:おすすめ問題集3選
+affiliate-mock-exam-materials:模試教材の選び方
+affiliate-correspondence-course:通信講座の比較
 https://px.a8.net/...:SMART合格講座（公式）
 ```
 
 - 内部: 同 CSV に存在する slug のみ
-- 外部 ASP: `https://` で始める
+- 表示順: **非アフィリ3 → アフィリ3**（計6件）。ASP `https://` 行は関連ボックスに出さない
 - フッター一括貼り付けはしない
+
+### 通常ガイドの `related_links`（末尾ボックス）
+
+```text
+affiliate-textbooks-recommend:おすすめテキスト3選【2026年度版・独学】
+past-question-strategy:過去問の回し方
+```
+
+- 比較記事 slug は **1〜2 本**。残りは通常ガイド・演習・用語へ
+- 本文 `section_*_body` に `affiliate-*` slug を **1文** 挿入可（ビルド時に内部リンク化）
+
+### 送り先の選び方
+
+| 通常ガイドの意図 | 比較記事 slug 例 |
+|------------------|------------------|
+| 独学・教材・学習計画 | `affiliate-textbooks-recommend` |
+| 過去問・分野攻略 | `affiliate-problem-books` |
+| 社会人・通信 | `affiliate-correspondence-course` |
+| 模試・直前 | `affiliate-mock-exam-materials` |
+
+合格率・合格後手続き・年収・会場案内・他資格制度比較のみの記事は **繋がない**
 
 ---
 
@@ -441,7 +480,7 @@ https://px.a8.net/...:SMART合格講座（公式）
 | テキスト・問題集 | Amazon | `comparison_kind: books` |
 | オンライン講座・通信・予備校 | A8 / afb | `comparison_kind: courses` |
 | 模試・直前 | Amazon + A8 | 混在可（要検索意図整理） |
-| 無料 vs 有料 | internal（収益リンクなし可） | — |
+| 無料 vs 有料 | A8 / afb / Amazon（URL 確定後） | brief 必須 |
 
 ---
 
@@ -497,14 +536,27 @@ https://px.a8.net/...:SMART合格講座（公式）
 
 ## 13. サイト固有メモ（任意）
 
-資格ごとに追記。具体 URL・教材名・Amazon 短縮 URL 一覧はここか `original_note` に書く。
+資格ごとに `sites/<site-id>/SITE.md` または `docs/affiliate/SITE.md` を置く。  
+雛形: [SITE.template.md](./SITE.template.md)。展開手順: [placement-and-rollout.md](./placement-and-rollout.md) §6・§9。
 
 | 項目 | 例 |
 |------|-----|
 | ドメイン | `https://example.jp/` |
-| 公開済み slug | （現状の本数と ASP） |
-| 画像ディレクトリ | `images/textbooks/` |
+| 公開済み `affiliate-*` slug | 本数・ASP・備考 |
+| `guideIndexPicks` | layout・3 item の slug |
+| 通常ガイド導線 | related_links 済 N 本 / 全 M 本 |
+| 画像 | `images/affiliate/` |
 
 ---
 
-*最終更新: 2026-06-13（§8.4 アフィリエイト用バナー・ビルド退行防止を追加）*
+## 14. 他サイトへの展開（要約）
+
+1. `sync_from_template.py --target ~/Projects/<資格サイト>` でエンジン同期
+2. サイト固有: `guide_articles.csv`・`affiliate-briefs/`・`images/affiliate/`・`site-config.json` の `guideIndexPicks`
+3. 比較記事 1 本公開 → 一覧カード設定 → 学習系ガイドに導線 → `build_all.py` → デプロイ
+
+詳細チェックリスト: [placement-and-rollout.md](./placement-and-rollout.md)
+
+---
+
+*最終更新: 2026-06-14（設置箇所・導線・マルチサイト展開を placement-and-rollout に分離）*

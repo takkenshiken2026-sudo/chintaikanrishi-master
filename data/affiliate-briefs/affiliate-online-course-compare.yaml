@@ -4,10 +4,10 @@ search_intent: 賃貸不動産経営管理士向けオンライン講座を比�
 title: 賃貸不動産経営管理士試験のオンライン講座比較【スタディング vs アガルート】独学との併用
 genre: 独学対策
 layout: product-comparison
-asp_primary: a8
+asp_primary: mixed
 comparison_kind: courses
 comparison_title: おすすめオンライン講座2選（比較）
-price_disclaimer: 料金·受講期間は執筆時点（2026-06-12）の各公式ページ参考です。申込前に必ず最新条件を確認してください。ASP URL確定後に公開してください。
+price_disclaimer: 料金·受講期間は執筆時点（2026-06-16）の各公式ページ参考です。申込前に必ず最新条件を確認してください。
 products:
   - rank: 1
     offer_type: course
@@ -54,7 +54,8 @@ related_links:
   - affiliate-textbooks-recommend:おすすめテキスト3選
   - affiliate-problem-books:おすすめ問題集3選
   - affiliate-free-vs-paid-study:無料と有料教材の使い分け
+  - https://studying.jp/chintaikanrishi/:スタディング賃管コース（公式）
+  - https://www.agaroot.jp/chintai_kk/:アガルート賃管講座（公式）
 operator_note: |
-  2026-06-12 v2本文完了。スタディング19,800円税込は studying.jp/chintaikanrishi で確認。
-  アガルート料金は公式LP要確認。A8 URL未確定のため a8_url 未設定·published 不可。
-  提携後: products[].a8_url を追記し related_links にASPリンクを追加。
+  2026-06-16 手書きリライト·published。スタディング19,800円税込·アガルートは公式LP要確認。
+  related_linksにスタディング·アガルート公式直リンク。A8確定後は a8_url へ差し替え可。

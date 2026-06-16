@@ -4,10 +4,10 @@ search_intent: 賃貸不動産経営管理士の再受験で短期講座を比�
 title: 賃貸不動産経営管理士試験の再受験者向け短期講座比較【TAC速修 vs LECプライム】【2026年度版】
 genre: 学習計画
 layout: product-comparison
-asp_primary: a8
+asp_primary: mixed
 comparison_kind: courses
 comparison_title: 再受験者向け短期講座2選（比較）
-price_disclaimer: 料金·割引·受講期間は執筆時点（2026-06-12）の各公式ページ参考です。申込前に必ず最新条件を確認してください。ASP URL確定後に公開してください。
+price_disclaimer: 料金·割引·受講期間は執筆時点（2026-06-16）の各公式ページ参考です。申込前に必ず最新条件を確認してください。
 products:
   - rank: 1
     offer_type: course
@@ -55,8 +55,8 @@ related_links:
   - affiliate-problem-books:おすすめ問題集3選
   - affiliate-mock-exam-materials:直前対策3選
   - affiliate-correspondence-course:通信講座比較
+  - https://www.tac-school.co.jp/kouza_chintai/chintai_crs_sokuhon.html:TAC賃管速修講座（公式）
+  - https://online.lec-jp.com/disp/CSfLastPackGoodsPage_003.jsp?GOODS_NO=100266461:LEC賃管プライム講座（公式）
 operator_note: |
-  2026-06-12 v2本文完了。TAC速修52,800円（受験経験者）は chintai_crs_sokuhon.html で確認。
-  LECプライム42,240円（受験者20％）は GOODS_NO=100266461 で確認。
-  A8 URL未確定のため a8_url 未設定·published 不可。
-  提携後: products[].a8_url を追記し related_links にASPリンクを追加。
+  2026-06-16 手書きリライト·published。TAC速修52,800円·LECプライム42,240円は各公式LPで確認。
+  講座画像は通信講座表紙をproxy使用。A8確定後は a8_url へ差し替え可。
