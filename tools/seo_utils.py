@@ -49,20 +49,14 @@ def content_date_from_row(row: dict[str, str] | None) -> str | None:
     return None
 
 
-_ARTICLE_DETAIL_INDEX = re.compile(r"^articles/([^/]+)/index\.html$")
-
-
 def sitemap_loc_rel(rel: str) -> str:
     """Map on-disk HTML path to sitemap loc (canonical-aligned public path).
 
-    Only article *detail* pages (articles/{slug}/index.html) become articles/{slug}/.
-    articles/index.html, q/*, terms/* are unchanged.
+    URL 形式はサイト全体で index.html 形式に統一（記事・q・terms すべて
+    articles/{slug}/index.html のように index.html を明示）。canonical・内部リンク・
+    sitemap を同一形式に揃えることで重複インデックスを防ぐ。
     """
-    normalized = rel.replace("\\", "/").lstrip("/")
-    m = _ARTICLE_DETAIL_INDEX.match(normalized)
-    if m:
-        return f"articles/{m.group(1)}/"
-    return normalized
+    return rel.replace("\\", "/").lstrip("/")
 
 
 def html_path_for_sitemap_loc(loc_path: str) -> Path:

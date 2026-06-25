@@ -17,8 +17,8 @@ if str(ROOT) not in sys.path:
 from tools.seo_utils import html_path_for_sitemap_loc, is_noindex_html, is_sitemap_excluded_rel  # noqa: E402
 
 LOC_RE = re.compile(r"<loc>(.*?)</loc>")
-# articles/{slug}/index.html in sitemap — canonical is articles/{slug}/
-ARTICLE_DETAIL_INDEX_HTML = re.compile(r"^articles/[^/]+/index\.html$")
+# URL 形式は index.html 形式に統一。記事の slash 形式（articles/{slug}/）は不可。
+ARTICLE_DETAIL_SLASH = re.compile(r"^articles/[^/]+/$")
 
 
 @dataclass
@@ -52,12 +52,12 @@ def main() -> int:
             if is_sitemap_excluded_rel(rel):
                 issues.append(Issue("ERROR", f"除外対象の URL が含まれています: {rel}"))
                 continue
-            if ARTICLE_DETAIL_INDEX_HTML.match(rel):
+            if ARTICLE_DETAIL_SLASH.match(rel):
                 slug = rel.split("/")[1]
                 issues.append(
                     Issue(
                         "ERROR",
-                        f"試験ガイドは canonical（末尾 /）に合わせてください: {rel} → articles/{slug}/",
+                        f"試験ガイドは canonical（index.html 形式）に合わせてください: {rel} → articles/{slug}/index.html",
                     )
                 )
                 continue

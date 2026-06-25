@@ -526,7 +526,7 @@ def guide_related_link_items(
             if slug not in seen:
                 seen.add(slug)
                 picked.append(
-                    f'<a class="related-link" href="{articles_prefix}{html.escape(slug)}/">'
+                    f'<a class="related-link" href="{articles_prefix}{html.escape(slug)}/index.html">'
                     f"{html.escape(g['title'])}</a>"
                 )
         if len(picked) >= limit:
@@ -542,7 +542,7 @@ def guide_related_link_items(
             continue
         seen.add(resolved)
         picked.append(
-            f'<a class="related-link" href="{articles_prefix}{html.escape(resolved)}/">'
+            f'<a class="related-link" href="{articles_prefix}{html.escape(resolved)}/index.html">'
             f"{html.escape(g['title'])}</a>"
         )
     return picked

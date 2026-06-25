@@ -577,7 +577,7 @@ def parse_related_links(
             continue
         if target in by_slug and target not in seen:
             seen.add(target)
-            href = f"../{html.escape(target)}/"
+            href = f"../{html.escape(target)}/index.html"
             text_label = resolve_related_link_label(target, label, by_slug[target]["title"])
             links.append(f'<a class="related-link" href="{href}">{html.escape(apply_vars(text_label))}</a>')
         elif target.startswith(("http://", "https://")):
@@ -612,7 +612,7 @@ def parse_related_links(
                 continue
             seen.add(slug)
             links.append(
-                f'<a class="related-link" href="../{html.escape(slug)}/">'
+                f'<a class="related-link" href="../{html.escape(slug)}/index.html">'
                 f"{html.escape(apply_vars(other['title']))}</a>"
             )
             if len(links) >= 2:
@@ -623,7 +623,7 @@ def parse_related_links(
             if slug in by_slug and slug not in seen and slug != current_slug:
                 seen.add(slug)
                 links.append(
-                    f'<a class="related-link" href="../{html.escape(slug)}/">'
+                    f'<a class="related-link" href="../{html.escape(slug)}/index.html">'
                     f"{html.escape(apply_vars(by_slug[slug]['title']))}</a>"
                 )
     if not links:
@@ -790,7 +790,7 @@ def build_article_html(
         link_external_urls=False,
     )
     desc = meta_description(meta_raw)
-    canonical = public_url(f"articles/{slug}/")
+    canonical = public_url(f"articles/{slug}/index.html")
     updated = content_date_from_row(article)
     genre = apply_vars(article.get("genre", "試験ガイド"))
     tags = split_semicolon(apply_vars(article.get("tags", "")))
@@ -1057,7 +1057,7 @@ def build_index_html(articles: list[dict[str, str]]) -> str:
             f'data-genre="{html.escape(genre, quote=True)}" '
             f'data-genre-style="{html.escape(style, quote=True)}" '
             f'data-search="{html.escape(search_text, quote=True)}">'
-            f'<a class="article-index-card-link" href="{html.escape(article["slug"])}/">'
+            f'<a class="article-index-card-link" href="{html.escape(article["slug"])}/index.html">'
             f'<span class="article-index-card-genre">{html.escape(genre)}</span>'
             f"<h2>{html.escape(title_text)}</h2>"
             f"<p>{html.escape(desc_text)}</p>"
@@ -1102,7 +1102,7 @@ def build_index_html(articles: list[dict[str, str]]) -> str:
     title = f"試験ガイド｜{brand_name()}（{exam_name()}）"
     desc = f"{exam_name()}の受験フェーズ別ガイド（制度・学習計画・演習・直前・再受験）一覧です。用語の定義は用語解説（知識ハブ）をご覧ください。"
     item_list = [
-        {"@type": "ListItem", "position": i, "name": apply_vars(a["title"]), "item": public_url(f"articles/{a['slug']}/")}
+        {"@type": "ListItem", "position": i, "name": apply_vars(a["title"]), "item": public_url(f"articles/{a['slug']}/index.html")}
         for i, a in enumerate(articles, start=1)
     ]
     ld_json = json.dumps(
