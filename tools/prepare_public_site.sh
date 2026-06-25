@@ -8,6 +8,7 @@ mkdir -p "$OUT"
 cd "$ROOT"
 for f in \
   index.html \
+  404.html \
   about.html \
   privacy.html \
   related-sites.html \
