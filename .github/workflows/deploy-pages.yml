@@ -33,12 +33,6 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Site-specific SPA data
-        run: |
-          python3 tools/csv_to_chintaikan_eisei_master.py
-          python3 tools/glossary_csv_to_eisei_embed_js.py
-          python3 tools/csv_to_eisei_ichimon_js.py
-
       - name: Build, validate, and bundle public_site
         run: python3 tools/build_all.py
 
