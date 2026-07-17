@@ -540,6 +540,18 @@ def write_site_config_js() -> None:
     )
 
 
+def adsense_publisher_id() -> str:
+    """ads.txt 用の publisher ID（ca-pub-… → pub-…）。未設定なら空。"""
+    client = adsense_client_id()
+    if not client:
+        return ""
+    if client.startswith("ca-pub-"):
+        return "pub-" + client[len("ca-pub-") :]
+    if client.startswith("pub-"):
+        return client
+    return ""
+
+
 def write_crawler_files() -> None:
     origin = clean_origin()
     host = origin.replace("https://", "").replace("http://", "").strip("/")
@@ -550,6 +562,16 @@ def write_crawler_files() -> None:
         f"Sitemap: {origin}/sitemap.xml\n",
         encoding="utf-8",
     )
+    # AdSense サイト確認用。未設定サイトでは作らない（または削除する）。
+    ads_path = ROOT / "ads.txt"
+    pub_id = adsense_publisher_id()
+    if pub_id:
+        ads_path.write_text(
+            f"google.com, {pub_id}, DIRECT, f08c47fec0942fa0\n",
+            encoding="utf-8",
+        )
+    elif ads_path.is_file():
+        ads_path.unlink()
 
 
 def sync_config_files() -> None:
@@ -560,4 +582,4 @@ def sync_config_files() -> None:
 
 if __name__ == "__main__":
     sync_config_files()
-    print("Synced site-config.js, CNAME, robots.txt from site-config.json")
+    print("Synced site-config.js, CNAME, robots.txt, ads.txt from site-config.json")
