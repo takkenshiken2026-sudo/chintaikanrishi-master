@@ -36,9 +36,25 @@ do
   fi
   cp "$f" "$OUT/"
 done
-# AdSense サイト確認（site-config の adsenseClientId があるとき sync で生成）
-if [[ -f "$ROOT/ads.txt" ]]; then
-  cp "$ROOT/ads.txt" "$OUT/"
+# AdSense サイト確認（site-config の adsenseClientId があるとき sync で必須生成）
+if python3 - <<'PY'
+import json, sys
+from pathlib import Path
+cfg = json.loads(Path("site-config.json").read_text(encoding="utf-8"))
+sys.exit(0 if str(cfg.get("adsenseClientId") or "").strip() else 1)
+PY
+then
+  if [[ ! -f "$ROOT/ads.txt" ]]; then
+    echo "prepare_public_site.sh: adsenseClientId があるのに ads.txt がありません。先に python3 tools/site_config.py を実行してください。" >&2
+    exit 1
+  fi
+  if ! grep -qE '^google\.com, pub-[0-9]+, DIRECT, f08c47fec0942fa0$' "$ROOT/ads.txt"; then
+    echo "prepare_public_site.sh: ads.txt の形式が不正です（google.com, pub-…, DIRECT, f08c47fec0942fa0 の行が必要）。" >&2
+    exit 1
+  fi
+  cp "$ROOT/ads.txt" "$OUT/ads.txt"
+  # ルート配信を明示（GitHub Pages / AdSense クローラ向け）
+  chmod 644 "$OUT/ads.txt"
 fi
 for d in articles q terms; do
   if [[ -d "$ROOT/$d" ]]; then
