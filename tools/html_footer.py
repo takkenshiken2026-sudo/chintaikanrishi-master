@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 import html
+import re
 from pathlib import Path
 
 from tools.site_config import (
@@ -201,6 +202,25 @@ def adsense_head_snippet() -> str:
         f'<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={cid}"\n'
         '     crossorigin="anonymous"></script>'
     )
+
+
+_ADSENSE_HEAD_RE = re.compile(
+    r"[ \t]*<!-- Google AdSense -->\s*"
+    r'<script\s+async\s+src="https://pagead2\.googlesyndication\.com/pagead/js/adsbygoogle\.js\?client=[^"]+"\s*'
+    r'crossorigin="anonymous"></script>\s*',
+    re.I,
+)
+
+
+def ensure_adsense_head(html_text: str) -> str:
+    """既存の AdSense タグを除去し、</head> 直前に1つだけ置く（index SEO 注入との二重化防止）。"""
+    cleaned = _ADSENSE_HEAD_RE.sub("", html_text)
+    snippet = adsense_head_snippet()
+    if not snippet:
+        return cleaned
+    if "</head>" not in cleaned:
+        return cleaned
+    return cleaned.replace("</head>", f"{snippet}\n</head>", 1)
 
 
 def analytics_snippet(rel_path: Path) -> str:
