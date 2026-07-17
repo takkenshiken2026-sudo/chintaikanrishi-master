@@ -34,7 +34,12 @@ from tools.site_config import (
     sync_config_files,
     fields,
 )
-from tools.html_footer import site_page_footer, site_page_header, site_shell_footer
+from tools.html_footer import (
+    ensure_adsense_head,
+    site_page_footer,
+    site_page_header,
+    site_shell_footer,
+)
 from tools.brand_assets import inject_brand_head
 from tools.build_index_faq_ldjson import inject_index_faq_ldjson
 from tools.index_seo_head import (
@@ -626,6 +631,9 @@ def main() -> int:
             new = update_index_auth_modal(new)
             new = update_index_logo_styles(new)
             new = update_index_glossary_excerpt(new)
+        if path.suffix == ".html":
+            # INDEX_SEO 注入が brand_head を分割しても AdSense が二重にならないよう最後に正規化
+            new = ensure_adsense_head(new)
         if new != old:
             path.write_text(new, encoding="utf-8")
             print(f"Updated {path.relative_to(ROOT)}")

@@ -205,6 +205,9 @@ _INDEX_SEO_BLOCK = re.compile(
 
 _ORPHAN_DUP_SEO_AFTER_MARKER = re.compile(
     rf"(?:<meta name=\"theme-color\"[^>]+>\s*)?"
+    r"(?:<!-- Google AdSense -->\s*"
+    r'<script\s+async\s+src="https://pagead2\.googlesyndication\.com/pagead/js/adsbygoogle\.js\?client=[^"]+"\s*'
+    r'crossorigin="anonymous"></script>\s*)?'
     r"(?:<meta name=\"description\"[^>]+>[\s\S]*?"
     rf"(?:{re.escape(INDEX_SEO_MARKER_END)}\s*)?)+",
     re.I,
