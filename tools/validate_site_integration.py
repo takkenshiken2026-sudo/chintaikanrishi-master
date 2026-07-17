@@ -31,6 +31,7 @@ from tools.index_spa_patch import (  # noqa: E402
     INDEX_NOSCRIPT_MARKER_START,
 )
 from tools.site_config import (  # noqa: E402
+    adsense_publisher_id,
     base_path,
     clean_origin,
     exam_name,
@@ -792,6 +793,26 @@ def _guide_index_picks(root: Path) -> list[Issue]:
     return validate_guide_index_picks(root)
 
 
+def _ads_txt(root: Path) -> list[Issue]:
+    """AdSense 有効サイトはルート ads.txt が必須（ステータス「不明」防止）。"""
+    pub_id = adsense_publisher_id()
+    if not pub_id:
+        return []
+    path = root / "ads.txt"
+    if not path.is_file():
+        return [Issue("ads.txt がありません（tools/site_config.py で生成・デプロイ必須）")]
+    text = path.read_text(encoding="utf-8")
+    expected = f"google.com, {pub_id}, DIRECT, f08c47fec0942fa0"
+    if expected not in text:
+        return [
+            Issue(
+                f"ads.txt に AdSense 行がありません（期待: {expected}）。"
+                "python3 tools/site_config.py を実行してください"
+            )
+        ]
+    return []
+
+
 def main() -> int:
     root = ROOT
     if len(sys.argv) > 1 and sys.argv[1] == "--root":
@@ -833,6 +854,7 @@ def main() -> int:
     issues.extend(_ga4_tracking(root))
     issues.extend(_static_page_site_leaks(root))
     issues.extend(_guide_index_picks(root))
+    issues.extend(_ads_txt(root))
 
     if not issues:
         print("validate_site_integration: OK")

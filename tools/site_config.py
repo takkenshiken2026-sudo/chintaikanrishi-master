@@ -562,13 +562,17 @@ def write_crawler_files() -> None:
         f"Sitemap: {origin}/sitemap.xml\n",
         encoding="utf-8",
     )
-    # AdSense サイト確認用。未設定サイトでは作らない（または削除する）。
+    # AdSense サイト確認用（https://{host}/ads.txt）。未設定サイトでは作らない。
     ads_path = ROOT / "ads.txt"
     pub_id = adsense_publisher_id()
     if pub_id:
+        # IAB ads.txt: コメント可。認証局 ID f08c47fec0942fa0 は Google AdSense 公式値。
+        # クローラ互換のためコメントは ASCII のみ。
         ads_path.write_text(
+            f"# {host} Google AdSense\n"
             f"google.com, {pub_id}, DIRECT, f08c47fec0942fa0\n",
-            encoding="utf-8",
+            encoding="ascii",
+            newline="\n",
         )
     elif ads_path.is_file():
         ads_path.unlink()
