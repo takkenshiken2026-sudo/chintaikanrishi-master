@@ -134,6 +134,11 @@ def ga4_measurement_id() -> str:
     return str(CONFIG.get("ga4MeasurementId") or "").strip()
 
 
+def adsense_client_id() -> str:
+    """Google AdSense の publisher client ID（未設定なら空。例: ca-pub-…）。"""
+    return str(CONFIG.get("adsenseClientId") or "").strip()
+
+
 def copyright_text() -> str:
     configured = str(CONFIG.get("copyright") or "").strip()
     if configured:
@@ -502,6 +507,7 @@ def write_site_config_js() -> None:
         "siteOrigin": clean_origin(),
         "contactUrl": contact_url(),
         "ga4MeasurementId": ga4_measurement_id(),
+        "adsenseClientId": adsense_client_id(),
         "theme": theme(),
         "navigation": {
             "header": [

@@ -14,6 +14,7 @@ import html
 from pathlib import Path
 
 from tools.site_config import (
+    adsense_client_id,
     base_path,
     brand_logo_lines,
     brand_logo_size_class,
@@ -186,6 +187,19 @@ def ga4_head_snippet() -> str:
         'gtag("js", new Date());\n'
         f'gtag("config", "{mid}");\n'
         "</script>"
+    )
+
+
+def adsense_head_snippet() -> str:
+    """生成 HTML の <head> 内用 AdSense オート広告スクリプト（未設定なら空）。"""
+    client = adsense_client_id()
+    if not client:
+        return ""
+    cid = html.escape(client, quote=True)
+    return (
+        "<!-- Google AdSense -->\n"
+        f'<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={cid}"\n'
+        '     crossorigin="anonymous"></script>'
     )
 
 
