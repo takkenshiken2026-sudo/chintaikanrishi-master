@@ -370,13 +370,16 @@ def social_image_meta_tags(*, site_root: Path | None = None) -> str:
 
 
 def brand_head_markup(rel_path: Path, *, site_root: Path | None = None, include_social_image: bool = True) -> str:
+    from tools.html_footer import adsense_head_snippet
+
     block = favicons_head_markup(rel_path, site_root=site_root)
-    if not block:
-        return ""
-    if include_social_image:
+    if block and include_social_image:
         social = social_image_meta_tags(site_root=site_root)
         if social:
             block += "\n" + social
+    ads = adsense_head_snippet()
+    if ads:
+        block = f"{block}\n{ads}" if block else ads
     return block
 
 
