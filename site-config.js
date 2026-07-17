@@ -5,6 +5,7 @@ window.SITE_CONFIG = {
   "siteOrigin": "https://chintaikanrishi-master.jp",
   "contactUrl": "https://forms.gle/duTebNY1vKqV6A816",
   "ga4MeasurementId": "G-NYSHQLECDS",
+  "adsenseClientId": "ca-pub-7927260139193410",
   "theme": {
     "accent": "#5c4d7a",
     "accentText": "#ffffff",
