@@ -192,6 +192,60 @@ def slug_file_for_glossary_row(row: dict, used_slugs: dict[str, str]) -> str:
 
 
 
+def legacy_no_reading_slug_file(term: str) -> str:
+    """reading をハッシュに含める前の旧スラッグ（term のみ）。
+
+    スラッグ生成が term のみ → term|reading に変わった際に URL が変わり、
+    Google がインデックス済みの旧 URL が 404 化した。旧 URL を復元して
+    現行 URL へリダイレクトするために使う。
+    """
+    h = hashlib.sha256(norm(term).encode("utf-8")).hexdigest()[:16]
+    return f"g-{h}.html"
+
+
+def build_legacy_redirect_html(term: str, new_slug_file: str, base: str) -> str:
+    """旧 URL に置く軽量リダイレクト（canonical + meta refresh + JS）。"""
+    new_abs = public_url(base, f"terms/{new_slug_file}")
+    term_esc = html.escape(term)
+    return (
+        "<!DOCTYPE html>\n"
+        '<html lang="ja">\n<head>\n'
+        '<meta charset="UTF-8">\n'
+        '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
+        f"<title>{term_esc}｜ページ移動｜{html.escape(brand_name())}</title>\n"
+        f'<link rel="canonical" href="{new_abs}">\n'
+        f'<meta http-equiv="refresh" content="0; url={new_abs}">\n'
+        '<meta name="robots" content="noindex, follow">\n'
+        f"<script>location.replace({json.dumps(new_abs)});</script>\n"
+        "</head>\n<body>\n"
+        f'<p>このページは移動しました。自動で移動しない場合は'
+        f'<a href="{new_abs}">{term_esc}の用語ページ</a>をご覧ください。</p>\n'
+        "</body>\n</html>\n"
+    )
+
+
+def write_legacy_term_redirects(entries: list[dict], base: str) -> int:
+    """reading 追加前の旧スラッグ URL から現行 URL へのリダイレクトを生成する。
+
+    現行の実ページと衝突する slug、および同一 term テキストによる二重生成は避ける。
+    """
+    real_slugs = {e["slug_file"] for e in entries}
+    written: set[str] = set()
+    count = 0
+    for e in entries:
+        term = e.get("term") or ""
+        new = e["slug_file"]
+        old = legacy_no_reading_slug_file(term)
+        if old == new or old in real_slugs or old in PRESERVED_TERM_HTML or old in written:
+            continue
+        (TERMS_DIR / old).write_text(
+            build_legacy_redirect_html(term, new, base), encoding="utf-8"
+        )
+        written.add(old)
+        count += 1
+    return count
+
+
 def public_url(base: str, rel_path: str) -> str:
     del base
     return site_public_url(rel_path)
@@ -1484,6 +1538,8 @@ def main() -> int:
             encoding="utf-8",
         )
 
+    legacy_redirects = write_legacy_term_redirects(entries, base)
+
     by_cat: dict[str, list[dict]] = {}
     for e in entries:
         by_cat.setdefault(e["category"] or "その他", []).append(e)
@@ -1508,6 +1564,7 @@ def main() -> int:
     sync_index_glossary_slug_map(entries)
 
     print(f"Wrote {len(entries)} term pages under {TERMS_DIR}")
+    print(f"Wrote {legacy_redirects} legacy term redirect stubs")
     print(f"Wrote {GLOSSARY_SLUG_MAP_JSON}")
     print(f"Updated {INDEX_HTML} (glos-article-slug-map-json)")
     print(f"Wrote {hub_count} field hub pages under {TERMS_DIR}/field-*/")
