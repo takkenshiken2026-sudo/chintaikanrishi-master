@@ -1388,7 +1388,7 @@ body.is-solving .site-footer{display:none!important}
         <button class="auth-tab" onclick="switchAuthTab('register')">新規登録</button>
       </div>
       <div id="auth-login">
-        <div class="form-group"><label class="form-label">メールアドレス</label><input class="form-input" id="login-email" type="email" placeholder="you@example.com"></div>
+        <div class="form-group"><label class="form-label">メールアドレス</label><input class="form-input" id="login-email" type="email" placeholder="例）you@example.jp"></div>
         <div class="form-group"><label class="form-label">パスワード</label><input class="form-input" id="login-pw" type="password" placeholder="••••••••"></div>
         <div class="auth-err" id="login-err"></div>
         <button class="btn-auth" onclick="doLogin()">ログイン</button>
@@ -1396,7 +1396,7 @@ body.is-solving .site-footer{display:none!important}
       </div>
       <div id="auth-register" style="display:none">
         <div class="form-group"><label class="form-label">お名前</label><input class="form-input" id="reg-name" type="text" placeholder="田中 太郎"></div>
-        <div class="form-group"><label class="form-label">メールアドレス</label><input class="form-input" id="reg-email" type="email" placeholder="you@example.com"></div>
+        <div class="form-group"><label class="form-label">メールアドレス</label><input class="form-input" id="reg-email" type="email" placeholder="例）you@example.jp"></div>
         <div class="form-group"><label class="form-label">パスワード（英字と数字を含む6文字以上）</label><input class="form-input" id="reg-pw" type="password" placeholder="abc123"></div>
         <div class="auth-err" id="reg-err"></div>
         <button class="btn-auth" onclick="doRegister()">アカウント作成</button>
@@ -3049,7 +3049,7 @@ async function doRegister(){
   }
 }
 function demoLogin(){
-  loadDB(); const email='demo@example.com';
+  loadDB(); const email='demo@chintaikanrishi-master.jp';
   if(!db[email]){
     const now=Date.now(),day=86400000, ans={};
     QUESTIONS.forEach((q,i)=>{ ans[q.id]={ans:q.ans,time:10+Math.random()*20,date:now-(4-Math.floor(i/4))*day}; });
