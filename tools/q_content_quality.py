@@ -69,6 +69,87 @@ def is_demo_past_question_row(
     return False
 
 
+# --- 過去問ページの index/noindex 判定・解説サニタイズ ---------------------
+# 過去問の解説（explanation / explanation_choices）は、自動生成された定型テンプレート
+# が大半で、個別問題ごとの実質的な理由づけを含まない。テンプレートのみのページを大量に
+# index させると「有用性の低いコンテンツ」（Google AdSense / 検索品質）の要因になるため、
+# 固有の解説が執筆された行だけを index し、定型のままの行は noindex（サイト内演習用）とする。
+#
+# 判定は保守的（＝迷ったら noindex）。実践演習（explanation に固有の理由づけあり）と
+# 用語・ガイド記事を index の正本とする方針。
+_PAST_TEMPLATE_MARKERS = (
+    "設問の条件に合う",
+    "正解になるのは",
+    "参照用の",
+    "○×判定",
+    "が示す論点と異なります",
+    "組合せ問題では",
+    "記述の正誤を先に確定",
+    "単体では適切な記述",
+    "この記述が設問",
+    "設問の求める不適切な記述",
+    "論点の基本整理に合っています",
+    "設問の求める結論に合う",
+    "全選択肢が正解扱い",
+)
+
+_PAST_CHOICE_NOTE_RE = re.compile(r"^\s*\d+\s*[:：]\s*(.*)$")
+
+
+def _past_choices_are_identical(raw: str) -> bool:
+    """explanation_choices（"2:…;3:…;4:…"）の各注記が番号違いだけの同一文なら True。"""
+    notes: list[str] = []
+    for part in re.split(r"[;；]", norm(raw)):
+        m = _PAST_CHOICE_NOTE_RE.match(part)
+        if m:
+            body = re.sub(r"（\d+）|\d+|「[^」]*」", "", m.group(1))
+            body = re.sub(r"\s+", "", body)
+            if body:
+                notes.append(body)
+    return len(notes) >= 2 and len(set(notes)) == 1
+
+
+def past_explanation_is_substantive(row: dict[str, str]) -> bool:
+    """過去問の解説が定型テンプレートでなく、固有の理由づけを含むとき True。"""
+    exp = norm(row.get("explanation"))
+    if len(exp) < 120:
+        return False
+    if any(m in exp for m in _PAST_TEMPLATE_MARKERS):
+        return False
+    if _past_choices_are_identical(row.get("explanation_choices", "")):
+        return False
+    return True
+
+
+def past_question_should_index(row: dict[str, str]) -> bool:
+    """個別過去問ページを index してよいか。固有解説がある行のみ True。"""
+    return past_explanation_is_substantive(row)
+
+
+def sanitize_past_explanation_row(row: dict[str, str]) -> dict[str, str]:
+    """表示前に過去問解説の循環論法（トートロジー）を取り除いた row のコピーを返す。
+
+    - 「選択肢Nが正解になるのは、この記述が設問の条件に合う…だからです。」
+    - 「参照用の○×判定でも選択肢Nは…と整理できます。」
+    などの中身のない一文を除去し、番号違いだけの同一 explanation_choices は空にして
+    ビルダー側のフォールバック（選択肢文からの案内）に委ねる。
+    """
+    out = dict(row)
+    exp = norm(out.get("explanation"))
+    if exp:
+        exp = re.sub(
+            r"選択肢\s*\d+\s*が正解になるのは、この記述が設問の条件に合う[^。]*。",
+            "",
+            exp,
+        )
+        exp = re.sub(r"参照用の○×判定でも[^。]*。", "", exp)
+        exp = re.sub(r"設問の条件に合う肢かどうかを確認してください。?", "", exp)
+        out["explanation"] = dedupe_prose(exp).strip()
+    if _past_choices_are_identical(out.get("explanation_choices", "")):
+        out["explanation_choices"] = ""
+    return out
+
+
 def is_demo_practice_question_row(row: dict[str, str]) -> bool:
     stem = norm(row.get("stem"))
     if _DEMO_STEM_RE.search(stem):
