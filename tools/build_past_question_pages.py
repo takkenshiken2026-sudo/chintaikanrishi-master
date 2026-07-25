@@ -36,7 +36,12 @@ if str(ROOT) not in sys.path:
 
 from tools.guide_index_picks_ui import build_guide_index_picks_html
 from tools.q_explanation import build_explanation_html
-from tools.q_content_quality import is_demo_past_question_row
+from tools.q_content_quality import (
+    is_demo_past_question_row,
+    past_question_should_index,
+    sanitize_past_explanation_row,
+)
+from tools.seo_utils import NOINDEX_ROBOTS_META
 from tools.q_similar_questions import build_similar_questions_html, load_question_catalog
 from tools.html_footer import (
     ROBOTS_INDEX_FOLLOW,
@@ -683,7 +688,14 @@ def build_question_html(
         badges.append('<span class="q-badge q-badge-warn">出題無効</span>')
     badge_html = ("<p class=\"q-badges\">" + " ".join(badges) + "</p>") if badges else ""
 
-    exp_html = build_explanation_html(page, row)
+    # 解説の循環論法（定型テンプレート）を表示前に除去し、読み手向けの案内に寄せる。
+    display_row = sanitize_past_explanation_row(row)
+    exp_page = dict(page)
+    exp_page["exp"] = norm(display_row.get("explanation")) or page.get("exp", "")
+    exp_html = build_explanation_html(exp_page, display_row)
+    # 個別過去問ページは演習用。固有解説がある行のみ index し、定型のままの行は
+    # noindex（サイト内では利用可・検索インデックス対象外）とする。
+    robots_meta = ROBOTS_INDEX_FOLLOW if past_question_should_index(row) else NOINDEX_ROBOTS_META
     similar_html = build_similar_questions_html(
         page,
         rel_path,
@@ -739,7 +751,7 @@ def build_question_html(
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{html.escape(title)}</title>
 <meta name="description" content="{html.escape(desc)}">
-{ROBOTS_INDEX_FOLLOW}
+{robots_meta}
 <link rel="canonical" href="{html.escape(canonical)}">
 <meta property="og:type" content="article">
 <meta property="og:title" content="{html.escape(title)}">

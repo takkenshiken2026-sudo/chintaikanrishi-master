@@ -61,6 +61,12 @@ for d in articles q terms; do
     cp -R "$ROOT/$d" "$OUT/"
   fi
 done
+# 開発用サンプル／プレビューページは公開サイトに含めない（AdSense 審査時の
+# 「制作途中・低有用性コンテンツ」誤認を避ける）。noindex 済みだが配信自体も止める。
+rm -rf \
+  "$OUT/terms/samples" \
+  "$OUT/terms/diagram-samples" \
+  "$OUT/terms/g-writing-sample.html"
 if [[ -f "$ROOT/privacy-terms.html" ]]; then
   cp "$ROOT/privacy-terms.html" "$OUT/"
 fi

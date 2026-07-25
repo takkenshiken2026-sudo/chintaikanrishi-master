@@ -15,6 +15,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from tools.correct_answer_format import collect_choice_texts, is_valid_correct, parse_correct_js_index
+from tools.q_content_quality import sanitize_past_explanation_row
 from tools.site_config import category_to_field_map, extended_correct_answers
 
 DATA_CSV = ROOT / "data" / "past_questions.csv"
@@ -82,7 +83,7 @@ def row_to_obj(row: dict, line_no: int) -> dict | None:
         raise ValueError(f"line {line_no}: 正答なし year={year} no={qno}")
 
     text = build_plain_text(row)
-    exp = norm(row.get("explanation")) or "（解説は未入力です。）"
+    exp = norm(sanitize_past_explanation_row(row).get("explanation")) or "（解説は未入力です。）"
 
     qid = year * 100 + qno
     return {
