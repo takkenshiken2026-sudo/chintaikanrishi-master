@@ -155,6 +155,20 @@ def meta_line(product: dict[str, Any], *, brief: dict[str, Any] | None = None) -
     return f'<p class="affiliate-product-meta">{" · ".join(parts)}</p>'
 
 
+def afb_lead_pixel_html(product: dict[str, Any]) -> str:
+    """afb 計測用 1x1（brief の afb_lead_img）。visit リンクとセットで設置。"""
+    src = norm(str(product.get("afb_lead_img") or ""))
+    if not src:
+        return ""
+    lower = src.lower()
+    if "afi-b.com/lead/" not in lower and "afi-b.net/lead/" not in lower:
+        return ""
+    return (
+        f'<img class="affiliate-afb-lead" src="{html.escape(src)}" width="1" height="1" '
+        f'alt="" style="border:none;" loading="lazy" decoding="async">'
+    )
+
+
 def supplement_html(product: dict[str, Any]) -> str:
     """書籍: 問題集 / 講座: 無料体験・特典など。"""
     offer_type = product_offer_type(product)
@@ -227,7 +241,7 @@ def product_card_html(
     return (
         f'<article class="affiliate-product-card affiliate-product-card--{offer_type}" '
         f'id="affiliate-product-r{html.escape(rank_id)}">'
-        f"{hit}{supplement_html(product)}</article>"
+        f"{hit}{supplement_html(product)}{afb_lead_pixel_html(product)}</article>"
     )
 
 
