@@ -162,5 +162,20 @@ window.SITE_CONFIG = {
     "bannerImage": "images/affiliate/chintaifudosankeieikanrishi-mock-exam-2026.png",
     "bannerAlt": "賃貸不動産経営管理士試験 本番想定模試 2026年版 PDFで販売中 590円 3回分入り noteで購入する",
     "footnote": "※ note で販売する有料コンテンツ（¥590）です。サイト内の無料演習とは別商品です。"
+  },
+  "coursePromo": {
+    "url": "https://t.afi-b.com/visit.php?a=y7404W-a7355645_E&p=D981484w",
+    "modeTitle": "スタディング 賃貸不動産経営管理士合格コース",
+    "modePurpose": "買い切り19,800円で動画・問題集まで揃えたい",
+    "priceLabel": "¥19,800（一括）",
+    "tagLabel": "無料お試し",
+    "ctaLabel": "無料で試す",
+    "footnote": "※ スタディング公式サイトへ移動します。料金・受講条件は申込前に各ページでご確認ください。",
+    "scoreLead": "スタディングの動画講座",
+    "scoreMeta": "約8時間・買い切り",
+    "bannerImage": "images/affiliate/chintaifudosankeieikanrishi-studying.webp",
+    "bannerAlt": "スタディング 賃貸不動産経営管理士試験 2026年度版 スマホで最短合格を目指す 無料で講座を見る",
+    "lpUrl": "https://studying.jp/chintaikanrishi/",
+    "afbLeadUrl": "https://t.afi-b.com/lead/y7404W/D981484w/a7355645_E"
   }
 };
