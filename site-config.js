@@ -159,7 +159,7 @@ window.SITE_CONFIG = {
     "priceLabel": "¥590",
     "scoreMeta": "50問×3回",
     "scoreLead": "本番同形式の50問",
-    "bannerImage": "images/affiliate/chintai-paid-mock-note-banner.webp",
+    "bannerImage": "images/affiliate/chintaifudosankeieikanrishi-mock-exam-2026.png",
     "bannerAlt": "2026年版 賃貸不動産経営管理士 有料模試 PDF版 3回分 590円 noteで購入",
     "footnote": "※ note で販売する有料コンテンツ（¥590）です。サイト内の無料演習とは別商品です。"
   }
