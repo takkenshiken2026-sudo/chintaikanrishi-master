@@ -643,6 +643,17 @@ details.rich-detail summary{display:none}
 .score-paid-mock-strip-title{display:block;font-size:var(--fs-body);font-weight:700;color:var(--text);margin-bottom:2px;line-height:1.35}
 .score-paid-mock-strip-meta{font-size:var(--fs-caption);color:var(--text2)}
 .score-paid-mock-strip-cta{font-size:var(--fs-sub);font-weight:700;color:var(--paid-mock-accent);flex-shrink:0;white-space:nowrap}
+.promo-banners-row{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;align-items:start;margin:8px 0 14px}
+.promo-banners-row:not(:has(> :not([hidden]) + :not([hidden]))){grid-template-columns:minmax(0,360px);justify-content:center}
+.promo-banners-row > [hidden]{display:none!important}
+.paid-mock-banner{margin:0;display:block;max-width:none;width:100%;min-width:0}
+.paid-mock-banner__link{display:block;border-radius:var(--r2);overflow:hidden;border:1px solid var(--border);box-shadow:var(--sh);text-decoration:none;transition:box-shadow .15s,transform .15s,border-color .15s}
+.paid-mock-banner__link:hover{box-shadow:var(--sh2);border-color:var(--text2);transform:translateY(-1px)}
+.paid-mock-banner__link img{display:block;width:100%;height:auto;aspect-ratio:1024/576;object-fit:contain;background:#fff}
+.paid-mock-banner__foot{margin:8px 0 0;font-size:11px;color:var(--text3);line-height:1.55;text-align:center}
+.score-paid-mock-banner{display:block;max-width:none;width:100%;margin:0;border-radius:var(--r2);overflow:hidden;border:1px solid var(--paid-mock-accent-border);box-shadow:0 2px 10px var(--paid-mock-accent-shadow);text-decoration:none;transition:border-color .15s,box-shadow .15s,transform .15s}
+.score-paid-mock-banner:hover{border-color:var(--paid-mock-accent);box-shadow:0 4px 14px var(--paid-mock-accent-shadow);transform:translateY(-1px)}
+.score-paid-mock-banner img{display:block;width:100%;height:auto;aspect-ratio:1024/576;object-fit:contain;background:#fff}
 
 /* ===== DASHBOARD ===== */
 .stat-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:18px}
@@ -6825,6 +6836,8 @@ loadDB();
 @media(max-width:700px){
   .radar-wrap svg{max-width:min(100%,300px)}
   .weak-mode-card{padding:14px 14px}
+  .promo-banners-row{grid-template-columns:1fr;max-width:none;justify-content:stretch}
+  .promo-banners-row:not(:has(> :not([hidden]) + :not([hidden]))){grid-template-columns:1fr;justify-content:stretch}
 }
 </style>
 
@@ -7355,8 +7368,8 @@ function injectQuizStartEnhancements(){
   }
   modeList.appendChild(weakCard);
 
-  if(!startEl.querySelector('#paid-mock-inject')){
-    injectPaidMockExamCard(modeList);
+  if(!startEl.querySelector('#promo-banners-row') && !startEl.querySelector('#paid-mock-inject')){
+    injectPromoBannersRow(startEl, modeList);
   }
 }
 
@@ -7370,12 +7383,58 @@ function getPaidMockExamConfig(){
     priceLabel: String(cfg.priceLabel||'¥590').trim(),
     scoreMeta: String(cfg.scoreMeta||'PDF').trim(),
     scoreLead: String(cfg.scoreLead||'本番形式の予想模試').trim(),
+    bannerImage: String(cfg.bannerImage||'').trim(),
+    bannerAlt: String(cfg.bannerAlt||cfg.modeTitle||'').trim(),
+    footnote: String(cfg.footnote||'').trim(),
   };
+}
+
+function ensurePromoBannersRow(startEl, modeList){
+  let row=startEl.querySelector('#promo-banners-row');
+  if(row) return row;
+  row=document.createElement('div');
+  row.id='promo-banners-row';
+  row.className='promo-banners-row';
+  const daily=startEl.querySelector('#daily-status-wrap');
+  if(daily){
+    startEl.insertBefore(row, daily);
+  }else if(modeList&&modeList.parentNode){
+    modeList.parentNode.insertBefore(row, modeList.nextSibling);
+  }else{
+    startEl.appendChild(row);
+  }
+  return row;
+}
+
+function buildPaidMockBannerEl(){
+  const m=getPaidMockExamConfig();
+  if(!m.url||!m.bannerImage) return null;
+  const label=m.bannerAlt||`${m.modeTitle}（有料・note・${m.priceLabel}）`;
+  const wrapper=document.createElement('div');
+  wrapper.id='paid-mock-inject';
+  wrapper.className='paid-mock-banner';
+  wrapper.innerHTML=`
+    <a class="paid-mock-banner__link" href="${escapeAttr(m.url)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeAttr(label)}">
+      <img src="${escapeAttr(m.bannerImage)}" alt="${escapeAttr(m.bannerAlt||m.modeTitle)}" width="1024" height="576" loading="lazy" decoding="async">
+    </a>
+    ${m.footnote?`<p class="paid-mock-banner__foot">${escapeAttr(m.footnote)}</p>`:''}`;
+  return wrapper;
+}
+
+function injectPromoBannersRow(startEl, modeList){
+  const paid=buildPaidMockBannerEl();
+  if(!paid){
+    injectPaidMockExamCard(modeList);
+    return;
+  }
+  const row=ensurePromoBannersRow(startEl, modeList);
+  row.replaceChildren();
+  row.appendChild(paid);
 }
 
 function injectPaidMockExamCard(modeList){
   const m=getPaidMockExamConfig();
-  if(!m.url) return;
+  if(!m.url||m.bannerImage) return;
   const wrapper=document.createElement('div');
   wrapper.id='paid-mock-inject';
   const label=`${m.modeTitle}（有料・note・${m.priceLabel}）`;
@@ -7409,9 +7468,18 @@ function renderScorePaidMockPromo(opts){
     wrap.innerHTML='';
     return;
   }
-  const label=`${m.modeTitle}（有料・note・${m.priceLabel}）`;
+  const label=m.bannerAlt||`${m.modeTitle}（有料・note・${m.priceLabel}）`;
   const leadHtml=opts.leadHtml!=null?opts.leadHtml:scorePaidMockLeadHtml(m,opts.variant);
   wrap.hidden=false;
+  if(m.bannerImage){
+    wrap.innerHTML=`
+      <p class="score-paid-mock-lead">${leadHtml}</p>
+      <a class="score-paid-mock-banner" href="${escapeAttr(m.url)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeAttr(label)}">
+        <img src="${escapeAttr(m.bannerImage)}" alt="${escapeAttr(m.bannerAlt||m.modeTitle)}" width="1024" height="576" loading="lazy" decoding="async">
+      </a>
+      ${m.footnote?`<p class="paid-mock-banner__foot">${escapeAttr(m.footnote)}</p>`:''}`;
+    return;
+  }
   wrap.innerHTML=`
     <p class="score-paid-mock-lead">${leadHtml}</p>
     <a class="score-paid-mock-strip" href="${escapeAttr(m.url)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeAttr(label)}">
@@ -7459,6 +7527,8 @@ window.gotoPage=function(id){
       // 弱点カードが既にある場合は解放状態が変わっていれば再描画
       const existingWeak=document.getElementById('weak-mode-inject');
       if(existingWeak) existingWeak.remove();
+      const existingPromoRow=document.getElementById('promo-banners-row');
+      if(existingPromoRow) existingPromoRow.remove();
       const existingPaid=document.getElementById('paid-mock-inject');
       if(existingPaid) existingPaid.remove();
       injectQuizStartEnhancements();
