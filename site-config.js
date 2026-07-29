@@ -159,7 +159,7 @@ window.SITE_CONFIG = {
     "priceLabel": "¥590",
     "scoreMeta": "50問×3回",
     "scoreLead": "本番同形式の50問",
-    "bannerImage": "images/affiliate/chintaifudosankeieikanrishi-mock-exam-2026.png",
+    "bannerImage": "images/affiliate/chintaifudosankeieikanrishi-moshi2026.webp",
     "bannerAlt": "賃貸不動産経営管理士試験 本番想定模試 2026年版 PDFで販売中 590円 3回分入り noteで購入する",
     "footnote": "※ note で販売する有料コンテンツ（¥590）です。サイト内の無料演習とは別商品です。"
   },
