@@ -308,7 +308,7 @@
           mark.textContent = "未";
         } else {
           answered++;
-          if (String(sel) === String(a.correct)) {
+          if (a.allCorrect || String(sel) === String(a.correct)) {
             score += (a.points || 0); correct++; ok = true;
             cell.classList.add("is-correct"); mark.textContent = "○";
           } else {
