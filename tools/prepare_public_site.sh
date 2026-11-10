@@ -20,6 +20,7 @@ for f in \
   site-q-index.js \
   site-terms-index.js \
   site-analytics.js \
+  sokuhou-selfcheck.js \
   CNAME \
   robots.txt \
   sitemap.xml \
