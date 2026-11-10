@@ -197,8 +197,8 @@ def build_guide_index_picks_html(rel_path: Path) -> str:
         '<section class="hub-promo hub-promo--strip article-index-picks" '
         'aria-labelledby="article-index-picks-heading">'
         '<div class="hub-promo__head article-index-picks-head">'
-        '<h2 id="article-index-picks-heading">本番形式で力試し：予想模試</h2>'
-        '<p class="hub-promo__lead">インプットの次は、本番同形式の予想模試でアウトプットを。50問3回分で得点力を確認できます。</p>'
+        '<h2 id="article-index-picks-heading">試験直前の総仕上げに：2026年版 直前対策模試</h2>'
+        '<p class="hub-promo__lead">本番までの総仕上げに。本番同形式の50問×3回で、時間配分と弱点を直前に確認できます。</p>'
         "</div>"
         '<div class="hub-promo__grid article-index-picks-grid">'
         '<article class="hub-promo-card article-index-pick" data-pick-kind="mock">'

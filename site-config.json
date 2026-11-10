@@ -320,11 +320,11 @@
   },
   "paidMockExam": {
     "url": "https://note.com/shikaku_master/n/n11609ea28445",
-    "modeTitle": "予想模試（PDF・3回分）",
-    "modePurpose": "50問通しで本番形式の実力確認をしたい",
+    "modeTitle": "2026年版 直前対策模試（PDF・3回分）",
+    "modePurpose": "試験直前に本番形式の50問で総仕上げしたい",
     "priceLabel": "¥590",
     "scoreMeta": "50問×3回",
-    "scoreLead": "本番同形式の50問",
+    "scoreLead": "直前対策の予想模試",
     "footnote": "※ note で販売する有料コンテンツ（¥590）です。サイト内の無料演習とは別商品です。"
   },
   "coursePromo": {
