@@ -1573,7 +1573,7 @@ body.is-solving .site-footer{display:none!important}
       <h2 class="page-title">「賃貸不動産経営管理士試験」の問題を解く</h2>
       <div class="page-sub">学習目的に合わせてモードを選んでください</div>
 
-      <p class="quiz-start-sokuhou"><a href="kaitou-sokuhou/2026/index.html">令和8年度（2026年）賃貸不動産経営管理士試験 解答速報・自己採点はこちら ›</a><br><a href="kaitou-sokuhou/index.html">過去の解答速報（2025年・2024年）はこちら ›</a></p>
+      <p class="quiz-start-sokuhou"><a href="kaitou-sokuhou/2026/index.html">令和8年度（2026年）賃貸不動産経営管理士試験 解答速報・自己採点はこちら ›</a></p>
 
       <div class="mode-list-v2">
         <div class="mode-card-v2" onclick="startIchimondou()">
@@ -7457,14 +7457,19 @@ function ensurePromoBannersRow(startEl, modeList){
 
 function buildPaidMockBannerEl(){
   const m=getPaidMockExamConfig();
-  if(!m.url||!m.bannerImage) return null;
+  if(!m.url) return null;
   const label=m.bannerAlt||`${m.modeTitle}（有料・note・${m.priceLabel}）`;
   const wrapper=document.createElement('div');
   wrapper.id='paid-mock-inject';
   wrapper.className='paid-mock-banner';
   wrapper.innerHTML=`
-    <a class="paid-mock-banner__link" href="${escapeAttr(m.url)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeAttr(label)}">
-      <img src="${escapeAttr(m.bannerImage)}" alt="${escapeAttr(m.bannerAlt||m.modeTitle)}" width="1672" height="941" loading="lazy" decoding="async">
+    <a class="score-paid-mock-strip" href="${escapeAttr(m.url)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeAttr(label)}">
+      <span class="score-paid-mock-strip-tag">有料</span>
+      <span class="score-paid-mock-strip-body">
+        <span class="score-paid-mock-strip-title">${escapeAttr(m.modeTitle)}</span>
+        <span class="score-paid-mock-strip-meta">${escapeAttr(m.scoreMeta)} · ${escapeAttr(m.priceLabel)} · note</span>
+      </span>
+      <span class="score-paid-mock-strip-cta">詳細 ↗</span>
     </a>
     ${m.footnote?`<p class="paid-mock-banner__foot">${escapeAttr(m.footnote)}</p>`:''}`;
   return wrapper;
@@ -7472,14 +7477,19 @@ function buildPaidMockBannerEl(){
 
 function buildCoursePromoBannerEl(){
   const c=getCoursePromoConfig();
-  if(!c.url||!c.bannerImage) return null;
+  if(!c.url) return null;
   const label=c.bannerAlt||`${c.modeTitle} — ${c.ctaLabel}`;
   const wrapper=document.createElement('div');
   wrapper.id='course-promo-banner';
   wrapper.className='course-promo-banner';
   wrapper.innerHTML=`
-    <a class="course-promo-banner__link" href="${escapeAttr(c.url)}" target="_blank" rel="nofollow sponsored noopener noreferrer" aria-label="${escapeAttr(label)}">
-      <img src="${escapeAttr(c.bannerImage)}" alt="${escapeAttr(c.bannerAlt||c.modeTitle)}" width="1672" height="941" loading="lazy" decoding="async">
+    <a class="score-paid-mock-strip" href="${escapeAttr(c.url)}" target="_blank" rel="nofollow sponsored noopener noreferrer" aria-label="${escapeAttr(label)}">
+      <span class="score-paid-mock-strip-tag">${escapeAttr(c.tagLabel||'講座')}</span>
+      <span class="score-paid-mock-strip-body">
+        <span class="score-paid-mock-strip-title">${escapeAttr(c.modeTitle)}</span>
+        <span class="score-paid-mock-strip-meta">${escapeAttr(c.scoreMeta)} · ${escapeAttr(c.priceLabel)}</span>
+      </span>
+      <span class="score-paid-mock-strip-cta">${escapeAttr(c.ctaLabel)} ↗</span>
     </a>
     ${c.footnote?`<p class="course-promo-banner__foot">${escapeAttr(c.footnote)}</p>`:''}`;
   if(c.afbLeadUrl){

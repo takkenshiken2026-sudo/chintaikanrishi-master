@@ -7,7 +7,7 @@ import html
 import re
 from pathlib import Path
 
-from tools.site_config import brand_name, exam_name, guide_index_picks
+from tools.site_config import brand_name, exam_name, guide_index_picks, paid_mock_exam
 
 GUIDE_INDEX_PICK_LAYOUTS = frozenset({"grid-3", "grid-2", "strip", "compact", "text"})
 
@@ -181,31 +181,37 @@ def normalize_guide_index_pick_layout(layout: str) -> str:
 
 
 def build_guide_index_picks_html(rel_path: Path) -> str:
-    picks = guide_index_picks()
-    if not picks:
+    # 教材（アフィリエイト）のおすすめに代えて、自社の予想模試への導線を表示する。
+    m = paid_mock_exam()
+    if not m or not str(m.get("url") or "").strip():
         return ""
-    layout = normalize_guide_index_pick_layout(str(picks.get("layout") or "grid-3"))
-    items = picks["items"]
-    cards = [
-        build_guide_index_pick_card_html(item, rel_path=rel_path, layout=layout)
-        for item in items
-    ]
-    hub = rel_path.parent.name if rel_path.parent != Path(".") else ""
-    leads_by_hub = picks.get("leadsByHub") or {}
-    lead = ""
-    if isinstance(leads_by_hub, dict) and hub in leads_by_hub:
-        lead = str(leads_by_hub.get(hub) or "").strip()
-    if not lead:
-        lead = str(picks.get("lead") or "").strip()
-    lead = apply_vars(lead)
-    lead_html = f'<p class="hub-promo__lead">{html.escape(lead)}</p>' if lead else ""
+    url = html.escape(str(m["url"]), quote=True)
+    title = html.escape(str(m.get("modeTitle") or "予想模試"))
+    price = str(m.get("priceLabel") or "").strip()
+    meta = str(m.get("scoreMeta") or "").strip()
+    footnote = str(m.get("footnote") or "").strip()
+    desc_parts = [p for p in [meta, price, "note で販売中"] if p]
+    desc = " · ".join(desc_parts) + "。本番同形式の50問で、時間配分と弱点を確認できます。"
+    foot_html = f'<p class="hub-promo__foot">{html.escape(footnote)}</p>' if footnote else ""
     return (
-        f'<section class="hub-promo hub-promo--{html.escape(layout, quote=True)} article-index-picks" '
+        '<section class="hub-promo hub-promo--strip article-index-picks" '
         'aria-labelledby="article-index-picks-heading">'
         '<div class="hub-promo__head article-index-picks-head">'
-        f'<h2 id="article-index-picks-heading">{html.escape(apply_vars(picks["title"]))}</h2>'
-        f"{lead_html}"
+        '<h2 id="article-index-picks-heading">本番形式で力試し：予想模試</h2>'
+        '<p class="hub-promo__lead">インプットの次は、本番同形式の予想模試でアウトプットを。50問3回分で得点力を確認できます。</p>'
         "</div>"
-        f'<div class="hub-promo__grid article-index-picks-grid">{"".join(cards)}</div>'
+        '<div class="hub-promo__grid article-index-picks-grid">'
+        '<article class="hub-promo-card article-index-pick" data-pick-kind="mock">'
+        f'<a class="hub-promo-card__link article-index-pick-link hub-promo-card__link--strip" '
+        f'href="{url}" target="_blank" rel="noopener noreferrer">'
+        '<div class="hub-promo-card__body">'
+        f"<h3>{title}</h3>"
+        f'<p class="hub-promo-card__desc article-index-pick-desc">{html.escape(desc)}</p>'
+        '<div class="hub-promo-card__foot article-index-pick-foot">'
+        '<span class="hub-promo-card__cta article-index-pick-cta">模試の詳細を見る</span>'
+        '<span class="hub-promo-card__kind article-index-pick-kind">予想模試</span>'
+        "</div></div></a></article>"
+        "</div>"
+        f"{foot_html}"
         "</section>"
     )
