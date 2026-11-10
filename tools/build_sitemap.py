@@ -171,7 +171,13 @@ def collect_entries(base: str) -> list[SitemapEntry]:
     }
 
     add_home(entries, base)
-    static_pages = ["about.html", "privacy.html", "related-sites.html", "kaitou-sokuhou/index.html"]
+    static_pages = [
+        "about.html", "privacy.html", "related-sites.html",
+        "kaitou-sokuhou/index.html",
+        "kaitou-sokuhou/2026/index.html",
+        "kaitou-sokuhou/2025/index.html",
+        "kaitou-sokuhou/2024/index.html",
+    ]
     for rel in static_pages:
         add_file(entries, base, rel, csv_dates=csv_dates)
 

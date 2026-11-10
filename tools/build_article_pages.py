@@ -1139,6 +1139,16 @@ def build_index_html(articles: list[dict[str, str]]) -> str:
   {breadcrumb_html(rel_path, [("トップ", "index.html"), ("試験ガイド", None)])}
   <h1>試験ガイド</h1>
   <p class="site-page-lead">{html.escape(exam_name())}の制度理解から学習計画・演習・直前対策まで、受験フェーズ別の<strong>進め方</strong>をまとめています。用語の意味・比較・数値は<a href="../terms/index.html">用語解説（知識ハブ）</a>、問題演習は<a href="../q/index.html">過去問一覧</a>からどうぞ。</p>
+  <section class="site-page-section" aria-labelledby="guide-sokuhou-heading">
+    <h2 id="guide-sokuhou-heading">解答速報・自己採点</h2>
+    <p>試験当日の解答速報と、問題ごとに採点できる自己採点ツールを年度別にまとめています。過去年（令和6年度・令和7年度）は公式の正解番号表に基づく解答を掲載しています。</p>
+    <ul>
+      <li><a href="../kaitou-sokuhou/2026/index.html">令和8年度（2026年）解答速報・自己採点</a></li>
+      <li><a href="../kaitou-sokuhou/2025/index.html">令和7年度（2025年）解答速報・自己採点</a></li>
+      <li><a href="../kaitou-sokuhou/2024/index.html">令和6年度（2024年）解答速報・自己採点</a></li>
+      <li><a href="../kaitou-sokuhou/index.html">解答速報 年度一覧</a></li>
+    </ul>
+  </section>
   {build_guide_index_picks_html(rel_path)}
   <section class="article-index-panel" aria-labelledby="article-index-heading">
     <div class="article-index-head">
