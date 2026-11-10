@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+<!--BRAND_ASSET_HEAD-->
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="48x48" href="../assets/brand/favicon-48.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/brand/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../assets/brand/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../assets/brand/apple-touch-icon.png">
+<meta name="theme-color" content="#5c4d7a">
+<meta property="og:image" content="https://chintaikanrishi-master.jp/assets/brand/og-image.png">
+<meta property="og:image:secure_url" content="https://chintaikanrishi-master.jp/assets/brand/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/png">
+<meta name="twitter:image" content="https://chintaikanrishi-master.jp/assets/brand/og-image.png">
+<meta name="twitter:image:alt" content="賃管マスター｜賃貸不動産経営管理士試験">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="description" content="令和8年度（2026年度）賃貸不動産経営管理士試験の解答速報ページ。試験日2026年11月15日(日)。試験終了後、全50問の解答（予想）を順次掲載し、自己採点・予想合格ラインの確認に使えます。">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="賃貸不動産経営管理士試験 解答速報【令和8年度・2026】｜賃管マスター">
+  <meta property="og:description" content="2026年11月15日(日)実施の賃貸不動産経営管理士試験の解答速報。試験終了後に全50問の解答（予想）を順次掲載します。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://chintaikanrishi-master.jp/kaitou-sokuhou/index.html">
+  <link rel="canonical" href="https://chintaikanrishi-master.jp/kaitou-sokuhou/index.html">
+  <title>賃貸不動産経営管理士試験 解答速報【令和8年度・2026】｜賃管マスター</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../site-pages.css">
+  <link rel="stylesheet" href="../site-theme.css">
+  <style>
+    /* ===== 解答速報ページ 固有スタイル ===== */
+    .ks-hero-status{
+      display:flex;align-items:flex-start;gap:12px;
+      background:#fff6e6;border:1px solid #f0c674;border-radius:10px;
+      padding:14px 16px;margin:14px 0 4px;
+    }
+    .ks-hero-status[data-state="published"]{background:#eef7ef;border-color:#8dc49a;}
+    .ks-hero-status-icon{flex-shrink:0;width:24px;height:24px;line-height:24px;text-align:center;font-weight:700;}
+    .ks-hero-status-body{flex:1;min-width:0;font-size:14px;line-height:1.7;}
+    .ks-hero-status-body strong{font-weight:700;}
+    .ks-updated{font-size:12px;color:var(--text-muted,#555);margin-top:6px;}
+
+    /* 解答一覧グリッド */
+    .ks-answer-wrap{margin:16px 0;}
+    .ks-answer-grid{
+      display:grid;grid-template-columns:repeat(10,1fr);gap:8px;margin:12px 0 0;
+    }
+    .ks-answer-cell{
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      border:1px solid rgba(0,0,0,0.12);border-radius:8px;background:#fff;
+      padding:8px 4px;min-height:52px;
+    }
+    .ks-answer-no{font-size:11px;color:var(--text-muted,#555);line-height:1;margin-bottom:5px;}
+    .ks-answer-val{font-size:18px;font-weight:700;line-height:1;color:var(--accent,#5c4d7a);font-family:"Courier New",monospace;}
+    .ks-answer-cell.is-pending .ks-answer-val{color:#bbb;font-weight:400;}
+    .ks-answer-legend{font-size:12px;color:var(--text-muted,#555);margin-top:10px;line-height:1.7;}
+
+    @media (max-width:860px){ .ks-answer-grid{grid-template-columns:repeat(5,1fr);} }
+    @media (max-width:420px){ .ks-answer-grid{grid-template-columns:repeat(4,1fr);gap:6px;} .ks-answer-val{font-size:16px;} }
+
+    /* 自己採点CTA */
+    .ks-cta{
+      display:flex;align-items:center;gap:16px;background:var(--accent,#5c4d7a);color:#fff;
+      border-radius:10px;padding:18px 20px;margin:16px 0;text-decoration:none;transition:opacity .15s;
+    }
+    .ks-cta:hover{opacity:.9;}
+    .ks-cta-body{flex:1;min-width:0;}
+    .ks-cta-label{font-size:10px;font-weight:700;letter-spacing:.1em;opacity:.7;margin-bottom:3px;}
+    .ks-cta-title{font-size:16px;font-weight:700;line-height:1.35;margin-bottom:3px;}
+    .ks-cta-sub{font-size:12px;opacity:.85;line-height:1.5;}
+    .ks-cta-arrow{font-size:20px;opacity:.7;flex-shrink:0;}
+  </style>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7927260139193410"
+     crossorigin="anonymous"></script>
+</head>
+<body class="site-static-page site-shell-column-page">
+  <div class="site-page-wrap">
+<header class="topnav site-shell-header">
+      <div class="topnav-inner">
+        <a class="topnav-logo" href="../index.html" aria-label="賃管マスター、賃貸不動産経営管理士試験対策のトップへ">
+          <div class="topnav-logo-mark" aria-hidden="true"><span class="logo-mark-line">賃管</span><span class="logo-mark-line logo-mark-line--sub">マスター</span></div>
+          <span class="topnav-logo-stack">
+            <span class="topnav-logo-text">賃管マスター</span>
+            <span class="topnav-logo-sub">賃貸不動産経営管理士試験</span>
+          </span>
+        </a>
+        <nav class="topnav-links" aria-label="メインナビゲーション">
+          <a class="topnav-link" id="tnav-ichimondou" href="/#ichimondou"><svg viewBox="0 0 16 16"><path d="M8 2v12M4 4h8M4 8h8M4 12h8"/></svg>一問一答</a>
+          <a class="topnav-link" id="tnav-past" href="/#past"><svg viewBox="0 0 16 16"><path d="M3 2h10v12H3z"/><path d="M5 5h6M5 8h6M5 11h4"/></svg>過去問</a>
+          <a class="topnav-link" id="tnav-orig" href="/#orig"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1"/></svg>実践演習</a>
+          <a class="topnav-link" id="tnav-dash" href="/#dash"><svg viewBox="0 0 16 16"><path d="M2 13L5 8l3 2 3-5 3 2"/></svg>記録・分析</a>
+          <a class="topnav-link" id="tnav-review" href="/#review"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg>復習</a>
+          <a class="topnav-link" id="tnav-glossary" href="../terms/index.html"><svg viewBox="0 0 16 16"><rect x="2.5" y="2" width="11" height="12" rx="1.5"/><path d="M5 6h6M5 9h4"/></svg>用語解説</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="site-page-main">
+      <nav class="site-page-header-crumb" aria-label="パンくず">
+      <ol class="q-breadcrumb">
+        <li><a href="../index.html">トップ</a></li>
+        <li aria-current="page">解答速報</li>
+      </ol>
+    </nav>
+      <h1>令和8年度（2026年度）賃貸不動産経営管理士試験 解答速報</h1>
+      <p class="site-page-lead">
+        <strong>2026年11月15日（日）</strong>実施の<strong>賃貸不動産経営管理士試験</strong>の解答速報ページです。試験終了後、全50問の解答（予想）を順次掲載します。自己採点と予想合格ラインの確認にご利用ください。
+      </p>
+
+      <div class="ks-hero-status" id="ks-status" data-state="before" role="status">
+        <span class="ks-hero-status-icon" aria-hidden="true">🕒</span>
+        <div class="ks-hero-status-body">
+          <strong>現在、解答は準備中です。</strong><br>
+          試験当日（2026年11月15日）の終了後、解答が判明し次第このページで順次公開します。公開後は下の「解答一覧」が更新されます。
+          <div class="ks-updated" id="ks-updated">最終更新：試験終了後に掲載予定</div>
+        </div>
+      </div>
+
+      <section class="site-page-section" aria-labelledby="sec-overview">
+        <h2 id="sec-overview">試験概要</h2>
+        <table>
+          <tbody>
+            <tr><th>試験名</th><td>賃貸不動産経営管理士試験（令和8年度・2026年度）</td></tr>
+            <tr><th>試験日</th><td>2026年11月15日（日）13:00〜15:00（120分）</td></tr>
+            <tr><th>出題数</th><td>50問（登録講習〈免除講習〉修了者は5問免除で45問）</td></tr>
+            <tr><th>出題形式</th><td>四肢択一・マークシート方式</td></tr>
+            <tr><th>出題分野</th><td>賃管法令・制度／契約・実務／設備・税務・その他（3分野）</td></tr>
+            <tr><th>合格基準点</th><td>年度ごとに試験実施団体が公表（正式な基準は公式発表が正本）</td></tr>
+            <tr><th>合格発表</th><td>試験実施団体が後日発表（日程は公式情報でご確認ください）</td></tr>
+          </tbody>
+        </table>
+        <p class="site-page-note">
+          試験時間・開始時刻・免除区分などは、お手元の<strong>受験票</strong>と<strong>公式の受験要項</strong>が正本です。必ずご確認ください。
+        </p>
+      </section>
+
+      <section class="site-page-section" aria-labelledby="sec-answers">
+        <h2 id="sec-answers">解答一覧（問1〜問50）</h2>
+        <p>
+          試験終了後、判明した解答（予想）を掲載します。公開前は「<span aria-hidden="true">—</span>（未掲載）」と表示しています。
+        </p>
+        <div class="ks-answer-wrap">
+          <div class="ks-answer-grid" id="ks-answer-grid" aria-label="問1から問50の解答一覧">
+            <!-- JSで問1〜問50のセルを生成。解答確定後は下の KS_ANSWERS を書き換えて差し替え -->
+          </div>
+          <p class="ks-answer-legend">
+            数字は各設問の正解の選択肢番号（予想）です。公式の正解・合格基準は、試験実施団体の公表が正本です。
+          </p>
+        </div>
+      </section>
+
+      <a class="ks-cta" href="../index.html#past">
+        <div class="ks-cta-body">
+          <div class="ks-cta-label">自己採点のあとに</div>
+          <div class="ks-cta-title">過去問演習で弱点を復習する</div>
+          <div class="ks-cta-sub">分野・年度で絞り込み、解説つきで解き直し。採点結果の弱点補強にどうぞ。</div>
+        </div>
+        <span class="ks-cta-arrow" aria-hidden="true">›</span>
+      </a>
+
+      <section class="site-page-section" aria-labelledby="sec-selfscore">
+        <h2 id="sec-selfscore">自己採点の手順</h2>
+        <ul>
+          <li><strong>1. 解答を控える</strong> … 試験中に問題冊子へ自分の解答を記録しておくと採点できます。</li>
+          <li><strong>2. 本ページで照合</strong> … 試験終了後、上の「解答一覧」と照らし合わせて正答数を数えます。</li>
+          <li><strong>3. 分野別に集計</strong> … 法令・制度／契約・実務／設備・税務の3分野ごとに正答数を記録すると、弱点が見えます。</li>
+          <li><strong>4. 公式発表を待つ</strong> … 速報は予想です。正式な合否は試験実施団体の合格発表でご確認ください。</li>
+        </ul>
+      </section>
+
+      <section class="site-page-section" aria-labelledby="sec-passline">
+        <h2 id="sec-passline">予想合格ライン（目安）</h2>
+        <p>
+          合格基準点は<strong>年度により変動</strong>します。本サイトでは学習上の目安として<strong>50問中35問前後（約70%）</strong>を安全圏の指標としています。速報段階の予想ラインはあくまで参考値です。
+        </p>
+        <p class="site-page-note">
+          正式な合格基準点・合否は、<strong>賃貸不動産経営管理士協議会</strong>など<strong>公式情報</strong>の発表が正本です。予想合格ラインの詳しい考え方は
+          <a href="../articles/pass-score/index.html">合格点の記事</a>をご覧ください。
+        </p>
+      </section>
+
+      <section class="site-page-section" aria-labelledby="sec-notice">
+        <h2 id="sec-notice">解答速報についての注意</h2>
+        <ul>
+          <li>本ページの解答は、本サイトが独自に作成する<strong>予想解答</strong>であり、試験実施団体が公表する正式な正解ではありません。</li>
+          <li>公開直後は内容を修正する場合があります。最新の内容は「最終更新」の表示をご確認ください。</li>
+          <li>問題文・選択肢の転載は行っていません。設問内容は各自の問題冊子をご参照ください。</li>
+          <li>合否および合格基準点は、必ず<strong>公式の合格発表</strong>でご確認ください。</li>
+        </ul>
+      </section>
+
+      <section class="site-page-section" aria-labelledby="sec-related">
+        <h2 id="sec-related">関連ページ</h2>
+        <ul>
+          <li><a href="../index.html#past">過去問演習</a>（分野・年度で絞り込み、解説つき）</li>
+          <li><a href="../q/index.html">過去問一覧</a></li>
+          <li><a href="../articles/pass-score/index.html">合格点の目安</a> ／ <a href="../articles/exam-difficulty/index.html">難易度</a></li>
+          <li><a href="../articles/pass-announcement-guide/index.html">合格発表の確認方法</a></li>
+          <li><a href="https://www.chintaikanrishi.jp/" target="_blank" rel="noopener noreferrer">賃貸不動産経営管理士協議会（公式）</a></li>
+        </ul>
+      </section>
+    </main>
+<footer class="site-footer" role="contentinfo">
+    <div class="site-footer-scroll">
+      <div class="site-footer-inner">
+        <a class="site-footer-brand" href="../index.html" title="賃管マスター（賃貸不動産経営管理士試験対策）トップへ">
+          <div class="topnav-logo-mark" aria-hidden="true"><span class="logo-mark-line">賃管</span><span class="logo-mark-line logo-mark-line--sub">マスター</span></div>
+        </a>
+        <span class="site-footer-sep" aria-hidden="true"></span>
+        <nav class="site-footer-legal" aria-label="サイト情報・ポリシー">
+          <a href="../index.html">トップ</a>
+          <a href="../about.html">このサイトについて</a>
+          <a href="../q/index.html">過去問一覧</a>
+          <a href="../terms/index.html">用語解説</a>
+          <a href="../articles/index.html">試験ガイド</a>
+          <a href="../related-sites.html">関連リンク</a>
+          <a href="../privacy.html">プライバシー</a>
+          <a href="https://forms.gle/duTebNY1vKqV6A816" target="_blank" rel="noopener noreferrer">お問い合わせ</a>
+        </nav>
+        <span class="site-footer-sep" aria-hidden="true"></span>
+        <span class="site-footer-copy">© 2026 賃管マスター学習支援・chintaikanrishi-master.jp</span>
+      </div>
+    </div>
+  </footer>
+<!-- GA4: tools/html_footer.analytics_snippet（測定IDは GA4_MEASUREMENT_ID） -->
+<script>window.__GA4_MEASUREMENT_ID__="G-NYSHQLECDS";</script>
+<script defer src="../site-analytics.js"></script>
+<script src="../site-config.js"></script>
+<script>
+/* =======================================================================
+   解答速報データ
+   -----------------------------------------------------------------------
+   試験終了後、下の KS_ANSWERS に 問1〜問50 の正解番号（1〜4）を入れると、
+   解答一覧が自動で更新されます。未掲載の問題は null のままにしてください。
+   例： const KS_ANSWERS = [3,1,4,2, ... ]; // 50個（問1→問50の順）
+
+   ステータス表示も自動で切り替わります：
+   - 1問でも埋まっていれば「公開中」表示（緑）に変わります。
+   - KS_UPDATED に公開日時の文字列を入れると「最終更新」に反映されます。
+   ======================================================================= */
+const KS_ANSWERS = new Array(50).fill(null); // ← 試験後にここを書き換える
+const KS_UPDATED = ""; // 例: "2026年11月15日 16:30"
+
+(function renderKaitouSokuhou(){
+  const grid = document.getElementById('ks-answer-grid');
+  if(grid){
+    const frag = document.createDocumentFragment();
+    for(let i=0;i<50;i++){
+      const no = i+1;
+      const val = KS_ANSWERS[i];
+      const cell = document.createElement('div');
+      cell.className = 'ks-answer-cell' + (val==null ? ' is-pending' : '');
+      const noEl = document.createElement('span');
+      noEl.className = 'ks-answer-no';
+      noEl.textContent = '問' + no;
+      const valEl = document.createElement('span');
+      valEl.className = 'ks-answer-val';
+      valEl.textContent = (val==null) ? '—' : String(val);
+      cell.appendChild(noEl);
+      cell.appendChild(valEl);
+      frag.appendChild(cell);
+    }
+    grid.appendChild(frag);
+  }
+
+  const published = KS_ANSWERS.some(v => v!=null);
+  const status = document.getElementById('ks-status');
+  const updated = document.getElementById('ks-updated');
+  if(published && status){
+    status.setAttribute('data-state','published');
+    status.querySelector('.ks-hero-status-icon').textContent = '✅';
+    status.querySelector('.ks-hero-status-body').innerHTML =
+      '<strong>解答速報を公開中です。</strong><br>下の「解答一覧」で自己採点にご利用ください。内容は修正する場合があります。' +
+      '<div class="ks-updated" id="ks-updated"></div>';
+  }
+  const updatedEl = document.getElementById('ks-updated');
+  if(updatedEl){
+    if(KS_UPDATED){
+      updatedEl.textContent = '最終更新：' + KS_UPDATED;
+    } else if(published){
+      updatedEl.textContent = '';
+    }
+  }
+})();
+</script>
+  </div>
+</body>
+</html>
