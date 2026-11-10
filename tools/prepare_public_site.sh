@@ -56,7 +56,7 @@ then
   # ルート配信を明示（GitHub Pages / AdSense クローラ向け）
   chmod 644 "$OUT/ads.txt"
 fi
-for d in articles q terms; do
+for d in articles q terms kaitou-sokuhou; do
   if [[ -d "$ROOT/$d" ]]; then
     cp -R "$ROOT/$d" "$OUT/"
   fi
