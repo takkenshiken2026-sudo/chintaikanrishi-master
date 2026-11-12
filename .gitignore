@@ -2,3 +2,4 @@
 public_site/
 __pycache__/
 *.pyc
+tools/snapshots/
