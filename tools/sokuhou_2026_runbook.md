@@ -58,12 +58,15 @@
    - 50件そろっているか、JSONがパースできるか確認する。
 
 6. **下書きブランチにコミット＆push**（マージはしない）。
+   `--apply` で作業ツリーの `kaitou-sokuhou/2026/index.html` は既に書き換わっている。
+   **その変更を保ったまま**新しいブランチを作る（`-b`。`origin/main`等へ切り直して変更を破棄しないこと）:
    ```bash
-   git checkout -B claude/sokuhou-2026-answers origin/main   # 既定ブランチ名は実際のデフォルトに合わせる
+   git checkout -b claude/sokuhou-2026-answers   # 現在のHEAD(ツールのある開発ブランチ)から分岐。変更は保持される
    git add kaitou-sokuhou/2026/index.html
    git commit    # メッセージ例は下記。末尾に各セッション所定の属性行を付ける
    git push -u origin claude/sokuhou-2026-answers
    ```
+   - 既に `claude/sokuhou-2026-answers` がある場合は `git checkout claude/sokuhou-2026-answers` で切替えてから add/commit。
    - もし環境が別の開発ブランチを強制する場合は、そのブランチにpushし、ブランチ名を通知に明記する。
    - コミットメッセージ例:
      ```
