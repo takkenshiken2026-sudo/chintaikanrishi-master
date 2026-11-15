@@ -1628,7 +1628,8 @@ body.seo-editorial-preview-page .seo-editorial.seo-article-card .related-box-tit
 /* 関連コンテンツの上に余白 */
 .sokuhou-page .related-box{margin-top:30px}
 .sokuhou-ans-pair{display:inline-block;min-width:3.2em;margin:0 .5em .2em 0;color:var(--text-muted,#555)}
-.sokuhou-ans-pair b{color:var(--accent,#5c4d7a);font-weight:800;margin-left:.2em}
+.sokuhou-ans-pair b{color:#d7263d;font-weight:800;font-size:1.12em;margin-left:.25em}
+.sokuhou-ans-pair b.is-wait{color:var(--text-muted,#9aa0a6);font-weight:600;font-size:1em}
 
 /* 未回答のハイライト（全問必須） */
 .sokuhou-q.is-missing{border-color:#e0a04d;background:#fff6e5;box-shadow:0 0 0 2px rgba(224,160,77,.3)}

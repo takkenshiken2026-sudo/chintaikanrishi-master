@@ -192,8 +192,12 @@ def answer_section_body(merged):
                 '公式の正解ではありません。</p>' % (determined, TOTAL_Q))
     rows = []
     for start in range(1, TOTAL_Q + 1, 10):
-        cells = "".join('<span class="sokuhou-ans-pair">問%d<b>%s</b></span>'
-                        % (no, merged[no - 1]["disp"]) for no in range(start, start + 10))
+        cells = ""
+        for no in range(start, start + 10):
+            m = merged[no - 1]
+            b = ('<b class="is-wait">ー</b>' if m["kind"] == "unpub"
+                 else '<b>%s</b>' % m["disp"])
+            cells += '<span class="sokuhou-ans-pair">問%d%s</span>' % (no, b)
         rows.append('<tr><th>問%d〜問%d</th><td>%s</td></tr>' % (start, start + 9, cells))
     table = ('<table class="seo-info-table sokuhou-ans-table"><thead><tr><th>問</th>'
              '<th>解答</th></tr></thead><tbody>%s</tbody></table>' % "".join(rows))
