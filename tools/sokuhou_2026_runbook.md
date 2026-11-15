@@ -1,7 +1,7 @@
 # 令和8年度(2026年) 解答速報 自動反映 手順書（runbook）
 
 試験当日(2026/11/15)の自動クロール用に起動されたセッションが読む作業手順。
-目的は「TACの解答速報＋他社判明分をマージし、当サイトの2026年解答速報ページに反映して
+目的は「TACの解答速報と判明分をマージし、当サイトの2026年解答速報ページに反映して
 **逐次公開**する」こと。
 **公開方針（2026/11/15 ユーザー決定）＝「判明次第 逐次公開」**：
 devブランチ `claude/relaxed-hypatia-ib3g7g` に反映・コミット後、**mainへFF（早送り）マージして公開**する。
@@ -10,10 +10,10 @@ devブランチ `claude/relaxed-hypatia-ib3g7g` に反映・コミット後、**
 ## マージ方針（問ごと）
 
 1. TACが正答番号を公表していれば **TACを最優先**。
-2. TAC未公表(ー)なら `kaitou-sokuhou/2026/answers-known.json` の**判明分**を使う（他社速報など）。
+2. TAC未公表(ー)なら `kaitou-sokuhou/2026/answers-known.json` の**判明分**を使う。
 3. どちらも無ければ「ー」(保留)。
 
-`answers-known.json` は人間（またはこのセッション）が他社速報の判明分を随時追記するファイル。
+`answers-known.json` は人間（またはこのセッション）が判明分を随時追記するファイル。
 TACが埋まればTACが優先されるので、TAC公表後も残しておいて問題ない。
 
 ## 前提・対象
@@ -73,7 +73,7 @@ git checkout claude/relaxed-hypatia-ib3g7g
 
 ## 手動運用（人間 or このセッション）
 
-他社速報で新たに判明した問があれば `kaitou-sokuhou/2026/answers-known.json` の `answers` に
+新たに判明した問があれば `kaitou-sokuhou/2026/answers-known.json` の `answers` に
 `"問番号": 正答番号` を追記し、`--apply` を実行 → コミット＆push。
 TACが本公開したら同じく `--apply` でTAC優先に自動で上書きされる。
 

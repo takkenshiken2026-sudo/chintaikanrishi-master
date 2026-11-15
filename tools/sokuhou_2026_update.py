@@ -152,21 +152,15 @@ def determined_count(merged):
 def answer_section_body(merged, tac_meta, tac_full):
     determined = determined_count(merged)
     complete = determined == TOTAL_Q
-    update_text = tac_meta.get("更新日時", "")
 
-    if tac_full:
-        note = ('<p class="sokuhou-answer-note">資格の学校TACが公開した'
-                '<a href="%s" target="_blank" rel="noopener noreferrer">解答速報</a>'
-                'に基づく参考解答です（TAC %s 時点）。公式の正解ではありません。</p>'
-                % (TAC_URL, html.escape(update_text or "")))
-    elif complete:
-        note = ('<p class="sokuhou-answer-note">各社の解答速報を基にした参考解答です'
-                '（TAC公表分を優先）。公式の正解ではありません。</p>')
+    if complete:
+        note = ('<p class="sokuhou-answer-note">自己採点用の参考解答です。'
+                '公式の正解ではありません。</p>')
     else:
-        note = ('<p class="sokuhou-answer-note">判明した問から順次掲載しています'
-                '（%d/%d問・<a href="%s" target="_blank" rel="noopener noreferrer">TAC</a>公表後はTACを優先）。'
-                '「ー」は判明待ちです。公式の正解ではありません。</p>'
-                % (determined, TOTAL_Q, TAC_URL))
+        note = ('<p class="sokuhou-answer-note">現在判明している問から順次掲載しています'
+                '（%d/%d問）。「ー」は判明待ちです。自己採点用の参考解答で、'
+                '公式の正解ではありません。</p>'
+                % (determined, TOTAL_Q))
 
     rows = []
     for start in range(1, TOTAL_Q + 1, 10):
@@ -182,7 +176,7 @@ def answer_section_body(merged, tac_meta, tac_full):
     foot = ""
     if any(m["disp"] == "※" for m in merged):
         foot += ('<p class="sokuhou-answer-note">※ は出題団体の判断等により複数正解・'
-                 '全員正解として扱われた可能性がある問題です。公式・TACの速報でご確認ください。</p>')
+                 '全員正解として扱われた可能性がある問題です。正式には公式の発表でご確認ください。</p>')
     if not complete:
         foot += ('<p class="sokuhou-answer-note">自己採点ツールは全50問が判明してから'
                  'ご利用いただけます（現在は判明分のみ掲載）。</p>')
