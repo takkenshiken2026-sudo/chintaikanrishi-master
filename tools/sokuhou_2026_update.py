@@ -2,22 +2,28 @@
 # -*- coding: utf-8 -*-
 """
 令和8年度(2026年) 賃貸不動産経営管理士試験 解答速報
-TAC(資格の学校TAC)の解答速報ページをクロールし、
-解答が公開されていれば kaitou-sokuhou/2026/index.html に反映する。
+TAC(資格の学校TAC)の解答速報ページをクロールし、判明している解答を
+kaitou-sokuhou/2026/index.html に反映する。
+
+マージ方針（問ごと）:
+  1. TACが正答番号を公表していれば TAC を最優先。
+  2. TACが未公表(ー)なら、kaitou-sokuhou/2026/answers-known.json の判明分を使う。
+  3. どちらも無ければ「ー」(保留)。
 
 使い方:
   python3 tools/sokuhou_2026_update.py --check
-      TACページを取得して公開状況を表示するだけ(ファイルは変更しない)。
-      公開済み(45問以上に正答番号あり)なら終了コード0、未公開なら2。
+      取得・マージ状況を表示するだけ(ファイルは変更しない)。
+      判明が1問以上あれば終了コード0、全く無ければ2。
 
   python3 tools/sokuhou_2026_update.py --apply
-      公開済みなら kaitou-sokuhou/2026/index.html を書き換える。
-      TACのHTMLスナップショットを tools/snapshots/ に保存する。
-      異常値(没問・複数正解など)があれば "REVIEW REQUIRED" を表示し終了コード3。
-      未公開なら何もせず終了コード2。
-      既に反映済み(JSONが埋まっている)なら何もせず終了コード0。
+      判明分を index.html に反映(何度実行しても同じ結果になる冪等処理)。
+      - 解答一覧の表は判明分を数字、未判明は「ー」で常に表示。
+      - 全50問が判明したときだけ自己採点ツールを有効化(解答JSONを投入)。
+        部分的な間は自己採点は「準備中」のまま(誤った自己採点を避けるため)。
+      - TACのHTMLスナップショットを tools/snapshots/ に保存(gitignore済み)。
+      - 没問・複数正解など想定外値があれば REVIEW REQUIRED を表示。
 
-このスクリプトはページを書き換える「下書き」を作るだけで、公開(マージ)はしない。
+このスクリプトはページを書き換えるだけで、公開(mainへのマージ)はしない。
 必ず人間が差分を確認してから公開すること。
 """
 import argparse
@@ -32,29 +38,20 @@ import sys
 TAC_URL = "https://www.tac-school.co.jp/kouza_chintai/sokuhou.html"
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TARGET = os.path.join(REPO_ROOT, "kaitou-sokuhou", "2026", "index.html")
+KNOWN_JSON = os.path.join(REPO_ROOT, "kaitou-sokuhou", "2026", "answers-known.json")
 SNAP_DIR = os.path.join(REPO_ROOT, "tools", "snapshots")
 
 TOTAL_Q = 50
-PUBLISHED_THRESHOLD = 45  # これ以上の問に 1〜4 の数字が入っていたら「公開済み」とみなす
+TAC_PUBLISHED_THRESHOLD = 45  # TAC側でこれ以上数字が入っていたら「TAC本公開」とみなす
 
-# 反映前(準備中)のページにある、置き換え対象の既存文字列 ----------------------
-ANSWER_NOTE_PENDING = (
-    '<p class="sokuhou-answer-note">自己採点用の参考解答です。公式の正解ではありません。</p>'
-    '<p class="sokuhou-notice" id="sokuhou-answers-pending">現在、解答は準備中です。'
-    '2026年11月15日（日）の試験終了後、問1〜問50の参考解答が判明し次第この欄に掲載します。</p>'
-)
-JSON_EMPTY = '<script type="application/json" id="sokuhou-answers">[]</script>'
-META_DATE_OLD = "最終更新日：2026-11-10"
-QUALITY_DATE_OLD = "<th>最終更新日</th><td>2026-11-10</td>"
+UNPUB_TOKENS = {"ー", "―", "−", "—", "-", "–", "", "？", "?"}
 
 
+# ----------------------------------------------------------------------------
 def fetch(url):
-    """curl(プロキシ設定済み)でHTMLを取得して文字列で返す。"""
     try:
-        out = subprocess.run(
-            ["curl", "-sS", "-L", "--max-time", "60", url],
-            capture_output=True, timeout=90,
-        )
+        out = subprocess.run(["curl", "-sS", "-L", "--max-time", "60", url],
+                             capture_output=True, timeout=90)
         if out.returncode != 0:
             sys.stderr.write("curl failed: " + out.stderr.decode("utf-8", "replace") + "\n")
             return None
@@ -65,139 +62,195 @@ def fetch(url):
 
 
 def parse_meta(t):
-    """公開予定日時 / 更新日時 / 次の更新予定 を抽出。"""
     meta = {}
     for m in re.finditer(
         r'<p>(公開予定日時|更新日時|次の更新予定)</p>\s*</div>\s*'
         r'<p class="DTLcontentList__text">(.*?)</p>', t, re.S):
-        label = m.group(1)
-        val = html.unescape(re.sub(r'<[^>]+>', '', m.group(2))).strip()
-        meta[label] = val
+        meta[m.group(1)] = html.unescape(re.sub(r'<[^>]+>', '', m.group(2))).strip()
     return meta
 
 
-def parse_answers(t):
-    """問1〜問50の (番号, 正答セルの生テキスト) を dict で返す。"""
+def parse_tac_answers(t):
+    """問1〜問50 の正答セル生テキストを dict{int:str} で返す。"""
     pairs = re.findall(
         r'<div class="cell question">\s*問\s*(\d+)\s*</div>\s*'
         r'<div class="cell answer">\s*(.*?)\s*</div>', t, re.S)
-    vals = {}
-    for n, a in pairs:
-        txt = html.unescape(re.sub(r'<[^>]+>', '', a)).strip()
-        vals[int(n)] = txt
-    return vals
-
-
-UNPUB_TOKENS = {"ー", "―", "−", "—", "-", "–", "", "？", "?"}
+    return {int(n): html.unescape(re.sub(r'<[^>]+>', '', a)).strip() for n, a in pairs}
 
 
 def classify(raw):
-    """正答セルの値を分類して (kind, value) を返す。
-    kind: 'num'(1〜4) / 'unpub'(未公開) / 'allcorrect'(没問・全員正解) / 'special'(要確認)
-    """
-    v = raw.strip()
+    v = (raw or "").strip()
     if re.fullmatch(r'[1-4]', v):
         return ("num", int(v))
     if v in UNPUB_TOKENS:
         return ("unpub", None)
-    # 没問・全員正解・正解なし など → 全員正解扱い
     if re.search(r'(没問|全員正解|全て正解|すべて正解|正解なし|全選択肢)', v):
         return ("allcorrect", v)
-    # 複数正解(例: 1・3, 1,3, 1/3)や想定外の値 → 要確認
     return ("special", v)
 
 
-def build_records(vals):
-    """JSON用レコードと、表示用・異常フラグを作る。"""
-    records = []
-    anomalies = []
+def load_known():
+    if not os.path.exists(KNOWN_JSON):
+        return {}
+    try:
+        with open(KNOWN_JSON, encoding="utf-8") as f:
+            data = json.load(f)
+        ans = data.get("answers", {})
+        out = {}
+        for k, v in ans.items():
+            out[int(k)] = v
+        return out
+    except Exception as e:  # noqa
+        sys.stderr.write("known.json 読み込み失敗: %r\n" % e)
+        return {}
+
+
+def merge(tac_vals, known):
+    """問ごとにマージ。各問について dict を返す:
+       {no, kind, value, disp, source, flag}
+       kind: 'num' / 'allcorrect' / 'special' / 'unpub'
+       source: 'TAC' / 'known' / ''
+    """
+    merged = []
     for no in range(1, TOTAL_Q + 1):
-        raw = vals.get(no, "")
-        kind, value = classify(raw)
-        rec = {"no": no, "label": "問%d" % no, "points": 1, "choices": 4, "field": ""}
+        kind, value = classify(tac_vals.get(no, ""))
+        source, flag = "", None
         if kind == "num":
-            rec["correct"] = value
+            source = "TAC"
             disp = str(value)
         elif kind == "allcorrect":
-            rec["correct"] = "-"
-            rec["allCorrect"] = True
+            source = "TAC"
             disp = "※"
-            anomalies.append("問%d: 全員正解扱い (TAC表記: %r)" % (no, raw))
+            flag = "問%d: 全員正解扱い (TAC表記: %r)" % (no, tac_vals.get(no, ""))
         elif kind == "special":
-            # 要確認。暫定で全員正解扱いにして自己採点が壊れないようにするが、必ず人間が確認する。
-            rec["correct"] = "-"
-            rec["allCorrect"] = True
-            rec["_raw"] = raw
+            source = "TAC"
             disp = "※"
-            anomalies.append("問%d: 想定外の値 %r (複数正解の可能性・要確認)" % (no, raw))
-        else:  # unpub
-            rec["correct"] = None
-            disp = "ー"
-            anomalies.append("問%d: 未公開(ー)" % no)
-        rec["_disp"] = disp
-        records.append(rec)
-    return records, anomalies
+            flag = "問%d: TAC想定外の値 %r (複数正解の可能性・要確認)" % (no, tac_vals.get(no, ""))
+        else:  # TAC未公表 → 判明分でフォールバック
+            kv = known.get(no, None)
+            if kv is None:
+                kind, value, disp, source = "unpub", None, "ー", ""
+            else:
+                kk, vv = classify(str(kv))
+                if kk == "num":
+                    kind, value, disp, source = "num", vv, str(vv), "known"
+                elif kk in ("allcorrect", "special"):
+                    kind, value, disp, source = "allcorrect", str(kv), "※", "known"
+                    flag = "問%d: 判明分で全員正解/複数扱い (%r) 要確認" % (no, kv)
+                else:
+                    kind, value, disp, source = "unpub", None, "ー", ""
+        merged.append({"no": no, "kind": kind, "value": value,
+                       "disp": disp, "source": source, "flag": flag})
+    return merged
 
 
-def count_published(vals):
-    return sum(1 for no in range(1, TOTAL_Q + 1)
-              if classify(vals.get(no, ""))[0] == "num")
+def determined_count(merged):
+    return sum(1 for m in merged if m["kind"] != "unpub")
 
 
-def answer_table_html(records, update_text):
-    """2025年ページと同じ体裁の解答一覧テーブルを生成。"""
-    note = (
-        '<p class="sokuhou-answer-note">資格の学校TACが公開した'
-        '<a href="%s" target="_blank" rel="noopener noreferrer">解答速報</a>'
-        'に基づく参考解答です（TAC %s 時点）。公式の正解ではありません。</p>'
-        % (TAC_URL, html.escape(update_text or ""))
-    )
+# ----------------------------------------------------------------------------
+def answer_section_body(merged, tac_meta, tac_full):
+    determined = determined_count(merged)
+    complete = determined == TOTAL_Q
+    update_text = tac_meta.get("更新日時", "")
+
+    if tac_full:
+        note = ('<p class="sokuhou-answer-note">資格の学校TACが公開した'
+                '<a href="%s" target="_blank" rel="noopener noreferrer">解答速報</a>'
+                'に基づく参考解答です（TAC %s 時点）。公式の正解ではありません。</p>'
+                % (TAC_URL, html.escape(update_text or "")))
+    elif complete:
+        note = ('<p class="sokuhou-answer-note">各社の解答速報を基にした参考解答です'
+                '（TAC公表分を優先）。公式の正解ではありません。</p>')
+    else:
+        note = ('<p class="sokuhou-answer-note">判明した問から順次掲載しています'
+                '（%d/%d問・<a href="%s" target="_blank" rel="noopener noreferrer">TAC</a>公表後はTACを優先）。'
+                '「ー」は判明待ちです。公式の正解ではありません。</p>'
+                % (determined, TOTAL_Q, TAC_URL))
+
     rows = []
     for start in range(1, TOTAL_Q + 1, 10):
-        end = start + 9
         cells = []
-        for no in range(start, end + 1):
-            rec = records[no - 1]
+        for no in range(start, start + 10):
             cells.append('<span class="sokuhou-ans-pair">問%d<b>%s</b></span>'
-                         % (no, rec["_disp"]))
+                         % (no, merged[no - 1]["disp"]))
         rows.append('<tr><th>問%d〜問%d</th><td>%s</td></tr>'
-                    % (start, end, "".join(cells)))
-    table = (
-        '<table class="seo-info-table sokuhou-ans-table"><thead><tr><th>問</th>'
-        '<th>解答</th></tr></thead><tbody>%s</tbody></table>' % "".join(rows)
-    )
-    has_star = any(r["_disp"] == "※" for r in records)
+                    % (start, start + 9, "".join(cells)))
+    table = ('<table class="seo-info-table sokuhou-ans-table"><thead><tr><th>問</th>'
+             '<th>解答</th></tr></thead><tbody>%s</tbody></table>' % "".join(rows))
+
     foot = ""
-    if has_star:
-        foot = ('<p class="sokuhou-answer-note">※ は出題団体の判断等により'
-                '複数正解・全員正解として扱われた可能性がある問題です。'
-                '最新情報は公式およびTACの解答速報でご確認ください。</p>')
+    if any(m["disp"] == "※" for m in merged):
+        foot += ('<p class="sokuhou-answer-note">※ は出題団体の判断等により複数正解・'
+                 '全員正解として扱われた可能性がある問題です。公式・TACの速報でご確認ください。</p>')
+    if not complete:
+        foot += ('<p class="sokuhou-answer-note">自己採点ツールは全50問が判明してから'
+                 'ご利用いただけます（現在は判明分のみ掲載）。</p>')
     return note + table + foot
 
 
-def records_to_json(records):
-    clean = []
-    for r in records:
-        d = {"no": r["no"], "label": r["label"], "correct": r["correct"],
-             "points": r["points"], "choices": r["choices"]}
-        if r.get("allCorrect"):
+def records_json(merged):
+    out = []
+    for m in merged:
+        d = {"no": m["no"], "label": "問%d" % m["no"], "points": 1, "choices": 4}
+        if m["kind"] == "num":
+            d["correct"] = m["value"]
+        else:  # allcorrect / special → 全員正解扱い
+            d["correct"] = "-"
             d["allCorrect"] = True
         d["field"] = ""
-        clean.append(d)
-    return json.dumps(clean, ensure_ascii=False)
+        out.append(d)
+    return json.dumps(out, ensure_ascii=False)
 
 
-def save_snapshot(raw, meta, vals):
+def apply_to_page(merged, tac_meta, tac_full):
+    with open(TARGET, encoding="utf-8") as f:
+        src = f.read()
+    orig = src
+    complete = determined_count(merged) == TOTAL_Q
+
+    # (1) 解答一覧セクションの本文を差し替え(冪等)
+    body = answer_section_body(merged, tac_meta, tac_full)
+    new, n1 = re.subn(
+        r'(<h2 id="sokuhou-sec-answers">解答一覧</h2>)(.*?)(</section>)',
+        lambda mm: mm.group(1) + body + mm.group(3), src, count=1, flags=re.S)
+    if n1 != 1:
+        return ("error", "解答一覧セクションが見つかりません。ページ構造が変わった可能性があります。", orig == src)
+    src = new
+
+    # (2) 自己採点JSON: 全問判明のときだけ投入。未完なら空([])のまま=準備中。
+    json_payload = records_json(merged) if complete else "[]"
+    src, n2 = re.subn(
+        r'(<script type="application/json" id="sokuhou-answers">)(.*?)(</script>)',
+        lambda mm: mm.group(1) + json_payload + mm.group(3), src, count=1, flags=re.S)
+    if n2 != 1:
+        return ("error", "sokuhou-answers が見つかりません。", orig == src)
+
+    # (3) 最終更新日
+    today = datetime.date.today().isoformat()
+    src = re.sub(r'最終更新日：\d{4}-\d{2}-\d{2}', '最終更新日：' + today, src)
+    src = re.sub(r'(<th>最終更新日</th><td>)\d{4}-\d{2}-\d{2}(</td>)',
+                 lambda mm: mm.group(1) + today + mm.group(2), src)
+
+    changed = src != orig
+    if changed:
+        with open(TARGET, "w", encoding="utf-8") as f:
+            f.write(src)
+    status = "ok-complete" if complete else "ok-partial"
+    msg = "全50問を反映し自己採点を有効化" if complete else "判明分を反映(自己採点は準備中のまま)"
+    return (status, msg + ("" if changed else "／変更なし"), not changed)
+
+
+def save_snapshot(raw, meta, tac_vals, merged):
     os.makedirs(SNAP_DIR, exist_ok=True)
     stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     with open(os.path.join(SNAP_DIR, "tac-sokuhou-%s.html" % stamp), "w",
               encoding="utf-8") as f:
         f.write(raw)
     summary = {
-        "fetched_at": stamp,
-        "meta": meta,
-        "answers": {str(n): vals.get(n, "") for n in range(1, TOTAL_Q + 1)},
-        "published_count": count_published(vals),
+        "fetched_at": stamp, "meta": meta,
+        "tac_answers": {str(n): tac_vals.get(n, "") for n in range(1, TOTAL_Q + 1)},
+        "merged": {str(m["no"]): {"disp": m["disp"], "source": m["source"]} for m in merged},
     }
     with open(os.path.join(SNAP_DIR, "tac-sokuhou-%s.json" % stamp), "w",
               encoding="utf-8") as f:
@@ -205,28 +258,18 @@ def save_snapshot(raw, meta, vals):
     return stamp
 
 
-def apply_to_page(records, update_text):
-    with open(TARGET, encoding="utf-8") as f:
-        src = f.read()
-
-    if JSON_EMPTY not in src:
-        if '"correct"' in src and 'id="sokuhou-answers"' in src:
-            return ("already", "既に解答が反映済みです（sokuhou-answers が埋まっています）。")
-        return ("error", "想定した空のJSON(sokuhou-answers)が見つかりません。ページ構造が変わった可能性があります。")
-    if ANSWER_NOTE_PENDING not in src:
-        return ("error", "想定した準備中テキストが見つかりません。ページ構造が変わった可能性があります。")
-
-    today = datetime.date.today().isoformat()
-    new = src.replace(ANSWER_NOTE_PENDING, answer_table_html(records, update_text))
-    new = new.replace(JSON_EMPTY,
-                      '<script type="application/json" id="sokuhou-answers">%s</script>'
-                      % records_to_json(records))
-    new = new.replace(META_DATE_OLD, "最終更新日：%s" % today)
-    new = new.replace(QUALITY_DATE_OLD, "<th>最終更新日</th><td>%s</td>" % today)
-
-    with open(TARGET, "w", encoding="utf-8") as f:
-        f.write(new)
-    return ("ok", "反映しました。最終更新日: %s" % today)
+def print_status(tac_vals, tac_meta, merged):
+    tac_pub = sum(1 for n in range(1, TOTAL_Q + 1) if classify(tac_vals.get(n, ""))[0] == "num")
+    det = determined_count(merged)
+    print("=== 取得・マージ結果 ===")
+    print("TAC 公開予定日時 :", tac_meta.get("公開予定日時", "(なし)"))
+    print("TAC 更新日時     :", tac_meta.get("更新日時", "(なし)"))
+    print("TACで数字が入っている問数 :", tac_pub, "/", TOTAL_Q)
+    print("マージ後の判明問数        :", det, "/", TOTAL_Q, "(全問判明=%s)" % (det == TOTAL_Q))
+    print("マージ結果 :", " ".join(
+        "%d:%s%s" % (m["no"], m["disp"], ("" if not m["source"] else "(%s)" % m["source"][0]))
+        for m in merged))
+    return tac_pub, det
 
 
 def main():
@@ -239,59 +282,40 @@ def main():
 
     raw = fetch(TAC_URL)
     if raw is None:
-        print("FETCH FAILED: TACページを取得できませんでした。ネットワーク許可とプロキシを確認してください。")
+        print("FETCH FAILED: TACページを取得できませんでした。")
         sys.exit(4)
 
-    meta = parse_meta(raw)
-    vals = parse_answers(raw)
-    pub = count_published(vals)
-    update_text = meta.get("更新日時", "")
-
-    print("=== TAC解答速報 取得結果 ===")
-    print("公開予定日時 :", meta.get("公開予定日時", "(なし)"))
-    print("更新日時     :", meta.get("更新日時", "(なし)"))
-    print("次の更新予定 :", meta.get("次の更新予定", "(なし)"))
-    print("パースできた問数 :", len(vals))
-    print("正答番号が入っている問数 :", pub, "/", TOTAL_Q)
-    print("正答(生値) :", " ".join("%d:%s" % (n, vals.get(n, "")) for n in range(1, TOTAL_Q + 1)))
-
-    published = pub >= PUBLISHED_THRESHOLD
+    tac_meta = parse_meta(raw)
+    tac_vals = parse_tac_answers(raw)
+    known = load_known()
+    merged = merge(tac_vals, known)
+    tac_pub, det = print_status(tac_vals, tac_meta, merged)
+    tac_full = tac_pub >= TAC_PUBLISHED_THRESHOLD
+    flags = [m["flag"] for m in merged if m["flag"]]
 
     if args.check:
-        if published:
-            print("STATUS: PUBLISHED (公開済み)")
-            sys.exit(0)
-        else:
-            print("STATUS: NOT PUBLISHED (未公開)")
-            sys.exit(2)
+        print("STATUS:", "COMPLETE" if det == TOTAL_Q else ("PARTIAL(%d)" % det if det else "NONE"))
+        if flags:
+            print("---- REVIEW REQUIRED ----")
+            for a in flags:
+                print(" *", a)
+        sys.exit(0 if det > 0 else 2)
 
     # --apply
-    stamp = save_snapshot(raw, meta, vals)
+    stamp = save_snapshot(raw, tac_meta, tac_vals, merged)
     print("スナップショット保存:", stamp)
-    if not published:
-        print("STATUS: NOT PUBLISHED — ページは変更しませんでした。")
+    if det == 0:
+        print("STATUS: NONE — 判明ゼロのためページは変更しませんでした。")
         sys.exit(2)
 
-    records, anomalies = build_records(vals)
-    status, msg = apply_to_page(records, update_text)
+    status, msg, nochange = apply_to_page(merged, tac_meta, tac_full)
     print("APPLY:", status, "-", msg)
-
-    # 合格推定点(あれば)を参考表示
-    mm = re.search(r'合格推定点', raw)
-    if mm:
-        around = html.unescape(re.sub(r'<[^>]+>', ' ', raw[mm.start():mm.start() + 400]))
-        around = re.sub(r'\s+', ' ', around).strip()
-        print("参考(合格推定点まわり):", around[:200])
-
-    if anomalies:
+    if flags:
         print("---- REVIEW REQUIRED (要確認) ----")
-        for a in anomalies:
+        for a in flags:
             print(" *", a)
-
     if status == "error":
         sys.exit(5)
-    if anomalies and any("想定外" in a or "未公開" in a for a in anomalies):
-        sys.exit(3)
     sys.exit(0)
 
 
