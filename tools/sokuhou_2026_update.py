@@ -330,7 +330,8 @@ def main():
     if det == 0:
         print("STATUS: NONE — 判明ゼロのため変更なし。")
         sys.exit(2)
-    save_store(store)
+    if changes:  # 実際に解答が増減したときだけストアを保存(無駄なタイムスタンプ更新を防ぐ)
+        save_store(store)
     status, msg = apply_to_page(merged)
     print("APPLY:", status, "-", msg)
     if status == "error":
