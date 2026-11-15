@@ -206,20 +206,23 @@ def answer_section_body(merged):
         foot += ('<p class="sokuhou-answer-note">※ は出題団体の判断等により複数正解・'
                  '全員正解として扱われた可能性がある問題です。正式には公式の発表でご確認ください。</p>')
     if not complete:
-        foot += ('<p class="sokuhou-answer-note">自己採点ツールは全50問が判明してから'
-                 'ご利用いただけます（現在は判明分のみ掲載）。</p>')
+        foot += ('<p class="sokuhou-answer-note">下の自己採点は、判明している問だけで'
+                 '現時点の得点を計算できます（未判明の問は判明後に反映）。</p>')
     return note + table + foot
 
 
 def records_json(merged):
+    """判明分は correct 付き、未判明は pending:true。判明分だけで採点できる。"""
     out = []
     for m in merged:
         d = {"no": m["no"], "label": "問%d" % m["no"], "points": 1, "choices": 4}
         if m["kind"] == "num":
             d["correct"] = m["value"]
-        else:
+        elif m["kind"] == "allcorrect":
             d["correct"] = "-"
             d["allCorrect"] = True
+        else:  # 未判明
+            d["pending"] = True
         d["field"] = ""
         out.append(d)
     return json.dumps(out, ensure_ascii=False)
@@ -239,7 +242,7 @@ def apply_to_page(merged):
         return ("error", "解答一覧セクションが見つかりません。")
     src = new
 
-    payload = records_json(merged) if complete else "[]"
+    payload = records_json(merged)  # 判明分があれば常に投入（部分採点可）
     src, n2 = re.subn(
         r'(<script type="application/json" id="sokuhou-answers">)(.*?)(</script>)',
         lambda mm: mm.group(1) + payload + mm.group(3), src, count=1, flags=re.S)

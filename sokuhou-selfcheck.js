@@ -11,7 +11,8 @@
   var STATE = {
     pass: { color: "#1f7a4d", bg: "#e7f4ec" },
     border: { color: "#9a6a00", bg: "#fbf1dc" },
-    miss: { color: "#8a3d3d", bg: "#f7e9e9" }
+    miss: { color: "#8a3d3d", bg: "#f7e9e9" },
+    provisional: { color: "#5c4d7a", bg: "#efeaf5" }
   };
 
   function num(v) {
@@ -31,6 +32,7 @@
     if (res.key === "pass") return "合格ライン到達！";
     if (res.key === "border") return "ボーダー付近（あと" + res.diff + "点）";
     if (res.key === "miss") return "合格ラインまであと" + res.diff + "点";
+    if (res.key === "provisional") return "暫定（判明分のみ）";
     return "自己採点の結果";
   }
 
@@ -83,7 +85,8 @@
     ctx.fillText("/ " + r.total + "点", 60 + sw + 20, 330);
     ctx.font = "500 26px 'Noto Sans JP', sans-serif";
     var sub = "正答 " + r.correct + "/" + r.n + "問";
-    if (data.pass != null) sub += "　合格ライン " + data.pass + "点";
+    if (r.partial) sub += "　※判明分のみ";
+    else if (data.pass != null) sub += "　合格ライン " + data.pass + "点";
     ctx.fillText(sub, 62, 372);
 
     // 判定バッジ（右上）
@@ -203,8 +206,12 @@
       date: root.getAttribute("data-date") || "",
       hashtags: root.getAttribute("data-hashtags") || ""
     };
+    // 判明済み（pending でない）問だけ採点対象にする。未判明でも現時点で採点可能。
+    var knownAnswers = [];
+    for (var i = 0; i < answers.length; i++) { if (!answers[i].pending) knownAnswers.push(answers[i]); }
+    var pendingCount = answers.length - knownAnswers.length;
     var total = 0;
-    for (var i = 0; i < answers.length; i++) total += (answers[i].points || 0);
+    for (var i = 0; i < knownAnswers.length; i++) total += (knownAnswers[i].points || 0);
 
     var grid = root.querySelector("#sokuhou-grid");
     var judgeBtn = root.querySelector("#sokuhou-judge");
@@ -277,14 +284,14 @@
       // 未回答ハイライトをリセット
       var mcells = grid.querySelectorAll(".sokuhou-q.is-missing");
       for (var mi = 0; mi < mcells.length; mi++) mcells[mi].classList.remove("is-missing");
-      // 全問選択必須：未回答があれば採点結果を出さない
+      // 判明済みの問は選択必須：未回答があれば採点結果を出さない
       var unanswered = [];
-      answers.forEach(function (a) { if (picks[a.no] == null) unanswered.push(a.no); });
+      knownAnswers.forEach(function (a) { if (picks[a.no] == null) unanswered.push(a.no); });
       if (unanswered.length) {
         last = null;
         resultEl.hidden = false;
         resultEl.className = "sokuhou-result is-warn";
-        resultEl.textContent = "未回答が " + unanswered.length + "問あります。全問に解答してから採点してください。";
+        resultEl.textContent = "未回答が " + unanswered.length + "問あります。判明している問に解答してから採点してください。";
         shareEl.hidden = true;
         var firstMiss = null;
         for (var ui = 0; ui < unanswered.length; ui++) {
@@ -297,7 +304,7 @@
 
       var score = 0, correct = 0, answered = 0;
       var detail = [];
-      answers.forEach(function (a) {
+      knownAnswers.forEach(function (a) {
         var sel = picks[a.no];
         var cell = grid.querySelector('.sokuhou-q[data-no="' + a.no + '"]');
         var mark = cell.querySelector(".sokuhou-q-mark");
@@ -317,15 +324,28 @@
         }
         detail.push({ no: a.no, user: blank ? null : sel, correct: a.correct, ok: ok, blank: blank });
       });
-      var res = judge(score, data.pass, total);
-      last = { score: score, total: total, correct: correct, n: answers.length, answered: answered, res: res, detail: detail };
+      // 未判明の問は採点対象外（「待」表示）
+      answers.forEach(function (a) {
+        if (!a.pending) return;
+        var cell = grid.querySelector('.sokuhou-q[data-no="' + a.no + '"]');
+        if (!cell) return;
+        cell.classList.remove("is-correct", "is-wrong", "is-blank");
+        cell.classList.add("is-pending-cell");
+        var mark = cell.querySelector(".sokuhou-q-mark");
+        if (mark) mark.textContent = "待";
+      });
+
+      var partial = pendingCount > 0;
+      var res = partial ? { key: "provisional" } : judge(score, data.pass, total);
+      last = { score: score, total: total, correct: correct, n: knownAnswers.length, answered: answered, res: res, detail: detail, partial: partial, pending: pendingCount };
 
       resultEl.hidden = false;
       resultEl.className = "sokuhou-result is-" + res.key;
       resultEl.innerHTML =
         '<span class="sokuhou-result-score">得点 ' + score + " / " + total + "点" +
-        '<span class="sokuhou-result-sub">（正答 ' + correct + "/" + answers.length + "問）</span></span>" +
-        '<span class="sokuhou-result-verdict">' + verdictShort(res, data.pass) + "</span>";
+        '<span class="sokuhou-result-sub">（判明 ' + knownAnswers.length + "問中 正答 " + correct + "問）</span></span>" +
+        '<span class="sokuhou-result-verdict">' + verdictShort(res, data.pass) + "</span>" +
+        (partial ? '<span class="sokuhou-result-note">未判明 ' + pendingCount + "問は判明後に反映されます（全問判明で合否ライン判定）</span>" : "");
 
       drawImage(canvas, data, last);
       last.file = canvasToFile(canvas, (data.label || "chintai") + "-自己採点.png");

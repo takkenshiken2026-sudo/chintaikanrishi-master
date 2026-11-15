@@ -1630,6 +1630,10 @@ body.seo-editorial-preview-page .seo-editorial.seo-article-card .related-box-tit
 .sokuhou-ans-pair{display:inline-block;min-width:3.2em;margin:0 .5em .2em 0;color:var(--text-muted,#555)}
 .sokuhou-ans-pair b{color:#d7263d;font-weight:800;font-size:1.12em;margin-left:.25em}
 .sokuhou-ans-pair b.is-wait{color:var(--text-muted,#9aa0a6);font-weight:600;font-size:1em}
+/* 自己採点：未判明（採点対象外）の問 */
+.sokuhou-q.is-pending-cell{opacity:.55}
+.sokuhou-q.is-pending-cell .sokuhou-q-mark{color:#9aa0a6;font-weight:700}
+.sokuhou-result-note{display:block;margin-top:6px;font-size:.85em;color:var(--text-muted,#666);font-weight:500}
 
 /* 未回答のハイライト（全問必須） */
 .sokuhou-q.is-missing{border-color:#e0a04d;background:#fff6e5;box-shadow:0 0 0 2px rgba(224,160,77,.3)}
