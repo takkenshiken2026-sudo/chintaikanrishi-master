@@ -1,9 +1,11 @@
 # 令和8年度(2026年) 解答速報 自動反映 手順書（runbook）
 
 試験当日(2026/11/15)の自動クロール用に起動されたセッションが読む作業手順。
-目的は「TACの解答速報＋他社判明分をマージし、当サイトの2026年解答速報ページに反映した
-**下書き（devブランチへのコミット）**を用意して通知する」こと。
-**公開（mainへのマージ）は人間が確認してから行う**ので、このセッションはmainへのマージもPR作成もしない。
+目的は「TACの解答速報＋他社判明分をマージし、当サイトの2026年解答速報ページに反映して
+**逐次公開**する」こと。
+**公開方針（2026/11/15 ユーザー決定）＝「判明次第 逐次公開」**：
+devブランチ `claude/relaxed-hypatia-ib3g7g` に反映・コミット後、**mainへFF（早送り）マージして公開**する。
+ただしFF不可（mainが別コミットで進んでいる）なら**公開は保留**して報告する（force push はしない）。PR作成はしない。
 
 ## マージ方針（問ごと）
 
@@ -41,12 +43,17 @@ python3 tools/sokuhou_2026_update.py --apply
 - 出力に `REVIEW REQUIRED` が出たら没問・複数正解・想定外値あり → 問番号を通知に明記。
 - 終了コード: 0=反映あり / 2=判明ゼロ（何もしない）/ 4=取得失敗。
 
-反映後、差分があればコミット＆push（**mainには触れない**）:
+反映後、差分があればコミット＆push、続けてmainへFF公開（逐次公開）:
 ```bash
 git --no-pager diff --stat
 git add -A
 git commit    # 末尾に各セッション所定の属性行(Co-Authored-By 等)を付ける
 git push origin claude/relaxed-hypatia-ib3g7g
+# ↓ 逐次公開（FF不可なら公開保留で報告。force push はしない）
+git checkout main && git pull --ff-only origin main \
+  && git merge --ff-only claude/relaxed-hypatia-ib3g7g \
+  && git push origin main
+git checkout claude/relaxed-hypatia-ib3g7g
 ```
 
 ## 通知で伝えること
@@ -59,7 +66,7 @@ git push origin claude/relaxed-hypatia-ib3g7g
 
 ## やってはいけないこと
 
-- `main`（デフォルト/公開ブランチ）への直接push・マージ・PR作成。公開は人間が行う。
+- `main` への **force push** や、FF不可時の強制マージ（その場合は公開保留で報告）。PR作成もしない。
 - TACの生HTMLのコミット（著作物。`tools/snapshots/` はgitignore済み）。
 - 没問・複数正解を確認なしで確定すること（通知で人間に委ねる）。
 - 合格ライン（`data-pass`）の勝手な変更。TACの「合格推定点」は参考として通知に添えるだけ。
