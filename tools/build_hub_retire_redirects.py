@@ -15,7 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 RETIRED_SECTIONS: tuple[str, ...] = ("compare", "numbers", "mistakes")
-TARGET = "../index.html"
+TARGET = "/index.html"
 
 REDIRECT_HTML = """<!DOCTYPE html>
 <html lang="ja">

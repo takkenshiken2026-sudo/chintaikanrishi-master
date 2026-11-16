@@ -204,7 +204,6 @@ DEFAULT_HEADER_NAV = [
     {"label": "トップ", "href": "index.html", "key": "top"},
     {"label": "このサイトについて", "href": "about.html", "key": "about"},
     {"label": "過去問一覧", "href": "q/index.html", "key": "q"},
-    {"label": "用語集", "href": "terms/index.html", "key": "terms"},
     {"label": "試験ガイド", "href": "articles/index.html", "key": "articles"},
     {"label": "関連リンク", "href": "related-sites.html", "key": "related"},
     {"label": "プライバシー", "href": "privacy.html", "key": "privacy"},

@@ -67,8 +67,10 @@ from tools.seo_editorial_chrome import (  # noqa: E402
     seo_editorial_stylesheet_links,
 )
 
-PRESERVED_TERM_SUBDIRS = frozenset({"compare", "numbers", "mistakes", "priority", "samples", "diagram-samples"})
-PRESERVED_TERM_HTML = frozenset({"index.html", "g-writing-sample.html", "g-diagram-sample.html"})
+# 用語解説セクションは廃止。retired リダイレクト(compare/numbers/mistakes/priority)のみ保持し、
+# 用語一覧(index.html)・執筆/図解サンプルは保持しない（空化時に削除される）。
+PRESERVED_TERM_SUBDIRS = frozenset({"compare", "numbers", "mistakes"})
+PRESERVED_TERM_HTML: frozenset[str] = frozenset()
 
 GLOSSARY_CSV = ROOT / "data" / "glossary_terms.csv"
 TERMS_DIR = ROOT / "terms"
@@ -1498,11 +1500,14 @@ def main() -> int:
         )
         hub_count += 1
 
-    (TERMS_DIR / "index.html").write_text(build_terms_index(entries, base), encoding="utf-8")
+    # 用語解説セクションは廃止。用語が1件もない場合は一覧ページ・図解サンプルを生成しない
+    # （上のクリーンアップで terms/index.html とサンプルは削除済み）。
+    if entries:
+        (TERMS_DIR / "index.html").write_text(build_terms_index(entries, base), encoding="utf-8")
 
-    from tools.build_term_diagram_sample_pages import build_all as build_term_diagram_samples
+        from tools.build_term_diagram_sample_pages import build_all as build_term_diagram_samples
 
-    build_term_diagram_samples(base_url=base)
+        build_term_diagram_samples(base_url=base)
 
     write_glossary_article_slug_map(entries)
     sync_index_glossary_slug_map(entries)
