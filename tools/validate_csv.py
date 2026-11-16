@@ -123,6 +123,12 @@ class Validator:
                     None,
                     "データ行がありません（知識ハブは執筆拡充前でも可。目標件数は validate_knowledge_hub の WARN を参照）",
                 )
+            elif path.name == "glossary_terms.csv":
+                self.warn(
+                    path,
+                    None,
+                    "データ行がありません（用語解説は廃止。一覧 terms/index.html は空の枠組みとして維持）",
+                )
             else:
                 self.error(path, None, "データ行がありません")
         return fieldnames, rows

@@ -988,14 +988,23 @@ def main() -> int:
     args = ap.parse_args()
     base = args.base_url.rstrip("/")
 
-    glossary_lookup = load_glossary_lookup()
-    guides = load_guide_articles()
-    question_catalog = load_question_catalog(ROOT)
-
+    # 実践演習・一問一答の静的SEOページ（q/practice・q/ichimon）は廃止。
+    # アプリ内モード（#orig / #ichimondou）と exam-site-data-*.js は維持する。
+    # 既存の生成物を削除し、以降は何も生成しない。
     for sub in ("practice", "ichimon"):
         target = Q_ROOT / sub
         if target.is_dir():
             shutil.rmtree(target)
+    print(
+        "build_practice_ichimon_pages: 静的SEOページは廃止済み。"
+        "q/practice と q/ichimon を削除しました（生成なし）。"
+    )
+    return 0
+
+    # 以下は旧・静的ページ生成処理（廃止）。
+    glossary_lookup = load_glossary_lookup()
+    guides = load_guide_articles()
+    question_catalog = load_question_catalog(ROOT)
 
     practice_rows = load_practice_rows()
     practice_pages: list[dict] = []

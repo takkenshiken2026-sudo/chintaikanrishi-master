@@ -517,11 +517,11 @@ def q_index_filters_details_html(
 
 
 def q_hub_links_html(rel_path: Path, *, current: str) -> str:
-    """過去問・実践演習・一問一答のモード切替タブ（一覧・個別ページ共通）。"""
+    """過去問のモード切替タブ（一覧・個別ページ共通）。
+    実践演習・一問一答の静的SEOページは廃止したため、静的タブは過去問のみ。
+    実践演習・一問一答はアプリ内モード（#orig / #ichimondou）で提供する。"""
     items: list[tuple[str, str, str]] = [
         ("past", "過去問", "q/index.html"),
-        ("practice", "実践演習", "q/practice/index.html"),
-        ("ichimon", "一問一答", "q/ichimon/index.html"),
     ]
     lis: list[str] = []
     for key, label, target in items:

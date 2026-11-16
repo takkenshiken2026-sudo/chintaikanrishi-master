@@ -96,7 +96,9 @@ def _check_shared_fields(
         )
 
     related = split_semicolon(_norm(row.get("related_terms")))
-    if len(related) < HUB_MIN_RELATED_TERMS:
+    # 用語解説（glossary）は廃止したため related_terms は空を許容する。
+    # 値がある場合のみ従来の下限件数・用語存在チェックを行う。
+    if related and len(related) < HUB_MIN_RELATED_TERMS:
         issues.append(
             HubIssue(
                 "ERROR",

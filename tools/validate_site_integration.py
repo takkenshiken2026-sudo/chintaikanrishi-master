@@ -116,12 +116,7 @@ def _q_index(q_index: Path) -> list[Issue]:
         issues.append(Issue("q/index.html: q_hub_links_html（3モードタブ）がありません"))
     if 'aria-current="page">過去問</span>' not in text and "is-current" not in text:
         issues.append(Issue("q/index.html: 過去問タブの current 表示がありません"))
-    if (
-        "/q/orig/index.html" not in text
-        and "/q/practice/index.html" not in text
-        and 'href="practice/index.html"' not in text
-    ):
-        issues.append(Issue("q/index.html: 実践演習タブへのリンクがありません"))
+    # 実践演習・一問一答の静的SEOページは廃止したため、実践演習タブの必須チェックは行わない。
     return issues
 
 
@@ -273,13 +268,10 @@ def _orig_practice_index_ok(path: Path) -> bool:
 
 def _mode_index_counts(root: Path) -> list[Issue]:
     issues: list[Issue] = []
-    practice_index = root / "q" / "orig" / "index.html"
-    if not _orig_practice_index_ok(practice_index):
-        practice_index = root / "q" / "practice" / "index.html"
-    checks = [
-        ("practice", root / "data" / "practice_questions.csv", practice_index, True),
-        ("ichimon", root / "data" / "ichimon_questions.csv", root / "q" / "ichimon" / "index.html", False),
-    ]
+    # 実践演習・一問一答の静的SEOページ（q/practice・q/ichimon）は廃止したため、
+    # これらの一覧ページ存在・件数一致・タブ契約は検証しない。
+    # アプリ内モード（#orig / #ichimondou）と exam-site-data-*.js のみ維持する。
+    checks: list[tuple[str, Path, Path, bool]] = []
     for mode, csv_path, index_path, skip_invalid in checks:
         csv_n = _csv_row_count(csv_path, skip_invalid=skip_invalid)
         json_n = _q_index_data_count(index_path)
